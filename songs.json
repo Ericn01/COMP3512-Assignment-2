@@ -1,4 +1,4 @@
-const songs = `[
+[
     {
     "song_id": 1167,
     "title": "Alarm",
@@ -8557,5 +8557,5 @@ const songs = `[
         "acousticness": 2,
         "speechiness": 15
     }
-    }
-]`;
+}
+]

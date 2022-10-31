@@ -26,7 +26,7 @@ body{
 
 /* Search Subsection (View 1)*/
 .search{
-    flex-basis: 30%;
+    flex-grow: 1;
     border: 2px solid black;
     box-shadow: 1px 1px 10px black;
 }
@@ -36,17 +36,23 @@ body{
     background-color: var(--complimentary-color);
 }
 .song-search input[type='text'], .song-search input[type='number'], .song-search select{
-    width: 150px;
     background-color: var(--complimentary-color);
     margin-left: 20px;
     outline: none;
     border: none;
     border-bottom: 2px solid var(--highlight-color);
 }
+
+.song-search input[type='text'], .song-search select{
+    width: 150px;
+}
+.song-search input[type='number']{
+    width: 75px;
+}
 .song-search h2{
 
 }
-.song-search p{
+.input-container{
     margin: 20px 12px auto;
     width: 85%;
     box-shadow: 2px 2px 5px black;
@@ -62,19 +68,32 @@ body{
 .song-search button{
     padding: 5px;
     border-radius: 7.5px;
+    border: none;
+    box-shadow: 1px 1px 3px black;
     background-color: var(--highlight-color);
-    width: 150px;
+    width: 40%;
     font-weight: 600;
     cursor: pointer;
 }
+/* Misc styling  */
+
+
+/* Year Inputs Styling */
+.year-input-wrapper{
+
+}
+
+
 /* Results Subsection (View 1)*/
 .results{
     text-align: center;
-    flex-basis: 65%;
+    flex-grow: 2.5;
     border: 1px solid black;
     box-shadow: 1px 1px 10px black;
 }
 table{
+    flex-basis: 35%;
+    flex-grow: 2;
     width: 95%;
     text-align: center;
 }

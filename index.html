@@ -8,7 +8,6 @@
     <meta name="keywords" content="songs, search, Spotify, data lookup, information">
     <meta name="author" content="Eric Nielsen">
     <title> Search Top Spotify Songs! </title>
-    <script src='script.js'></script>
     <link rel="stylesheet" type="text/css" href="styles.css"/>
 </head>
 <body>
@@ -16,41 +15,48 @@
         <h1> Find your favorite song!</h1>
     </header>
     <main class="content">
+        <!-- ======================================== SONG SEARCH SECTION =====================================-->
         <section class="song-search">
             <div class="search"> 
                 <form class="search-form" method="POST" action="">
                     <h2> Song Search </h2>
-                    <p class="input-container">
+                    <div class="input-container">
                         <input type="radio" name="search-radio" id="title-radio"/>
                         <label for="title-input"> Title </label>
                         <input type="text" name="title-input" id="title-input">
-                    </p>
-                    <p class="input-container">
+                    </div>
+                    <div class="input-container">
                         <input type="radio" name="search-radio" id="artist-radio"/>
                         <label for="artist-select"> Artist </label>
-                        <select class='select-input' id="artist-select" onclick="loadArtists();"> 
+                        <select class='select-input' id="artist-select"> 
 
                         </select>
-                    </p>
-                    <p class="input-container">
+                    </div>
+                    <div class="input-container">
                         <input type="radio" name="search-radio" id="genre-radio"/>
                         <label for="genre-select"> Genre </label>
-                        <select class='select-input' id="artist-select" onclick="loadGenres();"> 
+                        <select class='select-input' id="genre-select"> 
 
                         </select>
-                    </p>
-                    <p class="input-container">
+                    </div>
+                    <div class="input-container">
                         <input type="radio" name="search-radio" id="year-radio"/>
-                        <label for="year-input"> Year </label>
-                        <input type="number" name="year-input" id="year-less-input" min="2016" max="2019">
-                        <input type="number" name="year-input" id="popularity-greater-input" min="2016" max="2019">
-                    </p>
-                    <p class="input-container">
+                        <label for="search-radio"> Year</label>
+                        <div class="year-input-wrapper"> 
+                            <label for="less year-less-input"> Less </label> <input type="number" class='less' name="year-less-input" id="year-less-input" min="2016" max="2019">
+                            <br>
+                            <label for="year-less-input"> Greater </label> <input type="number" name="year-greater-input" id="popularity-greater-input" min="2016" max="2019">
+                        </div>
+                    </div>
+                    <div class="input-container">
                         <input type="radio" name="search-radio" id="popularity-radio"/>
                         <label for="popularity-input"> Popularity </label>
-                        <input type="number" name="popularity-less-input" id="popularity-less-input" min="55" max="100">
-                        <input type="number" name="popularity-greater-input" id="popularity-greater-input" min="55" max="100">
-                    </p>
+                        <div class="popularity-input-wrapper">
+                            <label for="popularity-less-input"> Less </label> <input type="number" class='less' name="popularity-less-input" id="popularity-less-input" min="55" max="100">
+                            <br>
+                            <label for="populartiy-greater-input"> Greater </label> <input type="number" name="popularity-greater-input" id="popularity-greater-input" min="55" max="100">
+                        </div>
+                    </div>
                     <div class="button-container"> 
                         <button type="clear" class="form-btn"> Clear </button>
                         <button type="submit" class="form-btn"> Search </button>
@@ -75,10 +81,24 @@
                 </table>
             </div>
         </section>
+        <!-- ======================================== SONG INFORMATION SECTION ===================================== -->
         <section class="song-info">
-            <div class="info">  </div>
-            <div class="chart"> </div>
+            <div class="info">  
+                <h2> Song Information </h2>
+                <div class="analysis bpm"> </div>
+                <div class="analysis energy"> </div>
+                <div class="analysis danceability"> </div>
+                <div class="analysis liveness"> </div>
+                <div class="analysis valence"> </div>
+                <div class="analysis acousticness"> </div>
+                <div class="analysis speechiness"> </div>
+                <div class="analysis popularity"> </div>
+            </div>
+            <div class="chart"> 
+                <canvas id="song-chart" width="400px" height="400px"> </canvas> 
+            </div>
         </section>
+        <!-- ======================================== PLAYLIST SECTION ============================================== -->
         <section class="song-playlists">
             <div class="playlist-list"> </div>
             <div class="playlist-details"> </div>
@@ -91,5 +111,6 @@
             <li> Eric Nielsen - 2022 </li>
         </ul>
     </footer>
+    <script type='module' src='script.js'></script>
 </body>
 </html>
