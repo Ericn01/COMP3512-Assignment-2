@@ -1,0 +1,86 @@
+
+/* Imported styles */
+
+/* Page variables (all colors used will be in here) */
+:root{
+    --dominant-color: #e7f2f8;
+    --highlight-color: #74bdcb;
+    --contrasting-color: #ffa384;
+    --complimentary-color: #efe7bc;
+    --text-color: #000000;
+}
+
+/* HEADER STYLES */
+
+/* BODY STYLES */
+body{
+    height: 100vh;
+    background-color: var(--dominant-color);
+}
+
+.content{
+    display: flex;
+    justify-content: flex-start;
+    align-content: flex-start;
+}
+
+/* Search Subsection (View 1)*/
+.search{
+    flex-basis: 30%;
+    border: 2px solid black;
+    box-shadow: 1px 1px 10px black;
+}
+.song-search{
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--complimentary-color);
+}
+.song-search input[type='text'], .song-search input[type='number'], .song-search select{
+    width: 150px;
+    background-color: var(--complimentary-color);
+    margin-left: 20px;
+    outline: none;
+    border: none;
+    border-bottom: 2px solid var(--highlight-color);
+}
+.song-search h2{
+
+}
+.song-search p{
+    margin: 20px 12px auto;
+    width: 85%;
+    box-shadow: 2px 2px 5px black;
+    padding: 15px 12px;
+}
+
+.button-container{
+    display: flex;
+    justify-content: space-evenly;
+    padding-top: 15px;
+    padding-bottom: 10px;
+}
+.song-search button{
+    padding: 5px;
+    border-radius: 7.5px;
+    background-color: var(--highlight-color);
+    width: 150px;
+    font-weight: 600;
+    cursor: pointer;
+}
+/* Results Subsection (View 1)*/
+.results{
+    text-align: center;
+    flex-basis: 65%;
+    border: 1px solid black;
+    box-shadow: 1px 1px 10px black;
+}
+table{
+    width: 95%;
+    text-align: center;
+}
+
+/* FOOTER STYLES */
+
+footer{
+    list-style-type: none;
+}

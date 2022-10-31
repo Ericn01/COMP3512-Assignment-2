@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Search for Spotify's top songs from 2016-2019, along with information about them!">
+    <meta name="keywords" content="songs, search, Spotify, data lookup, information">
+    <meta name="author" content="Eric Nielsen">
+    <title> Search Top Spotify Songs! </title>
+    <script src='script.js'></script>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+    <header>
+        <h1> Find your favorite song!</h1>
+    </header>
+    <main class="content">
+        <section class="song-search">
+            <div class="search"> 
+                <form class="search-form" method="POST" action="">
+                    <h2> Song Search </h2>
+                    <p class="input-container">
+                        <input type="radio" name="search-radio" id="title-radio"/>
+                        <label for="title-input"> Title </label>
+                        <input type="text" name="title-input" id="title-input">
+                    </p>
+                    <p class="input-container">
+                        <input type="radio" name="search-radio" id="artist-radio"/>
+                        <label for="artist-select"> Artist </label>
+                        <select class='select-input' id="artist-select" onclick="loadArtists();"> 
+
+                        </select>
+                    </p>
+                    <p class="input-container">
+                        <input type="radio" name="search-radio" id="genre-radio"/>
+                        <label for="genre-select"> Genre </label>
+                        <select class='select-input' id="artist-select" onclick="loadGenres();"> 
+
+                        </select>
+                    </p>
+                    <p class="input-container">
+                        <input type="radio" name="search-radio" id="year-radio"/>
+                        <label for="year-input"> Year </label>
+                        <input type="number" name="year-input" id="year-less-input" min="2016" max="2019">
+                        <input type="number" name="year-input" id="popularity-greater-input" min="2016" max="2019">
+                    </p>
+                    <p class="input-container">
+                        <input type="radio" name="search-radio" id="popularity-radio"/>
+                        <label for="popularity-input"> Popularity </label>
+                        <input type="number" name="popularity-less-input" id="popularity-less-input" min="55" max="100">
+                        <input type="number" name="popularity-greater-input" id="popularity-greater-input" min="55" max="100">
+                    </p>
+                    <div class="button-container"> 
+                        <button type="clear" class="form-btn"> Clear </button>
+                        <button type="submit" class="form-btn"> Search </button>
+                    </div>
+                </form>
+            </div>
+            <div class="results"> 
+                <h2> Search Results </h2>
+                <table class="results-table">
+                    <thead> 
+                        <tr> 
+                            <th> Title </th>
+                            <th> Artist </th>
+                            <th> Year </th>
+                            <th> Genre </th>
+                            <th> Popularity </th>    
+                        </tr>
+                    </thead>
+                    <tbody class="results">
+
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section class="song-info">
+            <div class="info">  </div>
+            <div class="chart"> </div>
+        </section>
+        <section class="song-playlists">
+            <div class="playlist-list"> </div>
+            <div class="playlist-details"> </div>
+        </section>
+    </main>
+    <footer>
+        <ul class="footer-list"> 
+            <li> COMP3512 - Web Development II </li>
+            <li> <a href="https://github.com/Ericn01/COMP3512-Assignment-2"> Github Repository </a></li>
+            <li> Eric Nielsen - 2022 </li>
+        </ul>
+    </footer>
+</body>
+</html>
