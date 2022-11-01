@@ -3,7 +3,7 @@
  * If it ends up becoming too long, I may split it up into seperate sections
  */
 songs =  JSON.parse(songData);
-console.log(songs);
+
 // const api_url = "http://www.randyconnolly.com/funwebdev/3rd/api/music/songs-nested.php"; // The URL containing the JSON data that will be fetched
 // async function getSongs(){
 //     const response = await fetch(api_url);
@@ -32,7 +32,6 @@ function getSongTitles(){
 function autocompleteTitles(){
     if (this.value.length >= 2){ // Starts using autocomplete after 2 characters
         const titleMatch = findMatches(this.value, songTitles);
-        console.log(titleMatch);
         resultsBox.replaceChildren();
         titleMatch.forEach(songMatch => {
                 let option = document.createElement('option');
@@ -64,7 +63,6 @@ for (let currentRadioBtn of radioButtons){
 function disableInputs(){
     if (this.checked){
         let radioType = String(this.id.replace("-radio", ''));
-        console.log(radioType);
         for (let input of inputs){
             if (!input.id.includes(radioType) && input.type != "radio"){
                 input.disabled = true;
@@ -83,7 +81,6 @@ function loadSelectOptions(fieldName){
     let selectElement = document.getElementById(selectionId);
     let fieldContainer = [];
     if (selectElement.options.length === 0){ // This should only be run once, when clicked. 
-        console.log("test");
         for (let currentSong of songs){
             let optionText = currentSong[field]["name"];
             if (!fieldContainer.includes(optionText)){ // Ensures that there are no duplicates 
@@ -102,41 +99,50 @@ document.getElementById("genre-select").addEventListener('click', loadSelectOpti
 document.getElementById("artist-select").addEventListener('click', loadSelectOptions("artist"));
 
 
-document.getElementById("submit-btn").addEventListener('click', searchJSON())
-function searchJSON(value, radioSelection){
-    const results = [];
-    let elemName = radioSelection.replace("-radio", "");
-    for (let song of songs){
-        if (elemName == 'title'){
+// function searchJSON(value, radioSelection){
+//     const results = [];
+//     let elemName = radioSelection.replace("-radio", "");
+//     for (let song of songs){
+//         if (elemName == 'title'){
 
-        }
-        else if (elemName == 'artist'){
+//         }
+//         else if (elemName == 'artist'){
 
-        }
-        else if (elemName == 'genre'){
+//         }
+//         else if (elemName == 'genre'){
 
+//         }
+//     }
+// }
+
+
+    function populateRow(parentElement, attribute, songObj){
+        const cellElement = document.createElement("td");
+        if (attribute == 'artist' || attribute == 'genre'){
+            subattribute = 'name';
+            cellElement.textContent = songObj[attribute][subattribute];
         }
+        else if (attribute == 'details'){
+            cellElement.textContent = songObj[attribute]['popularity'] + "%";
+        }
+        else{
+            cellElement.textContent = songObj[attribute];
+        }
+        parentElement.appendChild(cellElement);
     }
-    switch(radioSelection.toLowerCase()){
-        case "title-radio":
-            for (let song of songs){
-                if (song.title == value){
-
-                }
+    function populateSongs(){ // Should run in O(nlog(n)) time since the inner loop has a fixed length. Not great, but could be worse
+        const labels = ['title', 'artist', 'year', 'genre', 'details'];
+        let songRow;
+        for(let song of songs){
+            songRow = document.createElement("tr");
+            for (let i = 0; i < labels.length; i++){
+                populateRow(songRow, labels[i], song);
             }
-            break;
-        case "artist-radio":
-            break;
-        case "genre-radio":
-            break;
-        case "year-radio":
-            break;
-        case "popularity-radio":
-            break;
-        default:
-            console.log("Invisible radio button pressed?");
+            document.getElementById('results-body').appendChild(songRow); // Appends the current row to the table body
+        }
     }
-}
+    populateSongs();
+
 
 // ======================================================== SONG INFORMATION PAGE =========================================================== 
 

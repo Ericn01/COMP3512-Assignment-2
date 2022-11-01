@@ -1,4 +1,4 @@
-
+@import url('https://fonts.googleapis.com/css2?family=Trispace:wght@300&display=swap');
 /* Imported styles */
 
 /* Page variables (all colors used will be in here) */
@@ -14,26 +14,23 @@
 
 /* BODY STYLES */
 body{
+
+    font-family: 'Trispace', sans-serif;
     height: 100vh;
     background-color: var(--dominant-color);
+    
 }
-
-.content{
-    display: flex;
-    justify-content: flex-start;
-    align-content: flex-start;
-}
-
 /* Search Subsection (View 1)*/
 .search{
-    flex-grow: 1;
+    flex-grow: 2;
     border: 2px solid black;
     box-shadow: 1px 1px 10px black;
+    background-color: var(--complimentary-color);
+    margin: 15px;
 }
 .song-search{
     display: flex;
     justify-content: space-between;
-    background-color: var(--complimentary-color);
 }
 .song-search input[type='text'], .song-search input[type='number'], .song-search select{
     background-color: var(--complimentary-color);
@@ -77,18 +74,6 @@ body{
 }
 /* Misc styling  */
 
-.autocomplete{
-    position: relative;
-    display: inline-block;
-}
-
-.autocomplete-results{
-    position: absolute;
-    border: 1px 0px solid black;
-    top: 100%;
-    left: 0;
-    right: 0;
-}
 /* Year Inputs Styling */
 .year-input-wrapper{
 
@@ -97,17 +82,28 @@ body{
 
 /* Results Subsection (View 1)*/
 .results{
+    background-color:var(--contrasting-color);
+    padding: 12px;
+    margin: 15px;
     text-align: center;
     flex-grow: 2.5;
     border: 1px solid black;
     box-shadow: 1px 1px 10px black;
 }
 table{
-    flex-basis: 35%;
-    flex-grow: 2;
-    width: 95%;
-    text-align: center;
+    box-shadow: 1px 1px 10px gray;
+    padding: 10px 15px;
+    table-layout: fixed;
+    height: 300px;
+    margin: auto;
+    text-align: left;
+    overflow-y: scroll;
 }
+td{
+    width: 20%;
+    padding: 5px 2px;
+}
+
 
 /* Song Information Subsection (View 2)*/
 
