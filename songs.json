@@ -1,4 +1,4 @@
-[
+songData = `[
     {
     "song_id": 1167,
     "title": "Alarm",
@@ -865,7 +865,7 @@
     },
     {
     "song_id": 1199,
-    "title": "CAN'T STOP THE FEELING! (from DreamWorks Animation's \"TROLLS\")",
+    "title": "CAN'T STOP THE FEELING! (from DreamWorks Animation's TROLLS)",
     "year": 2016,
     "artist": {
         "id": 68,
@@ -1324,7 +1324,7 @@
     },
     {
     "song_id": 1216,
-    "title": "Just Like Fire (From the Original Motion Picture \"Alice Through The Looking Glass\")",
+    "title": "Just Like Fire (From the Original Motion Picture Alice Through The Looking Glass)",
     "year": 2016,
     "artist": {
         "id": 124,
@@ -8558,4 +8558,4 @@
         "speechiness": 15
     }
 }
-]
+]`;

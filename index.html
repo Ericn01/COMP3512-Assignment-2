@@ -21,9 +21,10 @@
                 <form class="search-form" method="POST" action="">
                     <h2> Song Search </h2>
                     <div class="input-container">
-                        <input type="radio" name="search-radio" id="title-radio"/>
+                        <input type="radio" name="search-radio" id="title-radio" checked=true/>
                         <label for="title-input"> Title </label>
-                        <input type="text" name="title-input" id="title-input">
+                        <input type="text" name="title-input" id="title-input" list="autocomplete-results">
+                        <datalist id="autocomplete-results"></datalist>
                     </div>
                     <div class="input-container">
                         <input type="radio" name="search-radio" id="artist-radio"/>
@@ -45,7 +46,7 @@
                         <div class="year-input-wrapper"> 
                             <label for="less year-less-input"> Less </label> <input type="number" class='less' name="year-less-input" id="year-less-input" min="2016" max="2019">
                             <br>
-                            <label for="year-less-input"> Greater </label> <input type="number" name="year-greater-input" id="popularity-greater-input" min="2016" max="2019">
+                            <label for="year-less-input"> Greater </label> <input type="number" name="year-greater-input" id="year-greater-input" min="2016" max="2019">
                         </div>
                     </div>
                     <div class="input-container">
@@ -59,7 +60,7 @@
                     </div>
                     <div class="button-container"> 
                         <button type="clear" class="form-btn"> Clear </button>
-                        <button type="submit" class="form-btn"> Search </button>
+                        <button type="submit" class="form-btn" id="submit-btn"> Search </button>
                     </div>
                 </form>
             </div>
@@ -100,7 +101,11 @@
         </section>
         <!-- ======================================== PLAYLIST SECTION ============================================== -->
         <section class="song-playlists">
-            <div class="playlist-list"> </div>
+            <div class="playlist-list"> 
+                <ul class="playlists">
+                    <li> </li>
+                </ul>
+            </div>
             <div class="playlist-details"> </div>
         </section>
     </main>
@@ -111,6 +116,7 @@
             <li> Eric Nielsen - 2022 </li>
         </ul>
     </footer>
-    <script type='module' src='script.js'></script>
-</body>
+    <script type="text/javascript" src="songs.json"></script>
+    <script type='text/javascript' src='script.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </html>
