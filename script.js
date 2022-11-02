@@ -73,7 +73,6 @@ function disableInputs(){
         }
     }
 }
-
 // This function is responsible for populating the select elements with options in the song search.
 function loadSelectOptions(fieldName){
     const field = fieldName;
@@ -85,7 +84,7 @@ function loadSelectOptions(fieldName){
             let optionText = currentSong[field]["name"];
             if (!fieldContainer.includes(optionText)){ // Ensures that there are no duplicates 
                 fieldContainer.push(optionText);
-                let optionValue = currentSong[field]["id"];
+                let optionValue = currentSong[field]["name"];
                 const songOption = document.createElement("option");
                 songOption.text = fieldContainer[fieldContainer.length - 1]; // adds the element that we just pushed into the array
                 songOption.value = optionValue;
@@ -97,24 +96,6 @@ function loadSelectOptions(fieldName){
 // Load the select elements with data upon clicking.
 document.getElementById("genre-select").addEventListener('click', loadSelectOptions("genre"));
 document.getElementById("artist-select").addEventListener('click', loadSelectOptions("artist"));
-
-
-// function searchJSON(value, radioSelection){
-//     const results = [];
-//     let elemName = radioSelection.replace("-radio", "");
-//     for (let song of songs){
-//         if (elemName == 'title'){
-
-//         }
-//         else if (elemName == 'artist'){
-
-//         }
-//         else if (elemName == 'genre'){
-
-//         }
-//     }
-// }
-
 
     function populateRow(parentElement, attribute, songObj){
         const cellElement = document.createElement("td");
@@ -130,10 +111,10 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
         }
         parentElement.appendChild(cellElement);
     }
-    function populateSongs(){ // Should run in O(nlog(n)) time since the inner loop has a fixed length. Not great, but could be worse
+    function populateSongs(results){ // Should run in O(nlog(n)) time since the inner loop has a fixed length. Not great, but could be worse
         const labels = ['title', 'artist', 'year', 'genre', 'details'];
         let songRow;
-        for(let song of songs){
+        for(let song of results){
             songRow = document.createElement("tr");
             for (let i = 0; i < labels.length; i++){
                 populateRow(songRow, labels[i], song);
@@ -141,8 +122,7 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
             document.getElementById('results-body').appendChild(songRow); // Appends the current row to the table body
         }
     }
-    populateSongs();
-
+    populateSongs(songs);
     document.getElementById("clear-btn").addEventListener("click", (e) => {
         for (let input of inputs){
             input.textContent = "";
@@ -154,20 +134,99 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
             // get song object from the button
         }
     );
+
     // Form data handling section
-    document.addEventListener("DOMContentLoaded", ()=> {
+    document.addEventListener("DOMContentLoaded", ()=> { // Populates the results table with all songs
         const songForm = document.getElementById('song-form');
         songForm.addEventListener('submit', formProcessing);
     });
-
-    function formProcessing(form){
-        form.preventDefault(); // Prevents the page from being reloaded and causing issues.
-        let songForm = form.target;
-        let formData = new FormData(songForm);
-        for (let key of formData.keys()){
-            console.log(key, formData.get(key));
-        }
+    function pushInputValue(inputName, arr){
+        console.log(inputName);
+        const value = document.getElementById(inputName).value;
+        arr.push(value);
     }
+    /**
+     * Searches for and returns the id value of the radio button that is checked.
+     * @returns the id of the form radio button that is currently selected
+     */
+    function getSelectedRadioButtonId(){
+        let selectedRadioId;
+        for (let currentRadioButton of radioButtons){
+            if (currentRadioButton.checked == true){
+                selectedRadioId = currentRadioButton.id;
+            }
+        }
+        return selectedRadioId;
+    }
+    // This function is responsible for processing the data sent through the form
+    function formProcessing(){
+        const selectedRadioId = getSelectedRadioButtonId();
+        const searchParam = []; // Array containing the search parameters 
+        let searchAttribute = "";
+        switch(selectedRadioId){
+            case "title-radio":
+                pushInputValue("title-input", searchParam);
+                searchAttribute = "title";
+                break;
+            case "artist-radio":
+                pushInputValue("artist-select", searchParam);
+                searchAttribute = "artist";
+                break;
+            case "genre-radio":
+                pushInputValue("genre-select", searchParam);
+                searchAttribute = "genre";
+                break;
+            case "year-radio":
+                pushInputValue("year-less-input", searchParam);
+                pushInputValue("year-greater-input", searchParam);
+                searchAttribute = "year"
+                break;
+            case "popularity-radio":
+                pushInputValue("popularity-less-input", searchParam);
+                pushInputValue("popularity-greater-input", searchParam);
+                searchAttribute = "popularity";
+                break;
+            default:
+        }
+        const searchResults = findResults(searchParam, searchAttribute, songs); // Returns the results of the search query
+        populateSongs(searchResults);
+    }
+
+    function findResults(valuesArr, searchAttribute, songObj){
+        const results = [];
+        if (valuesArr.length == 1){
+            let userValue = valuesArr[0];
+            let subSearchAttribute = "name"; // Remains the same for all attributes with 
+            for (let song of songObj){
+                if (song[searchAttribute][subSearchAttribute].includes(userValue)){
+                    results.push(song);
+                }
+            }
+        }
+        else if (valuesArr.length == 2){
+            const upperBound = Number(valuesArr[1]); // The upper boundary of the two given values
+            const lowerBound = Number(valuesArr[0]); // The lower bound of the two given values
+            for (let song of songs){
+                if (searchAttribute == "popularity"){ 
+                    const songPopularity = Number(song["details"][searchAttribute]); // The current song's popularity
+                    if (songPopularity >= lowerBound && songPopularity <= upperBound){
+                        results.push(song); // push the song if the given constrains are met
+                    }
+                }
+                else{ // Search attribute is year
+                    const songYear = Number(song[searchAttribute]); // The current song's popularity
+                    if (songYear >= lowerBound && songYear <= upperBound){
+                        results.push(song); // push the song if the given constrains are met
+                    }
+                }
+            }
+        }
+        else{
+            console.log("Oops, you have no search parameters! No songs will be found");
+        }
+        return results;
+    }
+
 
 
 // ======================================================== SONG INFORMATION PAGE =========================================================== 
