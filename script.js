@@ -143,7 +143,11 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
     }
     populateSongs();
 
-    
+    document.getElementById("clear-btn").addEventListener("click", (e) => {
+        for (let input of inputs){
+            input.textContent = "";
+        }
+    });
     document.getElementById("submit-btn").addEventListener("click", (e) => {
             // retrieving data from the button
             let id = e.target.getAttribute('data-id');
@@ -151,12 +155,20 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
         }
     );
     // Form data handling section
-    let formBody = new FormData();
-    formBody.set("id",)
-    const options = {
-        method: 'POST',
-        body: formBody
-    };
+    document.addEventListener("DOMContentLoaded", ()=> {
+        const songForm = document.getElementById('song-form');
+        songForm.addEventListener('submit', formProcessing);
+    });
+
+    function formProcessing(form){
+        form.preventDefault(); // Prevents the page from being reloaded and causing issues.
+        let songForm = form.target;
+        let formData = new FormData(songForm);
+        for (let key of formData.keys()){
+            console.log(key, formData.get(key));
+        }
+    }
+
 
 // ======================================================== SONG INFORMATION PAGE =========================================================== 
 
