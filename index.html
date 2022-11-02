@@ -19,7 +19,7 @@
         <!-- ======================================== SONG SEARCH SECTION =====================================-->
         <section class="song-search">
             <div class="search"> 
-                <form class="search-form" method="POST" action="">
+                <form class="search-form" action="" id="song-form">
                     <h2> Song Search </h2>
                     <div class="input-container">
                         <input type="radio" name="search-radio" id="title-radio" checked=true/>
@@ -60,7 +60,7 @@
                         </div>
                     </div>
                     <div class="button-container"> 
-                        <button type="clear" class="form-btn"> Clear </button>
+                        <button type="clear" class="form-btn" id="clear-btn"> Clear </button>
                         <button type="submit" class="form-btn" id="submit-btn"> Search </button>
                     </div>
                 </form>
@@ -86,7 +86,7 @@
         <!-- ======================================== SONG INFORMATION SECTION ===================================== -->
         <section class="song-info">
             <div class="info">  
-                <h2> Song Information </h2>
+                <h2 id="song-info-header"> Song Information </h2>
                 <div class="analysis bpm"> </div>
                 <div class="analysis energy"> </div>
                 <div class="analysis danceability"> </div>
@@ -114,7 +114,7 @@
         <ul class="footer-list"> 
             <li> COMP3512 - Web Development II </li>
             <li> <a href="https://github.com/Ericn01/COMP3512-Assignment-2"> Github Repository </a></li>
-            <li> Eric Nielsen - 2022 </li>
+            <li> Eric Nielsen, 2022 </li>
         </ul>
     </footer>
     <script type="text/javascript" src="songs.json"></script>
