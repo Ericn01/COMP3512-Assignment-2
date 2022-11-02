@@ -143,6 +143,20 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
     }
     populateSongs();
 
+    
+    document.getElementById("submit-btn").addEventListener("click", (e) => {
+            // retrieving data from the button
+            let id = e.target.getAttribute('data-id');
+            // get song object from the button
+        }
+    );
+    // Form data handling section
+    let formBody = new FormData();
+    formBody.set("id",)
+    const options = {
+        method: 'POST',
+        body: formBody
+    };
 
 // ======================================================== SONG INFORMATION PAGE =========================================================== 
 
