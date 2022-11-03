@@ -125,7 +125,7 @@ td{
     grid-template-rows: repeat(4, minmax(0, 1fr))
 }
 #song-info-header{
-    
+    grid-column: 1 / span 2;
 }
 .analysis{
     height: 100px; 
