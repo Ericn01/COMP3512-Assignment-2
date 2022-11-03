@@ -28,7 +28,7 @@ function getSongTitles(){
     }
     return songTitles;
 }
-// This function appends the autocomplete matches to the datalist
+
 function autocompleteTitles(){
     if (this.value.length >= 1){ // Starts using autocomplete after 1 character has been typed
         const titleMatch = findMatches(this.value, songTitles);
@@ -95,8 +95,8 @@ function loadSelectOptions(fieldName){
     }
 }
 // Load the select elements with data upon clicking.
-document.querySelector("#genre-select").addEventListener('click', loadSelectOptions("genre"));
-document.querySelector("#artist-select").addEventListener('click', loadSelectOptions("artist"));
+document.getElementById("genre-select").addEventListener('click', loadSelectOptions("genre"));
+document.getElementById("artist-select").addEventListener('click', loadSelectOptions("artist"));
 
     function populateRow(parentElement, attribute, songObj){
         const cellElement = document.createElement("td");
@@ -126,8 +126,8 @@ document.querySelector("#artist-select").addEventListener('click', loadSelectOpt
                 populateRow(songRow, labels[i], song);
             }
         resultsBody.appendChild(songRow); // Appends the current row to the table body
+        }
     }
-}
 populateSongs(songs);
     document.querySelector("#clear-btn").addEventListener("click", (e) => {
         for (let input of inputs){
@@ -163,7 +163,7 @@ populateSongs(songs);
             }
         }
         return selectedRadioId;
-    }   
+    }
     // This function is responsible for processing the data sent through the form
     function formProcessing(){
         // Prevents a page reload when we submit the form.
@@ -206,14 +206,14 @@ populateSongs(songs);
         let count = 0;
         for (song of songObj){
             if (searchAttribute == 'title' && String(song['title']).includes(userValue)){
-                results.push(song);
-            }
+                        results.push(song);
+                    }
             else if ((searchAttribute =='artist' || searchAttribute == 'genre') && (song[searchAttribute]['name'].includes)(userValue)){
                 results.push(song);
-            }
+                }
             else if (searchAttribute == 'popularity' || searchAttribute == 'year'){
-                const upperBound = Number(valuesArr[1]); // The upper boundary of the two given values
-                const lowerBound = Number(valuesArr[0]); // The lower bound of the two given values
+            const upperBound = Number(valuesArr[1]); // The upper boundary of the two given values
+            const lowerBound = Number(valuesArr[0]); // The lower bound of the two given values
                 if (searchAttribute == "popularity"){ 
                     const songPopularity = Number(song["details"][searchAttribute]); // The current song's popularity
                     if (songPopularity >= lowerBound && songPopularity <= upperBound){
@@ -229,24 +229,45 @@ populateSongs(songs);
             }
             else if (searchAttribute == ""){
                 console.log("No search attribute has been chosen");
-            }
+        }
             count++;
         }
         return results;
     }
 
 // ======================================================== SONG INFORMATION PAGE =========================================================== 
+const exampleData = songs[150].analytics;
+
 const data = {
     labels: [
-    'Danceability', 'Energy', 'Speechiness', 'Acousticness', 'Liveness', 'Valence']
-
+    'Danceability', 'Energy', 'Speechiness', 'Acousticness', 'Liveness', 'Valence'],
+    datasets: [{
+        label: "Song analysis",
+        data: [exampleData.danceability, exampleData.energy, exampleData.speechiness, exampleData.acousticness, exampleData.liveness, exampleData.valence],
+        fill: true,
+        backgroundColor: "rgba(255, 25, 10, 0.075)",
+        borderColor: "red",
+        pointHoverBackgroundColor: "white",
+        pointHoverBorderColor: "black",
+        pointBorderColor: "red",
+        pointRadius: 5
+    }]
+    
 };
+
 let ctx = document.querySelector("#song-chart").getContext('2d');
-// let chart = new Chart(ctx, {
-//     type: 'radar',
-//     data: data,
-//     options: options
-// });
+let chart = new Chart(ctx, {
+    type: 'radar',
+    data: data,
+    options: {
+        responsive: true,
+        elements: {
+            line: {
+                borderWidth: 2
+            }
+        }
+    }
+});
 
 
 // ======================================================== PLAYLIST INFO PAGE ============================================================== 
