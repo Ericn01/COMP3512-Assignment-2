@@ -30,7 +30,7 @@ function getSongTitles(){
 }
 
 function autocompleteTitles(){
-    if (this.value.length >= 1){ // Starts using autocomplete after 1 character has been typed
+    if (this.value.length >= 2){ // Starts using autocomplete after 1 character has been typed
         const titleMatch = findMatches(this.value, songTitles);
         resultsBox.replaceChildren();
         titleMatch.forEach(songMatch => {
@@ -108,6 +108,10 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
             cellElement.textContent = songObj[attribute]['popularity'] + "%";
         }
         else{
+            if (attribute == 'title'){
+                cellElement.className = 'table-link';
+                cellElement.value = songObj["song_id"];
+            }
             cellElement.textContent = songObj[attribute];
         }
         parentElement.appendChild(cellElement);
@@ -127,6 +131,7 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
             }
         resultsBody.appendChild(songRow); // Appends the current row to the table body
         }
+        trackResults(); // This function adds an event listener to all the title elements from our search results
     }
 populateSongs(songs);
     document.querySelector("#clear-btn").addEventListener("click", (e) => {
@@ -234,40 +239,98 @@ populateSongs(songs);
         }
         return results;
     }
+    function getSongAttributes(id){
+        let songId = id; // the value of the link element (song id)
+        const songAttributes = [];
+        for (song of songs){
+            if (songId === song['song_id']){ // Linear search through the songs object to see if the link id is equal to the current song id
+                songAttributes.push(song['analytics']); // Retrieves the analytics of the given song. 
+                songAttributes.push(song['details']); // Retrieves addional details of the song.
+                break;
+            }
+        }
+        return songAttributes;
+    }
 
 // ======================================================== SONG INFORMATION PAGE =========================================================== 
-const exampleData = songs[150].analytics;
-
-const data = {
-    labels: [
-    'Danceability', 'Energy', 'Speechiness', 'Acousticness', 'Liveness', 'Valence'],
-    datasets: [{
-        label: "Song analysis",
-        data: [exampleData.danceability, exampleData.energy, exampleData.speechiness, exampleData.acousticness, exampleData.liveness, exampleData.valence],
+function displaySongInformation(){
+    const id = this.value; // the ID of the song element that was clicked
+    const songData = getSongAttributes(id);
+    makeChart(songData);
+    makeSongInformation(songData);
+}
+/**
+ * This function draws a radar chart that displays the song's analytics data.
+ * @param {*} songData the required data of the song that the user is searching for
+ */
+function makeChart(songData){
+    const accessIndex = 0; // The analytics object is wrapped in an array of length 1, hence index 0 to access it
+    const labels = ['Danceability', 'Energy', 'Speechiness', 'Acousticness', 'Liveness', 'Valence'];
+    const parentNode = document.querySelector('.chart');
+    // To redraw on the canvas we must first destroy the old one. If this isn't done, JS throws an error
+    const canvas = document.querySelector("#song-chart")
+    parentNode.removeChild(canvas);
+    // Create a new canvas to draw the chart on 
+    const newCanvas = document.createElement("canvas");
+    newCanvas.id = "song-chart";
+    // Append the new canvas onto the chart container (parent node)
+    parentNode.appendChild(newCanvas);
+    const ctx = newCanvas.getContext('2d');
+    const data = {
+        labels: labels,
+        datasets: [ {
+        label: "Attributes",
+        data: [songData[accessIndex].danceability, songData[accessIndex].energy, songData[accessIndex].speechiness, 
+                songData[accessIndex].acousticness, songData[accessIndex].liveness, songData[accessIndex].valence],
         fill: true,
-        backgroundColor: "rgba(255, 25, 10, 0.075)",
-        borderColor: "red",
+        borderCapStyle: "round",
+        borderJoinStyle: "round",
+        tension: 0.15,
+        backgroundColor: "rgba(25, 25, 255, 0.075)",
+        borderColor: "blue",
+        pointBackgroundColor: "orange",
         pointHoverBackgroundColor: "white",
         pointHoverBorderColor: "black",
-        pointBorderColor: "red",
-        pointRadius: 5
-    }]
+        pointRadius: 4
+        }
+    ]
+    };
     
-};
-
-let ctx = document.querySelector("#song-chart").getContext('2d');
-let chart = new Chart(ctx, {
+    let chart = new Chart(ctx, {
     type: 'radar',
     data: data,
     options: {
-        responsive: true,
+        scales: {
+            r: {
+                grid: {
+                    circular: true
+                },
+                suggestedMin: 0,
+                suggestedMax: 100
+            }
+        },
+        responsive: false,
         elements: {
             line: {
                 borderWidth: 2
             }
         }
     }
-});
+    }); 
+}
+
+function makeSongInformation(songData){
+    const dataBoxes = document.querySelectorAll(".analysis");
+
+}
+
+// Table "link" click
+function trackResults(){
+    let tableLinks = document.querySelectorAll(".table-link"); // NodeList of all titles
+    for (let link of tableLinks){
+        link.addEventListener('click', displaySongInformation)
+    }
+}
 
 
 // ======================================================== PLAYLIST INFO PAGE ============================================================== 

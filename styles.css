@@ -28,7 +28,7 @@ body{
     background-color: var(--complimentary-color);
     margin: 15px;
 }
-.song-search{
+.song-search, .song-info, .song-playlists{
     display: flex;
     justify-content: space-between;
 }
@@ -47,7 +47,7 @@ body{
     width: 75px;
 }
 .song-search h2{
-
+    text-align: center;
 }
 .input-container{
     margin: 20px 12px auto;
@@ -85,7 +85,7 @@ body{
     padding: 12px;
     margin: 15px;
     text-align: center;
-    flex-grow: 2;
+    flex-grow: 2.5;
     border: 0.5px solid gray;
     box-shadow: 1px 1px 10px black;
     max-height: 550px; 
@@ -101,7 +101,7 @@ body{
     margin-right: auto;
     margin-top: 35px;
     text-align: left;
-    width: 1000px;
+    width: 800px;
     font-size: 0.85rem;
 }
 table tr:hover{
@@ -121,9 +121,21 @@ td{
     padding: 0.8rem 0.5rem;
 }
 
+.table-link{
+    text-decoration: underline;
+    cursor: pointer;
+}
+.table-link:hover{
+    font-weight: bold;
+    color: blue;
+}
+
 /* Song Information Subsection (View 2)*/
+
 .info{
+    flex-grow: 1;
     display: grid;
+    gap: 10px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: repeat(4, minmax(0, 1fr))
 }
@@ -131,11 +143,16 @@ td{
     grid-column: 1 / span 2;
 }
 .analysis{
-    height: 100px; 
-    width: 100px;
     border: 1px solid black;
     background-image: linear-gradient(orange, red);
-    margin: 20px;
+}
+
+.chart{
+    flex-grow: 1.5;
+    /* The following ensures that the chart is centered both horizontally and vertically*/
+    display: flex;
+    align-items: center; 
+    justify-content: center;
 }
 
 /* FOOTER STYLES */
