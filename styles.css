@@ -3,11 +3,11 @@
 
 /* Page variables (all colors used will be in here) */
 :root{
-    --dominant-color: #e7f2f8;
-    --highlight-color: #74bdcb;
-    --contrasting-color: #ffa384;
-    --complimentary-color: #efe7bc;
-    --text-color: #000000;
+    --dominant-color: #404258;
+    --highlight-color: #fb2576;
+    --contrasting-color: #474E68;
+    --complimentary-color: #6B728E;
+    --text-color: #ffffff;
 }
 
 /* HEADER STYLES */
@@ -18,7 +18,7 @@ body{
     font-family: 'Trispace', sans-serif;
     height: 100vh;
     background-color: var(--dominant-color);
-    
+    color: var(--text-color);
 }
 /* Search Subsection (View 1)*/
 .search{
@@ -33,7 +33,8 @@ body{
     justify-content: space-between;
 }
 .song-search input[type='text'], .song-search input[type='number'], .song-search select{
-    background-color: var(--complimentary-color);
+    color: var(--text-color);
+    background-color: transparent;
     margin-left: 20px;
     outline: none;
     border: none;
@@ -43,8 +44,16 @@ body{
 .song-search input[type='text'], .song-search select{
     width: 150px;
 }
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 .song-search input[type='number']{
-    width: 75px;
+    width: 80px;
+    -moz-appearance: textfield;
 }
 .song-search h2{
     text-align: center;
@@ -52,6 +61,7 @@ body{
 .input-container{
     margin: 20px 12px auto;
     width: 85% auto;
+    background-color: var(--contrasting-color);
     box-shadow: 2px 2px 5px black;
     padding: 15px 12px;
 }
@@ -94,7 +104,7 @@ body{
 .results-table{
     min-width: 500px;
     border-collapse: collapse;
-    box-shadow: 1px 1px 10px gray;
+    box-shadow: 1px 1px 10px black;
     padding: 10px 15px;
     table-layout: fixed;
     margin-left: auto;
@@ -137,7 +147,7 @@ td{
     display: grid;
     gap: 10px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: repeat(4, minmax(0, 1fr))
+    grid-template-rows: repeat(6, minmax(0, 1fr))
 }
 .song-details{
     grid-column: span 2;
@@ -147,7 +157,7 @@ td{
     display: block;
     background-color: var(--contrasting-color);
     border: 1px solid black;
-    box-shadow: 2px 5px 10px gray;
+    box-shadow: 2px 5px 10px black;
 }
 #song-info-header{
     text-align: center;
@@ -155,9 +165,10 @@ td{
     grid-column: 1 / span 2;
 }
 .analysis{
+    align-self: start;
     border: 1px solid black;
     background-color: var(--complimentary-color);
-    box-shadow: 1px 1px 3px gray;
+    box-shadow: 1px 1px 3px black;
 }
 .analysis h2{
     font-size: 1.5rem;

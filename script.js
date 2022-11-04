@@ -74,6 +74,40 @@ function disableInputs(){
         }
     }
 }
+
+const numberInputs = document.querySelectorAll('input[type="number"]');
+for (let input of numberInputs){
+    input.addEventListener('click', numberHandling);
+}
+function enableDisableNumberInputs(disableInputIndex){
+    for (let i = 0; i < numberInputs.length; i++){
+        if (i == disableInputIndex){
+            numberInputs[i].disabled = true;
+        }
+        else{
+            numberInputs[i].diabled = false;
+        }
+    }
+}
+function numberHandling(){
+    const selectedInputId = this.id;
+    switch(selectedInputId){
+        case "year-less-input":
+            enableDisableNumberInputs(1); // Disables the 'greater than' year input
+            break;
+        case "year-greater-input":
+            enableDisableNumberInputs(0); // Disables the 'less than' year input
+            break;
+        case "popularity-less-input":
+            enableDisableNumberInputs(3); // Disables the 'greater than' popularity input
+            break;
+        case "popularity-greater-input":
+            enableDisableNumberInputs(2); // Disables the 'less than' popularit input
+            break;
+        default:
+    }
+}
+
 // This function is responsible for populating the select elements with options in the song search.
 function loadSelectOptions(fieldName){
     const field = fieldName;
@@ -190,13 +224,21 @@ populateSongs(songs);
                 searchAttribute = "genre";
                 break;
             case "year-radio":
-                pushInputValue("year-less-input", searchParameters);
-                pushInputValue("year-greater-input", searchParameters);
+                if (numberInputs[0].disabled == false){
+                    pushInputValue("year-less-input", searchParameters);
+                }
+                else{
+                    pushInputValue("year-greater-input", searchParameters);
+                }
                 searchAttribute = "year"
                 break;
             case "popularity-radio":
-                pushInputValue("popularity-less-input", searchParameters);
-                pushInputValue("popularity-greater-input", searchParameters);
+                if (numberInputs[2].disabled == false){
+                    pushInputValue("popularity-less-input", searchParameters);
+                }
+                else{
+                    pushInputValue("popularity-greater-input", searchParameters);
+                }
                 searchAttribute = "popularity";
                 break;
             default:
@@ -208,7 +250,6 @@ populateSongs(songs);
         const results = [];
         const userValue = valuesArr[0];
         // Loop through the song objects array
-        let count = 0;
         for (song of songObj){
             if (searchAttribute == 'title' && String(song['title']).includes(userValue)){
                         results.push(song);
@@ -217,25 +258,36 @@ populateSongs(songs);
                 results.push(song);
                 }
             else if (searchAttribute == 'popularity' || searchAttribute == 'year'){
-            const upperBound = Number(valuesArr[1]); // The upper boundary of the two given values
-            const lowerBound = Number(valuesArr[0]); // The lower bound of the two given values
                 if (searchAttribute == "popularity"){ 
                     const songPopularity = Number(song["details"][searchAttribute]); // The current song's popularity
-                    if (songPopularity >= lowerBound && songPopularity <= upperBound){
-                        results.push(song);
+                    if (numberInputs[0].disabled == false){ // Search was based on the 'less' parameter -> very fragile, code: should probably be refactored. Also quite unclear
+                        if (Number(userValue) > songPopularity){
+                            results.push(song);
+                        }
+                    }
+                    else{ // search is based on greater than parameter
+                        if (Number(userValue) < songPopularity){
+                            results.push(song);
+                        }
                     }
                 }
                 else{ // Search attribute is year
                     const songYear = Number(song[searchAttribute]); // The current song's popularity
-                    if (songYear >= lowerBound && songYear <= upperBound){
-                        results.push(song);
+                    if (numberInputs[2].disabled == false){ // Search was based on the 'less' parameter for the year
+                        if (Number(userValue) < songYear){
+                            results.push(song);
+                        }
+                    }
+                    else{ // search is based on greater than parameter
+                        if (Number(userValue) > songYear){
+                            results.push(song);
+                        }
                     }
                 }
             }
             else if (searchAttribute == ""){
                 console.log("No search attribute has been chosen");
         }
-            count++;
         }
         return results;
     }
@@ -285,12 +337,10 @@ function makeChart(songData){
         data: [songData[accessIndex].danceability, songData[accessIndex].energy, songData[accessIndex].speechiness, 
                 songData[accessIndex].acousticness, songData[accessIndex].liveness, songData[accessIndex].valence],
         fill: true,
-        borderCapStyle: "round",
-        borderJoinStyle: "round",
         tension: 0.20,
-        backgroundColor: "rgba(25, 25, 255, 0.075)",
-        borderColor: "blue",
-        pointBackgroundColor: "orange",
+        backgroundColor: "rgba(25, 25, 255, 0.15)",
+        borderColor: "white",
+        pointBackgroundColor: "hotpink",
         pointHoverBackgroundColor: "white",
         pointHoverBorderColor: "black",
         pointRadius: 4
@@ -301,10 +351,16 @@ function makeChart(songData){
     type: 'radar',
     data: data,
     options: {
+        
+            labels:{
+                fontColor: "white"
+            },
+        
         scales: {
             r: {
                 grid: {
-                    circular: true
+                    circular: true,
+                    color: "white"
                 },
                 suggestedMin: 0,
                 suggestedMax: 100
@@ -335,7 +391,7 @@ function makeSongInformation(songData){
     const detailsBox = document.querySelector(".song-details");
     detailsBox.innerHTML = `<h1> ${title} <h1>` + `<h3> Duration: ${duration}s`;
 
-    const analytics = ["BPM: " + bpm, "Popularity:" + popularity, "Energy: " + energy, 
+    const analytics = ["BPM: " + bpm, "Popularity:" + popularity, "#{Rank} in energy: " + energy, 
                         "Valence: " + valence, "Acousticness: " + acousticness, "Speechiness: " + speechiness, 
                         "Liveness: " + liveness, "Danceability: " + danceability];
     const dataBoxes = document.querySelectorAll(".analysis");
