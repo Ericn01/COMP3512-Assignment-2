@@ -246,6 +246,7 @@ populateSongs(songs);
             if (songId === song['song_id']){ // Linear search through the songs object to see if the link id is equal to the current song id
                 songAttributes.push(song['analytics']); // Retrieves the analytics of the given song. 
                 songAttributes.push(song['details']); // Retrieves addional details of the song.
+                songAttributes.push(song['title']);
                 break;
             }
         }
@@ -257,6 +258,7 @@ function displaySongInformation(){
     const id = this.value; // the ID of the song element that was clicked
     const songData = getSongAttributes(id);
     makeChart(songData);
+    console.log("TEST");
     makeSongInformation(songData);
 }
 /**
@@ -285,7 +287,7 @@ function makeChart(songData){
         fill: true,
         borderCapStyle: "round",
         borderJoinStyle: "round",
-        tension: 0.15,
+        tension: 0.20,
         backgroundColor: "rgba(25, 25, 255, 0.075)",
         borderColor: "blue",
         pointBackgroundColor: "orange",
@@ -295,8 +297,7 @@ function makeChart(songData){
         }
     ]
     };
-    
-    let chart = new Chart(ctx, {
+    new Chart(ctx, {
     type: 'radar',
     data: data,
     options: {
@@ -320,8 +321,27 @@ function makeChart(songData){
 }
 
 function makeSongInformation(songData){
-    const dataBoxes = document.querySelectorAll(".analysis");
+    const title = songData[2];
+    const bpm = songData[1].bpm;
+    const duration = songData[1].duration;
+    const popularity = songData[1].popularity;
+    const energy = songData[0].energy;
+    const valence = songData[0].valence;
+    const acousticness = songData[0].acousticness;
+    const speechiness = songData[0].speechiness;
+    const liveness = songData[0].speechiness;
+    const danceability = songData[0].danceability;
 
+    const detailsBox = document.querySelector(".song-details");
+    detailsBox.innerHTML = `<h1> ${title} <h1>` + `<h3> Duration: ${duration}s`;
+
+    const analytics = ["BPM: " + bpm, "Popularity:" + popularity, "Energy: " + energy, 
+                        "Valence: " + valence, "Acousticness: " + acousticness, "Speechiness: " + speechiness, 
+                        "Liveness: " + liveness, "Danceability: " + danceability];
+    const dataBoxes = document.querySelectorAll(".analysis");
+    for (let i = 0; i < dataBoxes.length; i++){
+        dataBoxes[i].innerHTML = `<h2> ${String(analytics[i])} </h2>`;
+    }
 }
 
 // Table "link" click
