@@ -15,18 +15,41 @@ songs =  JSON.parse(songData);
  * This function loads the select inputs in the song search page. 
  * @param {*} fieldName the name of the field that we are looking for in the json file
  */
-const songTitles = getSongTitles(); // Loads all the song titles into an array
+const songTitles = getSongAttributeArray("title"); // Loads all the song titles into an array
+console.log(songTitles);
 const titleInput = document.querySelector('#title-input');
 const resultsBox = document.querySelector('#autocomplete-results');
 titleInput.addEventListener('input', autocompleteTitles);
 
-// This function fills an array with the titles of every song in the json file and returns it
-function getSongTitles(){
-    const songTitles = [];
+// This function fills an array with the given attribute of a song in the json file and returns it.
+// For the moment the supported attributes are 
+function getSongAttributeArray(attributeName){
+    const songAttributeArray = [];
     for (let song of songs){
-        songTitles.push(song['title']);
+        switch(attributeName){
+            case "title":
+            case "year":
+                songAttributeArray.push(song[attributeName]);
+                break;
+            case "energy":
+            case "valence":
+            case "acousticness":
+            case "speechiness":
+            case "liveness":
+            case "danceability":
+                songAttributeArray.push(song['analytics'][attributeName]);
+                break;
+            case "artist":
+            case "genre":
+                songAttributeArray.push(song[attributeName]['name']); // Returns the name of the genre or artist
+                break;
+            case "popularity":
+                songAttributeArray.push(song['details'][attributeName]);
+                break;
+            default:
+        }
     }
-    return songTitles;
+    return songAttributeArray;
 }
 
 function autocompleteTitles(){
@@ -375,29 +398,44 @@ function makeChart(songData){
     }
     }); 
 }
-
 function makeSongInformation(songData){
     const title = songData[2];
     const bpm = songData[1].bpm;
     const duration = songData[1].duration;
-    const popularity = songData[1].popularity;
-    const energy = songData[0].energy;
-    const valence = songData[0].valence;
-    const acousticness = songData[0].acousticness;
-    const speechiness = songData[0].speechiness;
-    const liveness = songData[0].speechiness;
-    const danceability = songData[0].danceability;
+    const popularity = findRanking(songData[1].popularity, "popularity");
+    const energyRanking = findRanking(songData[0].energy, "energy");
+    const valenceRanking = findRanking(songData[0].valence, "valence");
+    const acousticnessRanking = findRanking(songData[0].acousticness, "acousticness");
+    const speechinessRanking = findRanking(songData[0].speechiness, "speechiness");
+    const livenessRanking = findRanking(songData[0].speechiness, "liveness");
+    const danceabilityRanking = findRanking(songData[0].danceability, "danceability");
 
     const detailsBox = document.querySelector(".song-details");
-    detailsBox.innerHTML = `<h1> ${title} <h1>` + `<h3> Duration: ${duration}s`;
-
-    const analytics = ["BPM: " + bpm, "Popularity:" + popularity, "#{Rank} in energy: " + energy, 
-                        "Valence: " + valence, "Acousticness: " + acousticness, "Speechiness: " + speechiness, 
-                        "Liveness: " + liveness, "Danceability: " + danceability];
+    detailsBox.innerHTML = `<h1> ${title} <h1>` + `<h3> Duration: ${duration}`;
+    const headings = ["BPM 🏃", "Popularity 📈", "Energy 🔋", "Valence 😃", "Acousticness 🎶", 
+    "Speechiness 🦜", "Liveness ✨", "Danceability 🕺"]
+    const analytics = [bpm + " beats per minute", rankFormat(popularity), rankFormat(energyRanking), 
+    rankFormat(valenceRanking), rankFormat(acousticnessRanking), 
+                        rankFormat(speechinessRanking), rankFormat(livenessRanking), 
+                        rankFormat(danceabilityRanking)];
     const dataBoxes = document.querySelectorAll(".analysis");
     for (let i = 0; i < dataBoxes.length; i++){
-        dataBoxes[i].innerHTML = `<h2> ${String(analytics[i])} </h2>`;
+        makeAnalyticsBoxMarkup(headings[i], analytics[i], dataBoxes[i]);
     }
+}
+function rankFormat(rank){
+    return `Rank: #${rank}`;
+}
+function makeAnalyticsBoxMarkup(heading, data, dataBox){
+    if (dataBox.hasChildNodes()){
+        dataBox.textContent = "";
+    }
+    const headingMarkup = document.createElement("h2");
+    headingMarkup.textContent = heading;
+    const dataMarkup = document.createElement("h1");
+    dataMarkup.textContent = data;
+    dataBox.appendChild(headingMarkup);
+    dataBox.appendChild(dataMarkup)
 }
 
 // Table "link" click
@@ -406,6 +444,50 @@ function trackResults(){
     for (let link of tableLinks){
         link.addEventListener('click', displaySongInformation)
     }
+}
+
+// Adding an event listener to the table sort buttons
+
+// SORTING SONGS TO FIND THEIR RANKING 
+function sortAttribute(attribute){
+    const generalAttributeArray = getSongAttributeArray(attribute);
+    switch(attribute){
+        // === ANALYTICS & DETAILS ATTRIBUTES (NUMBERS) === 
+        case "energy":
+        case "valence":
+        case "acousticness":
+        case "speechiness":
+        case "liveness":
+        case "danceability":
+        case "bpm":
+        case "popularity":
+            generalAttributeArray.sort((a,b) => a-b); // Sorts by ascending order for number values
+            break;
+        // === ARTIST, GENRE, Title ===
+        case "artist":
+        case "genre":
+        case "title":
+            generalAttributeArray.sort(); // Sorts alphabetically -> numbers and symbols will come first
+            break;
+        default:
+    }
+    return generalAttributeArray;
+}
+function findRanking(attributeValue, attributeName){
+    const sortedAttributeArray = sortAttribute(attributeName).reverse(); // The ranking is based on the index of the song, so we want numerical values in descending order
+    let ranking = 0;
+    for (let i = 1; i <= sortedAttributeArray.length; i++){
+        if (attributeValue === sortedAttributeArray[i]){
+            ranking = i;
+        }
+    }
+    return ranking;
+}
+console.log(sortAttribute("energy"));
+
+function sortTable(attribute){
+    const sortedAttribute = sortAttribute(attribute);
+
 }
 
 
