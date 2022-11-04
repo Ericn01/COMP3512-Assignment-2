@@ -44,6 +44,7 @@ function getSongAttributeArray(attributeName){
                 songAttributeArray.push(song[attributeName]['name']); // Returns the name of the genre or artist
                 break;
             case "popularity":
+            case "bpm":
                 songAttributeArray.push(song['details'][attributeName]);
                 break;
             default:
@@ -322,6 +323,8 @@ populateSongs(songs);
                 songAttributes.push(song['analytics']); // Retrieves the analytics of the given song. 
                 songAttributes.push(song['details']); // Retrieves addional details of the song.
                 songAttributes.push(song['title']);
+                songAttributes.push(song['artist']);
+                songAttributes.push(song['genre']);
                 break;
             }
         }
@@ -329,6 +332,9 @@ populateSongs(songs);
     }
 
 // ======================================================== SONG INFORMATION PAGE =========================================================== 
+/**
+ * This function is responsible for filling the song information view with the given information.
+ */
 function displaySongInformation(){
     const id = this.value; // the ID of the song element that was clicked
     const songData = getSongAttributes(id);
@@ -356,7 +362,7 @@ function makeChart(songData){
     const data = {
         labels: labels,
         datasets: [ {
-        label: "Attributes",
+        label: "Value",
         data: [songData[accessIndex].danceability, songData[accessIndex].energy, songData[accessIndex].speechiness, 
                 songData[accessIndex].acousticness, songData[accessIndex].liveness, songData[accessIndex].valence],
         fill: true,
@@ -389,7 +395,7 @@ function makeChart(songData){
                 suggestedMax: 100
             }
         },
-        responsive: false,
+        responsive: true,
         elements: {
             line: {
                 borderWidth: 2
@@ -400,28 +406,40 @@ function makeChart(songData){
 }
 function makeSongInformation(songData){
     const title = songData[2];
-    const bpm = songData[1].bpm;
-    const duration = songData[1].duration;
-    const popularity = findRanking(songData[1].popularity, "popularity");
+    const bpmRanking = findRanking(songData[1].bpm,"bpm");
+    const duration = secondsToMin(songData[1].duration);
+    const popularityRanking = findRanking(songData[1].popularity, "popularity");
     const energyRanking = findRanking(songData[0].energy, "energy");
     const valenceRanking = findRanking(songData[0].valence, "valence");
     const acousticnessRanking = findRanking(songData[0].acousticness, "acousticness");
     const speechinessRanking = findRanking(songData[0].speechiness, "speechiness");
     const livenessRanking = findRanking(songData[0].speechiness, "liveness");
     const danceabilityRanking = findRanking(songData[0].danceability, "danceability");
-
     const detailsBox = document.querySelector(".song-details");
-    detailsBox.innerHTML = `<h1> ${title} <h1>` + `<h3> Duration: ${duration}`;
+    
+    const artistName = songData[3]['name'];
+    // const genreName = songData[4]['name']; Not sure if this should be included
+    detailsBox.innerHTML = `<h1> ${title} <h1> <h3> Produced by: ${artistName} </h3> <h3> Duration: ${duration}`;
     const headings = ["BPM 🏃", "Popularity 📈", "Energy 🔋", "Valence 😃", "Acousticness 🎶", 
     "Speechiness 🦜", "Liveness ✨", "Danceability 🕺"]
-    const analytics = [bpm + " beats per minute", rankFormat(popularity), rankFormat(energyRanking), 
-    rankFormat(valenceRanking), rankFormat(acousticnessRanking), 
-                        rankFormat(speechinessRanking), rankFormat(livenessRanking), 
-                        rankFormat(danceabilityRanking)];
+    const analytics = [bpmRanking, popularityRanking, energyRanking, 
+    valenceRanking, acousticnessRanking, speechinessRanking, livenessRanking, danceabilityRanking];
     const dataBoxes = document.querySelectorAll(".analysis");
     for (let i = 0; i < dataBoxes.length; i++){
         makeAnalyticsBoxMarkup(headings[i], analytics[i], dataBoxes[i]);
     }
+}
+/**
+ * Converts a number of seconds into a formatted M:SS date
+ * @param {} seconds the number of seconds to convert
+ * @returns the formatted duration string
+ */
+function secondsToMin(seconds){
+    minutesNum = seconds / 60
+    secondsNum = Number(String(minutesNum).substring(1)) * 60;
+    minutesFormatted = String(minutesNum).substring(0, 1);
+    secondsFormatted = String(secondsNum).substring(0, 2);
+    return `${minutesFormatted}:${secondsFormatted} minutes`;
 }
 function rankFormat(rank){
     return `Rank: #${rank}`;
@@ -432,10 +450,55 @@ function makeAnalyticsBoxMarkup(heading, data, dataBox){
     }
     const headingMarkup = document.createElement("h2");
     headingMarkup.textContent = heading;
+    const progressBar = makeAnalyticsProgressBar(data);
     const dataMarkup = document.createElement("h1");
-    dataMarkup.textContent = data;
+    dataMarkup.textContent = rankFormat(data);
     dataBox.appendChild(headingMarkup);
-    dataBox.appendChild(dataMarkup)
+    dataBox.appendChild(progressBar);
+    dataBox.appendChild(dataMarkup);
+}
+/**
+ * Returns a certain color based on the given progress bar value
+ * @param {*} value 
+ * @returns 
+ */
+function progressBarColor(value){
+    let color = "#ff0d0d";
+    if (value >= 260){
+        color = "#69b34c";
+    }
+    else if (value >= 210 && value < 260){
+        color = '#abc334';
+    }
+    else if (value >= 150 && value < 210){
+        color = '#fab733';
+    }
+    else if (value >= 100 && value < 150){
+        color = "#ff8e15";
+    }
+    else if (value >= 50 && value < 100){
+        color = '#ff4e11';
+    }
+    return color;
+}
+/**
+ * Draws a custom progress bar based on the given ranking
+ * @param {} value the ranking of the specified attributed of the given song
+ * @returns the progress bar element
+ */
+function makeAnalyticsProgressBar(value){
+    const numSongs = 317;
+    const pixelWidth = 175;
+    const absoluteValue = Math.abs(Number(value) - numSongs);
+    const progress = document.createElement('div');
+    progress.dataset.label = "";
+    progress.className = "progress";
+    progress.max = numSongs;
+    progress.value = absoluteValue; // Lower rankings end up higher on the progress bar
+    const width = (absoluteValue / numSongs) * pixelWidth;
+    const color = progressBarColor(absoluteValue);
+    progress.style = `--width:${width}px; --inputted-color:${color}`;
+    return progress;
 }
 
 // Table "link" click
@@ -483,7 +546,6 @@ function findRanking(attributeValue, attributeName){
     }
     return ranking;
 }
-console.log(sortAttribute("energy"));
 
 function sortTable(attribute){
     const sortedAttribute = sortAttribute(attribute);
