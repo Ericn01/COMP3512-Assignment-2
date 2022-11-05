@@ -15,8 +15,10 @@ songs =  JSON.parse(songData);
  * This function loads the select inputs in the song search page. 
  * @param {*} fieldName the name of the field that we are looking for in the json file
  */
+// Set the default song view
+switchView("SONG_SEARCH_VIEW");
+// Define a few global variables (will be refactored later)
 const songTitles = getSongAttributeArray("title"); // Loads all the song titles into an array
-console.log(songTitles);
 const titleInput = document.querySelector('#title-input');
 const resultsBox = document.querySelector('#autocomplete-results');
 titleInput.addEventListener('input', autocompleteTitles);
@@ -54,27 +56,27 @@ function getSongAttributeArray(attributeName){
 }
 
 function autocompleteTitles(){
-    if (this.value.length >= 2){ // Starts using autocomplete after 1 character has been typed
-        const titleMatch = findMatches(this.value, songTitles);
+    if (this.value.length >= 2){ // Starts using autocomplete after 2 character have been typed
+        const titleMatches = findMatches(this.value, songTitles);
         resultsBox.replaceChildren();
-        titleMatch.forEach(songMatch => {
+        for (let match of titleMatches){
                 let option = document.createElement('option');
-                option.textContent = songMatch;
+                option.textContent = match;
                 resultsBox.appendChild(option);
-            }
-        )
+        }
     }
 }
 
-/* Simple function that checks to see if th*/
+/* Simple function that checks to see if the current user input string matches any of the song titles in the JSON file */
 function findMatches(word, titles){
     const currentMatches = [];
     for(let title of titles){
-        if (String(title).includes(word)){
+        let stringTitle = String(title).toLowerCase(); // Includes function is casensitive so the word and string must have the same casing when compared
+        if (stringTitle.includes(word.toLowerCase())){
             currentMatches.push(title);
         }
     }
-    return currentMatches;
+    return currentMatches.sort(); // returns a sorted array of song matches
 }
 
 /* Add a event listener to every radio button */
@@ -107,9 +109,6 @@ function enableDisableNumberInputs(disableInputIndex){
     for (let i = 0; i < numberInputs.length; i++){
         if (i == disableInputIndex){
             numberInputs[i].disabled = true;
-        }
-        else{
-            numberInputs[i].diabled = false;
         }
     }
 }
@@ -167,11 +166,11 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
         }
         else{
             if (attribute == 'title'){
-                cellElement.className = 'table-link';
                 cellElement.value = songObj["song_id"];
             }
             cellElement.textContent = songObj[attribute];
         }
+        cellElement != 'details' ? cellElement.className = attribute : cellElement.className = 'popularity'; // setting the class name of the cell element
         parentElement.appendChild(cellElement);
     }
     function populateSongs(results){ // Should run in O(nlog(n)) time since the inner loop has a fixed length. Not great, but could be worse
@@ -230,7 +229,8 @@ populateSongs(songs);
     // This function is responsible for processing the data sent through the form
     function formProcessing(){
         // Prevents a page reload when we submit the form.
-        document.querySelector("#song-form").addEventListener('submit', e => e.preventDefault());        const selectedRadioId = getSelectedRadioButtonId();
+        document.querySelector("#song-form").addEventListener('submit', e => e.preventDefault());        
+        const selectedRadioId = getSelectedRadioButtonId();
         const searchParameters = []; // Array containing the search parameters 
         let searchAttribute = ""; // The attribute that the search is going by
         // Different logic will be applied depending on the selected radio button 
@@ -275,9 +275,9 @@ populateSongs(songs);
         const userValue = valuesArr[0];
         // Loop through the song objects array
         for (song of songObj){
-            if (searchAttribute == 'title' && String(song['title']).includes(userValue)){
+            if (searchAttribute == 'title' && String(song['title']).toLowerCase().includes(userValue.toLowerCase())){ // Includes function is case sensitive!
                         results.push(song);
-                    }
+                }
             else if ((searchAttribute =='artist' || searchAttribute == 'genre') && (song[searchAttribute]['name'].includes)(userValue)){
                 results.push(song);
                 }
@@ -338,8 +338,8 @@ populateSongs(songs);
 function displaySongInformation(){
     const id = this.value; // the ID of the song element that was clicked
     const songData = getSongAttributes(id);
+    switchView("SONG_INFORMATION_VIEW"); // Switches the view 
     makeChart(songData);
-    console.log("TEST");
     makeSongInformation(songData);
 }
 /**
@@ -419,20 +419,20 @@ function makeChart(songData){
 }
 function makeSongInformation(songData){
     const title = songData[2];
-    const bpmRanking = findRanking(songData[1].bpm,"bpm");
+    const bpm = songData[1].bpm; const bpmRanking = findRanking(bpm,"bpm");
     const duration = secondsToMin(songData[1].duration);
-    const popularityRanking = findRanking(songData[1].popularity, "popularity");
-    const energyRanking = findRanking(songData[0].energy, "energy");
-    const valenceRanking = findRanking(songData[0].valence, "valence");
-    const acousticnessRanking = findRanking(songData[0].acousticness, "acousticness");
-    const speechinessRanking = findRanking(songData[0].speechiness, "speechiness");
-    const livenessRanking = findRanking(songData[0].liveness, "liveness");
-    const danceabilityRanking = findRanking(songData[0].danceability, "danceability");
-    const detailsBox = document.querySelector(".song-details");
+    const popularity = songData[1].popularity; const popularityRanking = findRanking(popularity, "popularity");
+    const energy = songData[0].energy; const energyRanking = findRanking(energy, "energy");
+    const valence = songData[0].valence; const valenceRanking = findRanking(valence, "valence");
+    const acousticness = songData[0].acousticness; const acousticnessRanking = findRanking(acousticness, "acousticness");
+    const speechiness = songData[0].speechiness; const speechinessRanking = findRanking(speechiness, "speechiness");
+    const liveness = songData[0].liveness; livenessRanking = findRanking(liveness, "liveness");
+    const danceability = songData[0].danceability; danceabilityRanking = findRanking(danceability, "danceability");
     
+    const detailsBox = document.querySelector(".song-details");
     const artistName = songData[3]['name'];
-    // const genreName = songData[4]['name']; Not sure if this should be included
-    detailsBox.innerHTML = `<h1> ${title} <h1> <h3> Produced by: ${artistName} </h3> <h3> Duration: ${duration}`;
+    const genreName = songData[4]['name']; 
+    detailsBox.innerHTML = `<h1> ${title} <h1> <h3> Produced by ${artistName} </h3> <h3> Duration: ${duration} | Genre: ${genreName} ${getGenreEmoticon(genreName)}</h3>`;
     const headings = ["BPM 🏃", "Popularity 📈", "Energy 🔋", "Valence 😃", "Acousticness 🎶", 
     "Speechiness 🦜", "Liveness ✨", "Danceability 🕺"]
     const analytics = [bpmRanking, popularityRanking, energyRanking, 
@@ -441,6 +441,33 @@ function makeSongInformation(songData){
     for (let i = 0; i < dataBoxes.length; i++){
         makeAnalyticsBoxMarkup(headings[i], analytics[i], dataBoxes[i]);
     }
+}
+/** Associates an emoticon with the specified genre name and returns it. Simple function added for fun. */
+function getGenreEmoticon(genreName){
+    // There could have been many ways to do this, but I feel as though this is the clearest syntatictally
+    const emotes = {
+        "dance pop": "💃",
+        "pop": "🥂",
+        "canadian hip hop": "🇨🇦",
+        "atl hip hop": "🧨",
+        "indie pop": "",
+        "modern rock": "🎸",
+        "hip hop": "🔥",
+        "emo rap": "😢",
+        "dfw rap": "🎤",
+        "r&b": "🎷",
+        "cali rap": "🏖️",
+        "melodic rap": "🎵",
+        "art pop": "🎨",
+        "brostep": "🏍️",
+        "boy band": "🎢", 
+        "alt z": "🤳",
+        "contemporary country": "🐎",
+        "latin": "🇲🇽",
+        "afroswing": "🎢",
+    };
+    const emote = emotes[genreName];
+    return emote;
 }
 /**
  * Converts a number of seconds into a formatted M:SS date
@@ -452,6 +479,9 @@ function secondsToMin(seconds){
     secondsNum = Number(String(minutesNum).substring(1)) * 60;
     minutesFormatted = String(minutesNum).substring(0, 1);
     secondsFormatted = String(secondsNum).substring(0, 2);
+
+    secondsFormatted.length == 1 ? secondsFormatted += "0" : secondsFormatted; // if the length of seconds formatted is one, that means it's missing a 0
+    secondsFormatted.includes(".") ? secondsFormatted.replace(".", "0"): secondsFormatted; // if seconds formatted contains a period, replace it with a 0
     return `${minutesFormatted}:${secondsFormatted} minutes`;
 }
 function rankFormat(rank){
@@ -463,12 +493,44 @@ function makeAnalyticsBoxMarkup(heading, data, dataBox){
     }
     const headingMarkup = document.createElement("h2");
     headingMarkup.textContent = heading;
+    dataBox.title = getSongAttributeContext(heading);
     const progressBar = makeAnalyticsProgressBar(data);
     const dataMarkup = document.createElement("h1");
     dataMarkup.textContent = rankFormat(data);
     dataBox.appendChild(headingMarkup);
     dataBox.appendChild(progressBar);
     dataBox.appendChild(dataMarkup);
+}
+function getSongAttributeContext(attribute){
+    let attributeContext = ''
+    let cleanedAttribute = attribute.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '').toLowerCase().trim(); // removes the emoji from the given attribute. Regex taken from StackOverflow
+    switch(cleanedAttribute){
+        case 'bpm':
+            attributeContext = 'BPM (Beats per minute) refers to the tempo of the song.';
+            break;
+        case 'popularity':
+            attributeContext = 'Popularity refers to how popular this song is relative to others. ';
+            break;
+        case 'energy':
+            attributeContext = 'Energy represents the amount of energy and activity in the song.';
+            break;
+        case 'danceability':
+            attributeContext = 'Danceability describes the suitability of a track for dancing';
+            break;
+        case 'liveness':
+            attributeContext = 'Liveness is an estimate of how much audience noise is in the recording.'
+            break;
+        case 'acousticness':
+            attributeContext = 'Acousticness is a confidence measure of whether or not a song is acoustic';
+            break;
+        case 'speechiness':
+            attributeContext = 'Speechiness detects the presence of spoken words in song.';
+            break;
+        case 'valence':
+            attributeContext = 'Valence describes the musical positiveness conveyed by the song.'
+        default:
+    }
+    return attributeContext;
 }
 /**
  * Returns a certain color based on the given progress bar value
@@ -514,11 +576,11 @@ function makeAnalyticsProgressBar(value){
     return progress;
 }
 
-// Table "link" click
+// Table "link" click 
 function trackResults(){
-    let tableLinks = document.querySelectorAll(".table-link"); // NodeList of all titles
+    let tableLinks = document.querySelectorAll(".title"); // NodeList of all titles
     for (let link of tableLinks){
-        link.addEventListener('click', displaySongInformation)
+        link.addEventListener('click', displaySongInformation);
     }
 }
 
@@ -560,10 +622,60 @@ function findRanking(attributeValue, attributeName){
     return ranking;
 }
 
-function sortTable(attribute){
-    const sortedAttribute = sortAttribute(attribute);
+function sortTableByAttribute(attribute){
+    const attributeCellElements = document.querySelectorAll(attribute);
+    const textContentArr = [];
+    for (let cellElement of attributeCellElements){
+        textContentArr.push(cellElement.textContent);
+    }
+    if (attribute == 'year' || attribute == 'popularity'){
 
+    }
+    else{
+        textContentArr.sort();
+    }
+    for (let i =0; i < attributeCellElements.length; i++){
+        attributeCellElements[i].textContent = textContentArr[i];
+    }
 }
 
+// Adds a random placholder title to the title input space when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    const titleInput = document.querySelector("#title-input");
+    const NUM_SONGS = songs.length;
+    titleInput.placeholder = `${songTitles[Math.floor(Math.random() * NUM_SONGS)]}`;
+})
+
+// const sortButtons = document.querySelectorAll(".sort");
+// for (let button of sortButtons){
+//     button.addEventListener('click', sortTableByAttribute(this.value))
+// }
 
 // ======================================================== PLAYLIST INFO PAGE ============================================================== 
+
+
+// ======================================================== SWITCH VIEW =====================================================================
+
+function switchView(newView){
+    const songSearchBody = document.querySelector(".song-search");
+    const songInformationBody = document.querySelector(".song-info");
+    const songPlaylistBody = document.querySelector(".song-playlists");
+    if (newView == "SONG_SEARCH_VIEW"){
+        setDisplay(songSearchBody, songInformationBody, songPlaylistBody);
+    }
+    else if (newView == "SONG_INFORMATION_VIEW"){
+        setDisplay(songInformationBody, songSearchBody, songPlaylistBody);
+    }
+    else if (newView == "SONG_PLAYLIST_VIEW"){
+        setDisplay(songPlaylistBody, songSearchBody, songInformationBody);
+    }
+    else {
+        console.log("The given view attribute is not currently supported");
+    }
+}
+
+function setDisplay(flexBody, noBodyOne, noBodyTwo){
+    flexBody.style.display = 'flex';
+    noBodyOne.style.display = 'none';
+    noBodyTwo.style.display = 'none';
+}

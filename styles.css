@@ -13,6 +13,16 @@
 
 /* HEADER STYLES */
 
+header{
+    display: flex;
+    border-bottom: 2px solid black;
+}
+header h1{
+    font-size: 2.1em;
+    margin-left: 15px;
+    text-shadow: 1px 1px 4px gray;
+}
+
 /* BODY STYLES */
 body{
     font-size: 0.9rem;
@@ -60,7 +70,7 @@ input::-webkit-inner-spin-button {
     text-align: center;
 }
 .input-container{
-    margin: 20px 12px auto;
+    margin: 20px 25px auto;
     width: 85% auto;
     background-color: var(--contrasting-color);
     box-shadow: 2px 2px 5px black;
@@ -68,6 +78,7 @@ input::-webkit-inner-spin-button {
 }
 
 .button-container{
+    margin-top: 20px;
     display: flex;
     justify-content: space-evenly;
     padding-top: 15px;
@@ -79,10 +90,13 @@ input::-webkit-inner-spin-button {
     border: none;
     box-shadow: 1px 1px 3px black;
     background-color: var(--highlight-color);
+    color: var(--text-color);
+    text-shadow: 1px 1px 5px black;
     width: 40%;
     font-weight: 600;
     cursor: pointer;
 }
+
 /* Misc styling  */
 
 /* Year Inputs Styling */
@@ -99,7 +113,7 @@ input::-webkit-inner-spin-button {
     flex-grow: 2.5;
     border: 0.5px solid gray;
     box-shadow: 1px 1px 10px black;
-    max-height: 550px; 
+    max-height: 600px; 
     overflow: scroll;
 }
 .results-table{
@@ -112,7 +126,7 @@ input::-webkit-inner-spin-button {
     margin-right: auto;
     margin-top: 35px;
     text-align: left;
-    width: 800px;
+    width: 850px;
     font-size: 0.85rem;
     background-color: var(--complimentary-color);
 }
@@ -137,13 +151,13 @@ td{
     padding: 0.8rem 0.5rem;
 }
 
-.table-link{
+.title{
     text-decoration: underline;
     cursor: pointer;
 }
-.table-link:hover{
+.title:hover{
     font-weight: bold;
-    color: blue;
+    color: lightblue;
 }
 label{
     font-size: 1.1rem;

@@ -14,7 +14,8 @@
 </head>
 <body>
     <header>
-        <h1> Find your favorite song!</h1>
+        <h1> Explore Spotify's Top Songs!</h1>
+
     </header>
     <main class="content">
         <!-- ======================================== SONG SEARCH SECTION =====================================-->
@@ -70,11 +71,11 @@
                 <table class="results-table">
                     <thead> 
                         <tr> 
-                            <th> Title <span class="sort" title="Sort by title">▾</span></th>
-                            <th> Artist <span class="sort" title="Sort by artist name">▾</span></th>
-                            <th> Year <span class="sort" title="Sort by year (default)">▾</span></th>
-                            <th> Genre <span class="sort" title="Sort by genre">▾</span></th>
-                            <th> Popularity <span class="sort" title="Sort by popularity">▾</span></th>    
+                            <th> Title <span class="sort" value="title" title="Sort by title">▾</span></th>
+                            <th> Artist <span class="sort" value="artist" title="Sort by artist name">▾</span></th>
+                            <th> Year <span class="sort" value="year" title="Sort by year (default)">▾</span></th>
+                            <th> Genre <span class="sort" value="genre" title="Sort by genre">▾</span></th>
+                            <th> Popularity <span class="sort" value="popularity" title="Sort by popularity">▾</span></th>    
                         </tr>
                     </thead>
                     <tbody id="results-body">
@@ -83,8 +84,8 @@
             </div>
         </section>
         <!-- ======================================== SONG INFORMATION SECTION ===================================== -->
-        <h2 id="song-info-header"> Song Information </h2> 
         <section class="song-info">
+            <!-- <h2 id="song-info-header"> Song Information </h2> -->
             <div class="info">  
                 <div class="song-details"></div>
                 <div class="analysis bpm"> </div>
