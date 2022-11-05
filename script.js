@@ -376,17 +376,29 @@ function makeChart(songData){
         }
     ]
     };
-    new Chart(ctx, {
+    const songChart = new Chart(ctx, {
     type: 'radar',
     data: data,
     options: {
-        
-            labels:{
-                fontColor: "white"
-            },
-        
         scales: {
             r: {
+                ticks: {
+                    color: "white",
+                    backdropColor: "transparent",
+                    textStrokeWidth: 5,
+                    font:{
+                        family: 'serif',
+                        size: 13
+                    }
+                },
+                pointLabels: {
+                    color: 'white',
+                    font:{
+                        family: 'serif',
+                        size: 14,
+                        weight: 'bold'
+                    }
+                },
                 grid: {
                     circular: true,
                     color: "white"
@@ -403,6 +415,7 @@ function makeChart(songData){
         }
     }
     }); 
+    console.log(songChart);
 }
 function makeSongInformation(songData){
     const title = songData[2];
@@ -413,7 +426,7 @@ function makeSongInformation(songData){
     const valenceRanking = findRanking(songData[0].valence, "valence");
     const acousticnessRanking = findRanking(songData[0].acousticness, "acousticness");
     const speechinessRanking = findRanking(songData[0].speechiness, "speechiness");
-    const livenessRanking = findRanking(songData[0].speechiness, "liveness");
+    const livenessRanking = findRanking(songData[0].liveness, "liveness");
     const danceabilityRanking = findRanking(songData[0].danceability, "danceability");
     const detailsBox = document.querySelector(".song-details");
     
