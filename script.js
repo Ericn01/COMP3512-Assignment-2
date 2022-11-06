@@ -21,6 +21,7 @@ switchView("SONG_SEARCH_VIEW");
 const songTitles = getSongAttributeArray("title"); // Loads all the song titles into an array
 const titleInput = document.querySelector('#title-input');
 const resultsBox = document.querySelector('#autocomplete-results');
+const playlists = [] // empty array for now
 titleInput.addEventListener('input', autocompleteTitles);
 
 // This function fills an array with the given attribute of a song in the json file and returns it.
@@ -415,7 +416,6 @@ function makeChart(songData){
         }
     }
     }); 
-    console.log(songChart);
 }
 function makeSongInformation(songData){
     const title = songData[2];
@@ -426,20 +426,21 @@ function makeSongInformation(songData){
     const valence = songData[0].valence; const valenceRanking = findRanking(valence, "valence");
     const acousticness = songData[0].acousticness; const acousticnessRanking = findRanking(acousticness, "acousticness");
     const speechiness = songData[0].speechiness; const speechinessRanking = findRanking(speechiness, "speechiness");
-    const liveness = songData[0].liveness; livenessRanking = findRanking(liveness, "liveness");
-    const danceability = songData[0].danceability; danceabilityRanking = findRanking(danceability, "danceability");
+    const liveness = songData[0].liveness; const livenessRanking = findRanking(liveness, "liveness");
+    const danceability = songData[0].danceability; const danceabilityRanking = findRanking(danceability, "danceability");
     
     const detailsBox = document.querySelector(".song-details");
     const artistName = songData[3]['name'];
     const genreName = songData[4]['name']; 
     detailsBox.innerHTML = `<h1> ${title} <h1> <h3> Produced by ${artistName} </h3> <h3> Duration: ${duration} | Genre: ${genreName} ${getGenreEmoticon(genreName)}</h3>`;
     const headings = ["BPM 🏃", "Popularity 📈", "Energy 🔋", "Valence 😃", "Acousticness 🎶", 
-    "Speechiness 🦜", "Liveness ✨", "Danceability 🕺"]
-    const analytics = [bpmRanking, popularityRanking, energyRanking, 
-    valenceRanking, acousticnessRanking, speechinessRanking, livenessRanking, danceabilityRanking];
+    "Speechiness 👄", "Liveness ✨", "Danceability 🕺"]
+    
+    const analytics = [bpm, popularity, energy, valence, acousticness, speechiness, liveness, danceability];
+    const analyticsRanking = [bpmRanking, popularityRanking, energyRanking, valenceRanking, acousticnessRanking, speechinessRanking, livenessRanking, danceabilityRanking];
     const dataBoxes = document.querySelectorAll(".analysis");
     for (let i = 0; i < dataBoxes.length; i++){
-        makeAnalyticsBoxMarkup(headings[i], analytics[i], dataBoxes[i]);
+        makeAnalyticsBoxMarkup(headings[i], analyticsRanking[i], analytics, dataBoxes[i]);
     }
 }
 /** Associates an emoticon with the specified genre name and returns it. Simple function added for fun. */
@@ -464,7 +465,7 @@ function getGenreEmoticon(genreName){
         "alt z": "🤳",
         "contemporary country": "🐎",
         "latin": "🇲🇽",
-        "afroswing": "🎢",
+        "afroswing": "🦱",
     };
     const emote = emotes[genreName];
     return emote;
@@ -479,7 +480,6 @@ function secondsToMin(seconds){
     secondsNum = Number(String(minutesNum).substring(1)) * 60;
     minutesFormatted = String(minutesNum).substring(0, 1);
     secondsFormatted = String(secondsNum).substring(0, 2);
-
     secondsFormatted.length == 1 ? secondsFormatted += "0" : secondsFormatted; // if the length of seconds formatted is one, that means it's missing a 0
     secondsFormatted.includes(".") ? secondsFormatted.replace(".", "0"): secondsFormatted; // if seconds formatted contains a period, replace it with a 0
     return `${minutesFormatted}:${secondsFormatted} minutes`;
@@ -487,50 +487,73 @@ function secondsToMin(seconds){
 function rankFormat(rank){
     return `Rank: #${rank}`;
 }
-function makeAnalyticsBoxMarkup(heading, data, dataBox){
+function makeAnalyticsBoxMarkup(heading, dataRankings, data, dataBox){
     if (dataBox.hasChildNodes()){
         dataBox.textContent = "";
     }
+    // Create the header for the specified analytic
     const headingMarkup = document.createElement("h2");
     headingMarkup.textContent = heading;
-    dataBox.title = getSongAttributeContext(heading);
-    const progressBar = makeAnalyticsProgressBar(data);
+    // Create the progress bar 
+    const progressBar = makeAnalyticsProgressBar(dataRankings);
+    // Create and display the ranking of the specified attribute 
     const dataMarkup = document.createElement("h1");
-    dataMarkup.textContent = rankFormat(data);
+    dataMarkup.textContent = rankFormat(dataRankings);
+    // Song attribute value and context 
+    const context = document.createElement('p');
+    context.textContent = getSongAttributeContext(heading, data)['attribute_context'];
+    // Append children elements
     dataBox.appendChild(headingMarkup);
+    dataBox.appendChild(context);
     dataBox.appendChild(progressBar);
     dataBox.appendChild(dataMarkup);
+    dataBox.title = getSongAttributeContext(heading, data)['attribute_title']; // The first element that this function returns is 
 }
-function getSongAttributeContext(attribute){
+
+function getSongAttributeContext(attribute, data){
+    let attributeTitle = ''
     let attributeContext = ''
     let cleanedAttribute = attribute.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '').toLowerCase().trim(); // removes the emoji from the given attribute. Regex taken from StackOverflow
+    console.log(data);
     switch(cleanedAttribute){
         case 'bpm':
-            attributeContext = 'BPM (Beats per minute) refers to the tempo of the song.';
+            attributeTitle = 'BPM (Beats per minute) refers to the tempo of the song.';
+            attributeContext = `Runs at ${data[0]} beats per minute.`;
             break;
         case 'popularity':
-            attributeContext = 'Popularity refers to how popular this song is relative to others. ';
+            attributeTitle = 'Popularity refers to how popular this song is relative to others. ';
+            attributeContext = getAttributeContext(cleanedAttribute, data, 1);
             break;
         case 'energy':
-            attributeContext = 'Energy represents the amount of energy and activity in the song.';
-            break;
-        case 'danceability':
-            attributeContext = 'Danceability describes the suitability of a track for dancing';
-            break;
-        case 'liveness':
-            attributeContext = 'Liveness is an estimate of how much audience noise is in the recording.'
-            break;
-        case 'acousticness':
-            attributeContext = 'Acousticness is a confidence measure of whether or not a song is acoustic';
-            break;
-        case 'speechiness':
-            attributeContext = 'Speechiness detects the presence of spoken words in song.';
+            attributeTitle = 'Energy represents the amount of energy and activity in the song.';
+            attributeContext = getAttributeContext(cleanedAttribute, data, 2);
             break;
         case 'valence':
-            attributeContext = 'Valence describes the musical positiveness conveyed by the song.'
+            attributeTitle = 'Valence describes the musical positiveness conveyed by the song.'
+            attributeContext =  getAttributeContext(cleanedAttribute, data, 3);
+        case 'acousticness':
+            attributeTitle = 'Acousticness is a confidence measure of whether or not a song is acoustic';
+            attributeContext = getAttributeContext(cleanedAttribute, data, 4);
+            break;
+        case 'speechiness':
+            attributeTitle = 'Speechiness detects the presence of spoken words in song.';
+            attributeContext = getAttributeContext(cleanedAttribute, data, 5);
+            break;
+        case 'liveness':
+            attributeTitle = 'Liveness is an estimate of how much audience noise is in the recording.'
+            attributeContext = getAttributeContext(cleanedAttribute, data, 6);
+            break;
+        case 'danceability':
+            attributeTitle = 'Danceability describes the suitability of a track for dancing';
+            attributeContext = getAttributeContext(cleanedAttribute, data, 7);
+            break;
         default:
     }
-    return attributeContext;
+    return {"attribute_title": attributeTitle, "attribute_context": attributeContext};
+}
+function getAttributeContext(attribute, data, index){
+    attributeValue = data[index];
+    return `Has a ${attribute} value of ${attributeValue}%.`;
 }
 /**
  * Returns a certain color based on the given progress bar value
@@ -653,6 +676,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ======================================================== PLAYLIST INFO PAGE ============================================================== 
 
+// creates a playlist
+function makePlaylist(name, firstSong){
+    const playlist = {
+        "name" : name,
+        "songs": [firstSong],
+    };
+    playlists.add(playlist);
+}
+// adds a song to the passed playlist
+function addSongToPlaylist(playlist, song){
+    playlist["songs"].push(song);
+}
+
+function getPlaylistData(playlist){
+    const averageDuration = getPlaylistAverageDuration(playlist)
+    const mostPopularSong = getPlaylistMostPopularSong(playlist);
+    const numSongs = playlist['songs'].length;
+
+    const playlistData = {
+        "average_duration": averageDuration,
+        "most_popular_song": mostPopularSong,
+        "number_of_songs": numSongs
+    };
+    return playlistData;
+}
+// calculates and returns the average song duration of a given playlist
+function getPlaylistAverageDuration(playlist){
+    const songs = playlist['songs'];
+    let totalDuration = 0;
+    for (let song of songs){
+        totalDuration += song['duration'];
+    }
+    const avgDuration = totalDuration / songs.length;
+    return secondsToMin(totalDuration);
+}
+// finds and returns the most popular song in the given playlist
+function getPlaylistMostPopularSong(playlist){
+    const songs = playlist['songs'];
+    let mostPopular = songs[0]; // to create a playlist you need at least one song so this won't raise an error
+    for (let song of songs){
+        if (song['details']['popularity'] > mostPopular['details']['popularity']){
+            mostPopular = song;
+        }
+    }
+    return mostPopular;
+}
 
 // ======================================================== SWITCH VIEW =====================================================================
 
