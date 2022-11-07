@@ -249,7 +249,7 @@ populateSongs(songs);
                 searchAttribute = "genre";
                 break;
             case "year-radio":
-                if (numberInputs[0].disabled == false){
+                if (!numberInputs[0].disabled){
                     pushInputValue("year-less-input", searchParameters);
                 }
                 else{
@@ -258,7 +258,7 @@ populateSongs(songs);
                 searchAttribute = "year"
                 break;
             case "popularity-radio":
-                if (numberInputs[2].disabled == false){
+                if (!numberInputs[2].disabled){
                     pushInputValue("popularity-less-input", searchParameters);
                 }
                 else{
@@ -381,6 +381,20 @@ function makeChart(songData){
     type: 'radar',
     data: data,
     options: {
+        plugins: {
+            title: {
+                display: true,
+                text: `'${songData[2]}'` + " radar view",
+                align: 'center',
+                color: 'white',
+                font:{
+                    family: 'serif',
+                    color: 'snow',
+                    size: 18,
+                    weight: 'bold'
+                }
+            }
+        },
         scales: {
             r: {
                 ticks: {
@@ -432,16 +446,20 @@ function makeSongInformation(songData){
     const detailsBox = document.querySelector(".song-details");
     const artistName = songData[3]['name'];
     const genreName = songData[4]['name']; 
-    detailsBox.innerHTML = `<h1> ${title} <h1> <h3> Produced by ${artistName} </h3> <h3> Duration: ${duration} | Genre: ${genreName} ${getGenreEmoticon(genreName)}</h3>`;
+    detailsBox.innerHTML = `<h1 class='song-title'> ${title} <h1> <h3> Produced by ${artistName} </h3> <h3> ${duration} | ${upperCaseFirstChar(genreName)} ${getGenreEmoticon(genreName)}</h3>`;
     const headings = ["BPM 🏃", "Popularity 📈", "Energy 🔋", "Valence 😃", "Acousticness 🎶", 
     "Speechiness 👄", "Liveness ✨", "Danceability 🕺"]
     
     const analytics = [bpm, popularity, energy, valence, acousticness, speechiness, liveness, danceability];
     const analyticsRanking = [bpmRanking, popularityRanking, energyRanking, valenceRanking, acousticnessRanking, speechinessRanking, livenessRanking, danceabilityRanking];
+
     const dataBoxes = document.querySelectorAll(".analysis");
     for (let i = 0; i < dataBoxes.length; i++){
         makeAnalyticsBoxMarkup(headings[i], analyticsRanking[i], analytics, dataBoxes[i]);
     }
+}
+function upperCaseFirstChar(str){
+    return str[0].toUpperCase() + str.substring(1);
 }
 /** Associates an emoticon with the specified genre name and returns it. Simple function added for fun. */
 function getGenreEmoticon(genreName){
@@ -451,7 +469,7 @@ function getGenreEmoticon(genreName){
         "pop": "🥂",
         "canadian hip hop": "🇨🇦",
         "atl hip hop": "🧨",
-        "indie pop": "",
+        "indie pop": "🧑",
         "modern rock": "🎸",
         "hip hop": "🔥",
         "emo rap": "😢",
@@ -478,14 +496,15 @@ function getGenreEmoticon(genreName){
 function secondsToMin(seconds){
     minutesNum = seconds / 60
     secondsNum = Number(String(minutesNum).substring(1)) * 60;
+    let secondsDecimalVal = String(secondsNum).substring(1)
+    Number(secondsDecimalVal) > .5 ? Math.ceil(Number(secondsDecimalVal)) : Math.floor(Number(secondsDecimalVal));
     minutesFormatted = String(minutesNum).substring(0, 1);
     secondsFormatted = String(secondsNum).substring(0, 2);
     secondsFormatted.length == 1 ? secondsFormatted += "0" : secondsFormatted; // if the length of seconds formatted is one, that means it's missing a 0
-    secondsFormatted.includes(".") ? secondsFormatted.replace(".", "0"): secondsFormatted; // if seconds formatted contains a period, replace it with a 0
     return `${minutesFormatted}:${secondsFormatted} minutes`;
 }
 function rankFormat(rank){
-    return `Rank: #${rank}`;
+    return `Rank: #${rank + 1}`;
 }
 function makeAnalyticsBoxMarkup(heading, dataRankings, data, dataBox){
     if (dataBox.hasChildNodes()){
@@ -514,7 +533,6 @@ function getSongAttributeContext(attribute, data){
     let attributeTitle = ''
     let attributeContext = ''
     let cleanedAttribute = attribute.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '').toLowerCase().trim(); // removes the emoji from the given attribute. Regex taken from StackOverflow
-    console.log(data);
     switch(cleanedAttribute){
         case 'bpm':
             attributeTitle = 'BPM (Beats per minute) refers to the tempo of the song.';
@@ -531,6 +549,7 @@ function getSongAttributeContext(attribute, data){
         case 'valence':
             attributeTitle = 'Valence describes the musical positiveness conveyed by the song.'
             attributeContext =  getAttributeContext(cleanedAttribute, data, 3);
+            break;
         case 'acousticness':
             attributeTitle = 'Acousticness is a confidence measure of whether or not a song is acoustic';
             attributeContext = getAttributeContext(cleanedAttribute, data, 4);
@@ -585,7 +604,7 @@ function progressBarColor(value){
  * @returns the progress bar element
  */
 function makeAnalyticsProgressBar(value){
-    const numSongs = 317;
+    const numSongs = songs.length;
     const pixelWidth = 175;
     const absoluteValue = Math.abs(Number(value) - numSongs);
     const progress = document.createElement('div');
@@ -666,7 +685,7 @@ function sortTableByAttribute(attribute){
 document.addEventListener('DOMContentLoaded', () => {
     const titleInput = document.querySelector("#title-input");
     const NUM_SONGS = songs.length;
-    titleInput.placeholder = `${songTitles[Math.floor(Math.random() * NUM_SONGS)]}`;
+    titleInput.placeholder = `${songTitles[Math.floor(Math.random() * NUM_SONGS)]}`; // Math random -> (0-1) * NUM_SONGS = [0-317] (decimals included) -> math.floor to make value an integer
 })
 
 // const sortButtons = document.querySelectorAll(".sort");
@@ -747,4 +766,15 @@ function setDisplay(flexBody, noBodyOne, noBodyTwo){
     flexBody.style.display = 'flex';
     noBodyOne.style.display = 'none';
     noBodyTwo.style.display = 'none';
+}
+
+// Switch view from song info to song search button 
+const infoToSearchBtn = document.createElement("button");
+infoToSearchBtn.id = "info-to-search-btn";
+infoToSearchBtn.textContent = 'Find New Songs!';
+document.querySelector(".info").appendChild(infoToSearchBtn);
+infoToSearchBtn.addEventListener('click', songInfoToSearchPageViewSwitch);
+
+function songInfoToSearchPageViewSwitch(){
+    switchView("SONG_SEARCH_VIEW");
 }

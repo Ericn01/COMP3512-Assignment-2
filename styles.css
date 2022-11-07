@@ -211,7 +211,6 @@ label{
     letter-spacing: 0.8px;
 }
 
-
 .data-box{
     flex-grow: 5;
 }
@@ -231,8 +230,8 @@ label{
     position: absolute;
     height: 14px;
     width: var(--width);
-    min-width: 5px;
-    max-width: calc(100% - 2px);
+    min-width: 0px;
+    max-width: calc(100%);
     background-color: var(--inputted-color);
     border: 1px solid black;
     border-radius: 1rem;
@@ -249,6 +248,27 @@ canvas{
     position: absolute;
 }
 
+.song-title{
+    color: var(--highlight-color);
+    text-shadow: 1px 1px 5px black;
+    font-size: 2rem;
+    letter-spacing: 0.8px;
+}
+
+#info-to-search-btn{
+    grid-column: span 2;
+    width: 150px;
+    height: 45px;
+    background-color: var(--highlight-color);
+    color: var(--text-color);
+    text-shadow: 1px 1px 2px gray;
+    border-radius: 5.5px;
+    border: 1px solid black;
+    cursor: pointer;
+    margin: auto;
+    font-size: 18px;
+    box-shadow: 1px 1px 6px black;
+}
 /* FOOTER STYLES */
 .footer-list{
     border-top: 2px solid black;
