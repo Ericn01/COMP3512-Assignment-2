@@ -33,7 +33,7 @@ body{
 }
 /* Search Subsection (View 1)*/
 .search{
-    flex-grow: 2;
+    flex-grow: 1;
     border: 0.5px solid gray;
     box-shadow: 1px 1px 10px black;
     background-color: var(--complimentary-color);
@@ -54,6 +54,9 @@ body{
 
 .song-search input[type='text'], .song-search select{
     width: 150px;
+    margin-top: 7.5px;
+    margin-right: 5%;
+    float: right;
 }
 
 input::-webkit-outer-spin-button,
@@ -61,48 +64,52 @@ input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
-
 .song-search input[type='number']{
-    width: 80px;
+    width: 100px;
+    margin-right: 5%;
+    float: right;
     -moz-appearance: textfield;
 }
 .song-search h2{
     text-align: center;
 }
 .input-container{
-    margin: 20px 25px auto;
+    margin: 20px 70px auto;
     width: 85% auto;
     background-color: var(--contrasting-color);
     box-shadow: 2px 2px 5px black;
     padding: 15px 12px;
 }
 
+.year-input-wrapper, .popularity-input-wrapper{
+    margin-left: 10%;
+    margin-top: 7.5px;
+}
+.year-input-wrapper label, .popularity-input-wrapper label{
+    font-size: 0.9rem;
+    font-weight: normal;
+}
 .button-container{
-    margin-top: 20px;
+    margin: 20px 55px;
     display: flex;
     justify-content: space-evenly;
     padding-top: 15px;
     padding-bottom: 10px;
 }
 .song-search button{
-    padding: 5px;
+    padding: 6.5px;
     border-radius: 7.5px;
     border: none;
     box-shadow: 1px 1px 3px black;
     background-color: var(--highlight-color);
     color: var(--text-color);
     text-shadow: 1px 1px 5px black;
-    width: 40%;
+    width: 45%;
     font-weight: 600;
     cursor: pointer;
 }
 
 /* Misc styling  */
-
-/* Year Inputs Styling */
-.year-input-wrapper{
-
-}
 
 /* Results Subsection (View 1)*/
 .results{
@@ -110,10 +117,10 @@ input::-webkit-inner-spin-button {
     padding: 12px;
     margin: 15px;
     text-align: center;
-    flex-grow: 2.5;
+    flex-grow: 3;
     border: 0.5px solid gray;
     box-shadow: 1px 1px 10px black;
-    max-height: 600px; 
+    max-height: 610px; 
     overflow: scroll;
 }
 .results-table{
@@ -126,7 +133,7 @@ input::-webkit-inner-spin-button {
     margin-right: auto;
     margin-top: 35px;
     text-align: left;
-    width: 850px;
+    width: 950px;
     font-size: 0.85rem;
     background-color: var(--complimentary-color);
 }
@@ -257,15 +264,16 @@ canvas{
 
 #info-to-search-btn{
     grid-column: span 2;
-    width: 150px;
-    height: 45px;
+    width: 180px;
+    height: 50px;
     background-color: var(--highlight-color);
     color: var(--text-color);
     text-shadow: 1px 1px 2px gray;
-    border-radius: 5.5px;
+    border-radius: 7.5px;
     border: 1px solid black;
     cursor: pointer;
     margin: auto;
+    font-family: 'Zen Antique', serif;
     font-size: 18px;
     box-shadow: 1px 1px 6px black;
 }

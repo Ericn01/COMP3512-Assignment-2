@@ -93,40 +93,57 @@ function disableInputs(){
         let radioType = String(this.id.replace("-radio", ''));
         for (let input of inputs){
             if (!input.id.includes(radioType) && input.type != "radio"){
-                input.disabled = true;
+                disableEnableInputBehavior(input, 'disabled');
             }
             else if(input.id.includes(radioType)){
-                input.disabled = false;
+                disableEnableInputBehavior(input, 'enabled');
             }
         }
     }
 }
 
+// Defines the behavior of the given input depending on the state that is passed (enabled or disabled)
+function disableEnableInputBehavior(input, state){
+    if (state == 'disabled'){
+        input.style.color = 'gray';
+        input.style.backgroundColor = 'rgba(0,0,0,0.025)';
+        input.disabled = true;
+    }
+    else if (state == 'enabled'){
+        input.style.color = 'white';
+        input.style.backgroundColor = 'transparent';
+        input.disabled = false;
+    }
+    else{
+        console.log("Invalid state parameter passed");
+    }
+}
 const numberInputs = document.querySelectorAll('input[type="number"]');
 for (let input of numberInputs){
     input.addEventListener('click', numberHandling);
 }
-function enableDisableNumberInputs(disableInputIndex){
-    for (let i = 0; i < numberInputs.length; i++){
-        if (i == disableInputIndex){
-            numberInputs[i].disabled = true;
-        }
-    }
-}
 function numberHandling(){
+    const yearLessInput = numberInputs[0];
+    const yearGreaterInput = numberInputs[1];
+    const popularityLessInput = numberInputs[2];
+    const popularityGreaterInput = numberInputs[3];
     const selectedInputId = this.id;
     switch(selectedInputId){
         case "year-less-input":
-            enableDisableNumberInputs(1); // Disables the 'greater than' year input
+            disableEnableInputBehavior(yearLessInput, 'enabled');
+            disableEnableInputBehavior(yearGreaterInput, 'disabled'); // Disables the 'greater than' year input
             break;
         case "year-greater-input":
-            enableDisableNumberInputs(0); // Disables the 'less than' year input
+            disableEnableInputBehavior(yearLessInput, 'disabled');
+            disableEnableInputBehavior(yearGreaterInput, 'enabled'); // Disables the 'less than' year input
             break;
         case "popularity-less-input":
-            enableDisableNumberInputs(3); // Disables the 'greater than' popularity input
+            disableEnableInputBehavior(popularityLessInput, 'enabled');
+            disableEnableInputBehavior(popularityGreaterInput, 'disabled'); // Disables the 'greater than' popularity input
             break;
         case "popularity-greater-input":
-            enableDisableNumberInputs(2); // Disables the 'less than' popularit input
+            disableEnableInputBehavior(popularityLessInput, 'disabled');
+            disableEnableInputBehavior(popularityGreaterInput, 'enabled')  // Disables the 'less than' popularit input
             break;
         default:
     }
@@ -194,7 +211,9 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
 populateSongs(songs);
     document.querySelector("#clear-btn").addEventListener("click", (e) => {
         for (let input of inputs){
-            input.textContent = "";
+            if (input.id != 'genre-select' || input.id != 'artist-select'){
+                input.textContent = "";
+            }
         }
     });
     document.querySelector("#submit-btn").addEventListener("click", (e) => {
@@ -283,28 +302,28 @@ populateSongs(songs);
                 results.push(song);
                 }
             else if (searchAttribute == 'popularity' || searchAttribute == 'year'){
-                if (searchAttribute == "popularity"){ 
-                    const songPopularity = Number(song["details"][searchAttribute]); // The current song's popularity
-                    if (numberInputs[0].disabled == false){ // Search was based on the 'less' parameter -> very fragile, code: should probably be refactored. Also quite unclear
-                        if (Number(userValue) > songPopularity){
-                            results.push(song);
-                        }
-                    }
-                    else{ // search is based on greater than parameter
-                        if (Number(userValue) < songPopularity){
-                            results.push(song);
-                        }
-                    }
-                }
-                else{ // Search attribute is year
+                if (searchAttribute == "year"){ 
                     const songYear = Number(song[searchAttribute]); // The current song's popularity
-                    if (numberInputs[2].disabled == false){ // Search was based on the 'less' parameter for the year
+                    if (numberInputs[0].disabled){ // Search was based on the 'less' parameter for the year
                         if (Number(userValue) < songYear){
                             results.push(song);
                         }
                     }
                     else{ // search is based on greater than parameter
                         if (Number(userValue) > songYear){
+                            results.push(song);
+                        }
+                    }
+                }
+                else{ // Search attribute is year
+                    const songPopularity = Number(song["details"][searchAttribute]); // The current song's popularity
+                    if (numberInputs[2].disabled){// Search is based on the 'less parameter' for popularity
+                        if (Number(userValue) < songPopularity){
+                            results.push(song);
+                        }
+                    }
+                    else{ // search is based on greater than parameter
+                        if (Number(userValue) > songPopularity){
                             results.push(song);
                         }
                     }
@@ -473,6 +492,9 @@ function getGenreEmoticon(genreName){
         "modern rock": "🎸",
         "hip hop": "🔥",
         "emo rap": "😢",
+        "folk-pop": "🌿",
+        "chicago rap": "💥",
+        "grime": "🎹",
         "dfw rap": "🎤",
         "r&b": "🎷",
         "cali rap": "🏖️",
@@ -768,6 +790,9 @@ function setDisplay(flexBody, noBodyOne, noBodyTwo){
     noBodyTwo.style.display = 'none';
 }
 
+function makePlaylistView(){
+
+}
 // Switch view from song info to song search button 
 const infoToSearchBtn = document.createElement("button");
 infoToSearchBtn.id = "info-to-search-btn";
