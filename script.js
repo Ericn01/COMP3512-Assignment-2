@@ -167,6 +167,7 @@ function loadSelectOptions(fieldName){
                 selectElement.appendChild(songOption);
             }
         }
+        
     }
 }
 // Load the select elements with data upon clicking.
@@ -226,7 +227,7 @@ populateSongs(songs);
     // Form data handling section
     // Populates the results table with all songs
     const submitBtn = document.querySelector('#submit-btn');
-    submitBtn.addEventListener('click', formProcessing);
+    submitBtn.addEventListener('click', displayResults);
     
     // appends the given input value to the given array 
     function pushInputValue(inputName, arr){
@@ -247,7 +248,7 @@ populateSongs(songs);
         return selectedRadioId;
     }
     // This function is responsible for processing the data sent through the form
-    function formProcessing(){
+    function getSearchResults(){
         // Prevents a page reload when we submit the form.
         document.querySelector("#song-form").addEventListener('submit', e => e.preventDefault());        
         const selectedRadioId = getSelectedRadioButtonId();
@@ -288,6 +289,10 @@ populateSongs(songs);
             default:
         }
         const searchResults = findResults(searchParameters, searchAttribute, songs); // Returns the results of the search query
+        return searchResults;
+    }
+    function displayResults(){
+        const searchResults = getSearchResults();
         populateSongs(searchResults);
     }
     function findResults(valuesArr, searchAttribute, songObj){
@@ -317,7 +322,7 @@ populateSongs(songs);
                 }
                 else{ // Search attribute is year
                     const songPopularity = Number(song["details"][searchAttribute]); // The current song's popularity
-                    if (numberInputs[2].disabled){// Search is based on the 'less parameter' for popularity
+                    if (numberInputs[2].disabled){// Search is based on the 'less parameter' for for year attribute
                         if (Number(userValue) < songPopularity){
                             results.push(song);
                         }
@@ -477,8 +482,16 @@ function makeSongInformation(songData){
         makeAnalyticsBoxMarkup(headings[i], analyticsRanking[i], analytics, dataBoxes[i]);
     }
 }
+/* Modifies the first character of every word in a string such that it is in uppercase form
+*  Essentially has the same functionality as python's title() function.
+*/
 function upperCaseFirstChar(str){
-    return str[0].toUpperCase() + str.substring(1);
+    const stringArray = str.split(" ");
+    let upperCaseFirstCharString = "";
+    for (elem of stringArray){
+        upperCaseFirstCharString += (elem[0].toUpperCase() + elem.substring(1)) + " ";
+    }
+    return upperCaseFirstCharString;
 }
 /** Associates an emoticon with the specified genre name and returns it. Simple function added for fun. */
 function getGenreEmoticon(genreName){
@@ -685,22 +698,28 @@ function findRanking(attributeValue, attributeName){
     }
     return ranking;
 }
-
-function sortTableByAttribute(attribute){
-    const attributeCellElements = document.querySelectorAll(attribute);
-    const textContentArr = [];
-    for (let cellElement of attributeCellElements){
-        textContentArr.push(cellElement.textContent);
+// Receive all of the sort buttons, and add an event listener to sort them.
+const sortButtons = document.querySelectorAll(".sort");
+console.log(sortButtons);
+for (let i =0; i < sortButtons.length; i++){
+    sortButtons[i].addEventListener('click', sortTableByAttribute);
+}
+// Sorts the table by the given attribute 
+function sortTableByAttribute(){
+    // The attribute that we are sorting by
+    const attribute = this.id;
+    console.log(attribute);
+    // First and foremost we need to receive the search results.
+    const results = getSearchResults();
+    if (attribute != 'year-sort' || attribute != 'popularity-sort'){
+        results.sort();
+        console.log(results);
     }
-    if (attribute == 'year' || attribute == 'popularity'){
-
+    else {
+        results.sort((a,b) => a-b);
+        console.log(results);
     }
-    else{
-        textContentArr.sort();
-    }
-    for (let i =0; i < attributeCellElements.length; i++){
-        attributeCellElements[i].textContent = textContentArr[i];
-    }
+    populateSongs(results);
 }
 
 // Adds a random placholder title to the title input space when the page loads
@@ -709,12 +728,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const NUM_SONGS = songs.length;
     titleInput.placeholder = `${songTitles[Math.floor(Math.random() * NUM_SONGS)]}`; // Math random -> (0-1) * NUM_SONGS = [0-317] (decimals included) -> math.floor to make value an integer
 })
-
-// const sortButtons = document.querySelectorAll(".sort");
-// for (let button of sortButtons){
-//     button.addEventListener('click', sortTableByAttribute(this.value))
-// }
-
 // ======================================================== PLAYLIST INFO PAGE ============================================================== 
 
 // creates a playlist
