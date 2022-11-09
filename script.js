@@ -162,6 +162,7 @@ function loadSelectOptions(fieldName){
                 fieldContainer.push(optionText);
                 let optionValue = currentSong[field]["name"];
                 const songOption = document.createElement("option");
+                songOption.style.color = 'black'; // Able to see the select options
                 songOption.text = fieldContainer[fieldContainer.length - 1]; // adds the element that we just pushed into the array
                 songOption.value = optionValue;
                 selectElement.appendChild(songOption);
@@ -173,7 +174,6 @@ function loadSelectOptions(fieldName){
 // Load the select elements with data upon clicking.
 document.getElementById("genre-select").addEventListener('click', loadSelectOptions("genre"));
 document.getElementById("artist-select").addEventListener('click', loadSelectOptions("artist"));
-
     function populateRow(parentElement, attribute, songObj){
         const cellElement = document.createElement("td");
         if (attribute == 'artist' || attribute == 'genre'){
@@ -209,7 +209,7 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
         }
         trackResults(); // This function adds an event listener to all the title elements from our search results
     }
-populateSongs(songs);
+    populateSongs(songs);
     document.querySelector("#clear-btn").addEventListener("click", (e) => {
         for (let input of inputs){
             if (input.id != 'genre-select' || input.id != 'artist-select'){
@@ -364,8 +364,8 @@ function displaySongInformation(){
     const id = this.value; // the ID of the song element that was clicked
     const songData = getSongAttributes(id);
     switchView("SONG_INFORMATION_VIEW"); // Switches the view 
-    makeChart(songData);
     makeSongInformation(songData);
+    makeChart(songData);   
 }
 /**
  * This function draws a radar chart that displays the song's analytics data.
@@ -456,9 +456,7 @@ function makeChart(songData){
     }); 
 }
 function makeSongInformation(songData){
-    const title = songData[2];
     const bpm = songData[1].bpm; const bpmRanking = findRanking(bpm,"bpm");
-    const duration = secondsToMin(songData[1].duration);
     const popularity = songData[1].popularity; const popularityRanking = findRanking(popularity, "popularity");
     const energy = songData[0].energy; const energyRanking = findRanking(energy, "energy");
     const valence = songData[0].valence; const valenceRanking = findRanking(valence, "valence");
@@ -466,21 +464,45 @@ function makeSongInformation(songData){
     const speechiness = songData[0].speechiness; const speechinessRanking = findRanking(speechiness, "speechiness");
     const liveness = songData[0].liveness; const livenessRanking = findRanking(liveness, "liveness");
     const danceability = songData[0].danceability; const danceabilityRanking = findRanking(danceability, "danceability");
-    
-    const detailsBox = document.querySelector(".song-details");
-    const artistName = songData[3]['name'];
-    const genreName = songData[4]['name']; 
-    detailsBox.innerHTML = `<h1 class='song-title'> ${title} <h1> <h3> Produced by ${artistName} </h3> <h3> ${duration} | ${upperCaseFirstChar(genreName)} ${getGenreEmoticon(genreName)}</h3>`;
+
+    makeDetailsBox(songData)    
     const headings = ["BPM 🏃", "Popularity 📈", "Energy 🔋", "Valence 😃", "Acousticness 🎶", 
     "Speechiness 👄", "Liveness ✨", "Danceability 🕺"]
-    
     const analytics = [bpm, popularity, energy, valence, acousticness, speechiness, liveness, danceability];
     const analyticsRanking = [bpmRanking, popularityRanking, energyRanking, valenceRanking, acousticnessRanking, speechinessRanking, livenessRanking, danceabilityRanking];
-
     const dataBoxes = document.querySelectorAll(".analysis");
     for (let i = 0; i < dataBoxes.length; i++){
         makeAnalyticsBoxMarkup(headings[i], analyticsRanking[i], analytics, dataBoxes[i]);
     }
+}
+function makeDetailsBox(songData){
+    const detailsBox = document.querySelector(".song-details");
+    detailsBox.id = 'details-box'
+    // Song title heading setup
+    const title = songData[2];
+    const songTitleHeading = document.createElement("h1");
+    songTitleHeading.className = 'song-title';
+    songTitleHeading.textContent = title;
+    // Artist name setup
+    const artist = songData[3]['name'];
+    const artistNameBox = document.createElement("h3");
+    artistNameBox.textContent = `Produced by ${artist}`;
+    // Genre name & duration setup
+    const genre = songData[4]['name'];
+    const duration = secondsToMin(songData[1].duration);
+    // Creating the 'add to playlist button'
+    const songPlaylistButton = document.createElement("button");
+    songPlaylistButton.textContent = 'Add to Playlist';
+    songPlaylistButton.id = 'playlist-add';
+    songPlaylistButton.addEventListener('click', addSongToPlaylist);
+    // Setting up the duration and genre data 
+    const durationGenreBox = document.createElement("h3")
+    durationGenreBox.textContent = `${duration} | ${upperCaseFirstChar(genre)} ${getGenreEmoticon(genre)}`
+    // Appending all the child elements
+    detailsBox.appendChild(songTitleHeading);
+    detailsBox.appendChild(artistNameBox);
+    detailsBox.appendChild(durationGenreBox);
+    detailsBox.appendChild(songPlaylistButton);
 }
 /* Modifies the first character of every word in a string such that it is in uppercase form
 *  Essentially has the same functionality as python's title() function.
@@ -730,14 +752,17 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 // ======================================================== PLAYLIST INFO PAGE ============================================================== 
 
+// TEMPORARY: ADD SWITCH TO PLAYLIST VIEW BUTTON
+document.querySelector("#playlist-view-btn").addEventListener('click', displayPlaylists);
 // creates a playlist
 function makePlaylist(name, firstSong){
     const playlist = {
         "name" : name,
         "songs": [firstSong],
     };
-    playlists.add(playlist);
+    playlists.push(playlist);
 }
+makePlaylist("Default Playlist", songs[0]);
 // adds a song to the passed playlist
 function addSongToPlaylist(playlist, song){
     playlist["songs"].push(song);
@@ -747,7 +772,6 @@ function getPlaylistData(playlist){
     const averageDuration = getPlaylistAverageDuration(playlist)
     const mostPopularSong = getPlaylistMostPopularSong(playlist);
     const numSongs = playlist['songs'].length;
-
     const playlistData = {
         "average_duration": averageDuration,
         "most_popular_song": mostPopularSong,
@@ -757,13 +781,15 @@ function getPlaylistData(playlist){
 }
 // calculates and returns the average song duration of a given playlist
 function getPlaylistAverageDuration(playlist){
-    const songs = playlist['songs'];
+    const songs = playlists['songs'];
     let totalDuration = 0;
-    for (let song of songs){
-        totalDuration += song['duration'];
+    if (songs != ""){
+        for (let song of songs){
+            totalDuration += song['duration'];
+        }
     }
     const avgDuration = totalDuration / songs.length;
-    return secondsToMin(totalDuration);
+    return secondsToMin(avgDuration);
 }
 // finds and returns the most popular song in the given playlist
 function getPlaylistMostPopularSong(playlist){
@@ -775,6 +801,34 @@ function getPlaylistMostPopularSong(playlist){
         }
     }
     return mostPopular;
+}
+// Creates the playlist view markup -> Playlist list
+function displayPlaylists(){
+    switchView("SONG_PLAYLIST_VIEW");
+    makePlaylistList(playlists);
+    makePlaylistDetails(playlists);
+}
+// [playlist1, playlist2] => each playlist is an array of songs [[{Playlist 1: Song 1}, {Playlist 1: Song 2}], []]
+/* Displays the list of playlists, along with their names, and number of songs */
+function makePlaylistList(playlists){
+    const outerList = document.createElement("ul");
+    for (playlist of playlists){
+        const numSongs = getPlaylistData(playlist)['number_of_songs'];
+        const playlistName = playlist['name'];
+        const playlistDataElement = document.createElement("li");
+        playlistDataElement.textContent = `${firstCharToUpperCase(playlistName)} - ${numSongs} songs`;
+        outerList.appendChild(playlistDataElement);
+    }
+    const listDiv = document.querySelector(".playlist-list");
+    listDiv.appendChild(outerList);
+}
+
+function makePlaylistDetails(playlist){
+    // Data that will be displayed in the details view
+    const playlistData = getPlaylistData(playlist);
+    const mostPopularSongBox = document.createElement('div');
+    mostPopularSongBox.textContent = `Most popular song: ${playlistData['most_popular_song']['title']} - ${playlistData['most_popular_song']['details']['popularity']}%`;
+    const detailsContainer = document.querySelector(".playlist-details");
 }
 
 // ======================================================== SWITCH VIEW =====================================================================
