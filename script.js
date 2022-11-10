@@ -2,7 +2,7 @@
  * This page will contain the code controlling the entire single page application
  * If it ends up becoming too long, I may split it up into seperate sections
  */
-songs =  JSON.parse(songData);
+songs = JSON.parse(songData);
 
 // const api_url = "http://www.randyconnolly.com/funwebdev/3rd/api/music/songs-nested.php"; // The URL containing the JSON data that will be fetched
 // async function getSongs(){
@@ -464,7 +464,6 @@ function makeSongInformation(songData){
     const speechiness = songData[0].speechiness; const speechinessRanking = findRanking(speechiness, "speechiness");
     const liveness = songData[0].liveness; const livenessRanking = findRanking(liveness, "liveness");
     const danceability = songData[0].danceability; const danceabilityRanking = findRanking(danceability, "danceability");
-
     makeDetailsBox(songData)    
     const headings = ["BPM 🏃", "Popularity 📈", "Energy 🔋", "Valence 😃", "Acousticness 🎶", 
     "Speechiness 👄", "Liveness ✨", "Danceability 🕺"]
@@ -478,6 +477,9 @@ function makeSongInformation(songData){
 function makeDetailsBox(songData){
     const detailsBox = document.querySelector(".song-details");
     detailsBox.id = 'details-box'
+    if (detailsBox.hasChildNodes()){
+        detailsBox.textContent = "";
+    }
     // Song title heading setup
     const title = songData[2];
     const songTitleHeading = document.createElement("h1");
@@ -722,7 +724,6 @@ function findRanking(attributeValue, attributeName){
 }
 // Receive all of the sort buttons, and add an event listener to sort them.
 const sortButtons = document.querySelectorAll(".sort");
-console.log(sortButtons);
 for (let i =0; i < sortButtons.length; i++){
     sortButtons[i].addEventListener('click', sortTableByAttribute);
 }
@@ -730,7 +731,6 @@ for (let i =0; i < sortButtons.length; i++){
 function sortTableByAttribute(){
     // The attribute that we are sorting by
     const attribute = this.id;
-    console.log(attribute);
     // First and foremost we need to receive the search results.
     const results = getSearchResults();
     if (attribute != 'year-sort' || attribute != 'popularity-sort'){
@@ -754,15 +754,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // TEMPORARY: ADD SWITCH TO PLAYLIST VIEW BUTTON
 document.querySelector("#playlist-view-btn").addEventListener('click', displayPlaylists);
+makePlaylist("Default playlist", [songs[0], songs[1], songs[3], songs[100], songs[20], songs[15]]);
+makePlaylist("Country Playlist", [songs[5], songs[100]]);
+makePlaylist("EDM Playlist", [songs[150], songs[4], songs[180]]);
 // creates a playlist
-function makePlaylist(name, firstSong){
+function makePlaylist(name, songs){
     const playlist = {
         "name" : name,
-        "songs": [firstSong],
+        "songs": songs,
     };
     playlists.push(playlist);
 }
-makePlaylist("Default Playlist", songs[0]);
 // adds a song to the passed playlist
 function addSongToPlaylist(playlist, song){
     playlist["songs"].push(song);
@@ -781,10 +783,10 @@ function getPlaylistData(playlist){
 }
 // calculates and returns the average song duration of a given playlist
 function getPlaylistAverageDuration(playlist){
-    const songs = playlists['songs'];
+    const playlistSongs = playlist['songs'];
     let totalDuration = 0;
     if (songs != ""){
-        for (let song of songs){
+        for (let song of playlistSongs){
             totalDuration += song['duration'];
         }
     }
@@ -802,6 +804,23 @@ function getPlaylistMostPopularSong(playlist){
     }
     return mostPopular;
 }
+function getPlaylistAverages(playlist){
+    const avgArray = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+    for (song of playlist){
+        const analytics = song['analytics'];
+        avgArray[0] += analytics['danceability'];
+        avgArray[1] += analytics['energy'];
+        avgArray[2] += analytics['speechiness'];
+        avgArray[3] += analytics['acousticness'];
+        avgArray[4] += analytics['liveness'];
+        avgArray[5] += analytics['valence'];
+    }
+    for (let i = 0; i < avgArray.length;  i++){
+        attributeAvgValue = avgArray[i] / playlist.length
+        avgArray[i] = Math.ceil(attributeAvgValue);
+    }
+    return avgArray;
+}
 // Creates the playlist view markup -> Playlist list
 function displayPlaylists(){
     switchView("SONG_PLAYLIST_VIEW");
@@ -810,26 +829,105 @@ function displayPlaylists(){
 }
 // [playlist1, playlist2] => each playlist is an array of songs [[{Playlist 1: Song 1}, {Playlist 1: Song 2}], []]
 /* Displays the list of playlists, along with their names, and number of songs */
-function makePlaylistList(playlists){
+function makePlaylistList(){
+    if (playlists.length == 0){return;} // exits the function if no playlists are present
+    const listDiv = document.querySelector(".playlist-list");
+    listDiv.innerHTML = ""; // clears whatever html was previously present 
     const outerList = document.createElement("ul");
     for (playlist of playlists){
         const numSongs = getPlaylistData(playlist)['number_of_songs'];
         const playlistName = playlist['name'];
         const playlistDataElement = document.createElement("li");
-        playlistDataElement.textContent = `${firstCharToUpperCase(playlistName)} - ${numSongs} songs`;
+        playlistDataElement.textContent = `${upperCaseFirstChar(playlistName)} - ${numSongs} songs`;
         outerList.appendChild(playlistDataElement);
     }
-    const listDiv = document.querySelector(".playlist-list");
+    listDiv.appendChild(makeHeading("Playlists"));
     listDiv.appendChild(outerList);
 }
 
-function makePlaylistDetails(playlist){
-    // Data that will be displayed in the details view
-    const playlistData = getPlaylistData(playlist);
-    const mostPopularSongBox = document.createElement('div');
-    mostPopularSongBox.textContent = `Most popular song: ${playlistData['most_popular_song']['title']} - ${playlistData['most_popular_song']['details']['popularity']}%`;
-    const detailsContainer = document.querySelector(".playlist-details");
+function makePlaylistDetails(){
+    if (playlists.length == 0){return;} // exit condition 
+    const detailsContainer = document.querySelector(".details");
+    detailsContainer.innerHTML = "";
+    detailsContainer.appendChild(makeHeading("Playlist Details"))
+    for (playlist of playlists){
+        // Data that will be displayed in the details view
+        const playlistData = getPlaylistData(playlist);
+        const mostPopularSongBox = document.createElement('div');
+        mostPopularSongBox.textContent = `Most popular song: ${playlistData['most_popular_song']['title']} - ${playlistData['most_popular_song']['details']['popularity']}%`;
+        detailsContainer.appendChild(mostPopularSongBox);
+    }
 }
+function makeHeading(text){
+    const heading = document.createElement("h1")
+    heading.textContent = text;
+    return heading;
+}
+function mostCommonGenreInPlaylist(playlist){
+    if (playlist.length == 1){return playlist["songs"][0]['genre']['name']};
+    let highestGenreCount = 0;
+    for (song of playlist["songs"]){
+
+    }
+}
+function makePlaylistAveragesChart(averagesData){
+    const averagesCanvas = document.querySelector("#averages-chart");
+    const ctx = averagesCanvas.getContext('2d');
+    const data = {
+        labels: [
+        'Danceability',
+        'Energy',
+        'Speechiness',
+        'Acousticness',
+        'Liveness',
+        'Valence',
+      ],
+      datasets: [{
+        label: 'Playlist Averages',
+        data: averagesData,
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.75)',
+          'rgba(75, 192, 192, 0.75)',
+          'rgba(255, 205, 86, 0.75)',
+          'rgba(201, 203, 207, 0.75)',
+          'rgba(54, 162, 235, 0.75)', 
+          'purple'
+        ]
+      }]
+    };
+    config = {
+        type: 'polarArea',
+        data: data,
+        plugins: {
+            legend: {
+                align: "center",
+                position: "left",
+                title: {
+                    display: true,
+                    font: 'serif',
+                    text: 'Analytics averages of playlist '
+                },
+                labels: {
+                  display: true,
+                  font: {
+                    color: "white",
+                    size: 16
+                  }
+                }
+            },
+            title: {
+              display: true,
+              position: "top",
+              text: "Migratory Birds in Different Seasons"
+            },
+        },
+    
+    }
+    const chart = new Chart(ctx, config);
+}
+
+const playlistTwoAverages = getPlaylistAverages(playlists[0]['songs']);
+makePlaylistAveragesChart(playlistTwoAverages);
 
 // ======================================================== SWITCH VIEW =====================================================================
 

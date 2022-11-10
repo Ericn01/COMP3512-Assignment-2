@@ -204,11 +204,9 @@ label{
     display: grid;
     gap: 10px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: repeat(6, minmax(0, 1fr))
+    grid-template-rows: repeat(5, minmax(0, 1fr))
 }
-.chart{
-    margin-bottom: 250px;
-}
+
 .song-details{
     grid-column: span 2;
     text-align: center;
@@ -266,7 +264,7 @@ label{
     height: 14px;
     width: var(--width);
     min-width: 0px;
-    max-width: calc(100%);
+    max-width: 100%;
     background-color: var(--inputted-color);
     border: 1px solid black;
     border-radius: 1rem;
@@ -307,15 +305,45 @@ canvas{
 }
 
 /* SONG PLAYLIST VIEW */
-
+.song-playlists{
+    margin: 10px;
+}
 .playlist-list{
-    border: 1px solid black;
-    box-shadow: 1px 1px 8px gray;
+    background: var(--complimentary-color);
     flex-grow: 1;
 }
 .playlist-details{
-    border: 1px solid black;
+    margin-left: 20px;
+    background-color: var(--contrasting-color);
     flex-grow: 3;
+}
+.playlist-list ul{
+    text-align: center;
+}
+.playlist-list li{
+    background-color: var(--contrasting-color);
+    font-size: 1.1rem;
+    list-style-type: none;
+    box-shadow: 2px 2px 3px black;
+    margin: 10px 12px auto;
+    padding: 12px;
+    cursor: pointer;
+}
+.playlist-list li:hover{
+    color: var(--highlight-color);
+    text-decoration: underline;
+}
+.playlist-list, .playlist-details{
+    box-shadow: 1px 1px 8px black;
+    border: 2px solid black;
+    height: 700px;
+    text-align: center;
+    text-shadow: 1px 1px black;
+}
+.averages-container{
+   
+    margin: 50px;
+
 }
 /* FOOTER STYLES */
 .footer-list{
