@@ -821,11 +821,17 @@ function getPlaylistAverages(playlist){
     }
     return avgArray;
 }
+function setPlaylistListItems(){
+    const listItems = document.querySelectorAll(".playlist-list li");
+    for (let li of listItems){
+        li.addEventListener("click", makePlaylistDetails)
+    }
+}
 // Creates the playlist view markup -> Playlist list
 function displayPlaylists(){
     switchView("SONG_PLAYLIST_VIEW");
     makePlaylistList(playlists);
-    makePlaylistDetails(playlists);
+    setPlaylistListItems();
 }
 // [playlist1, playlist2] => each playlist is an array of songs [[{Playlist 1: Song 1}, {Playlist 1: Song 2}], []]
 /* Displays the list of playlists, along with their names, and number of songs */
@@ -838,6 +844,7 @@ function makePlaylistList(){
         const numSongs = getPlaylistData(playlist)['number_of_songs'];
         const playlistName = playlist['name'];
         const playlistDataElement = document.createElement("li");
+        playlistDataElement.id = playlistName;
         playlistDataElement.textContent = `${upperCaseFirstChar(playlistName)} - ${numSongs} songs`;
         outerList.appendChild(playlistDataElement);
     }
@@ -846,17 +853,25 @@ function makePlaylistList(){
 }
 
 function makePlaylistDetails(){
-    if (playlists.length == 0){return;} // exit condition 
+    const playlist = findPlaylist(this.id); // find the playlist that the list element relates to based on the given id
     const detailsContainer = document.querySelector(".details");
     detailsContainer.innerHTML = "";
     detailsContainer.appendChild(makeHeading("Playlist Details"))
+    // Data that will be displayed in the details view
+    const playlistData = getPlaylistData(playlist);
+    const mostPopularSongBox = document.createElement('div');
+    mostPopularSongBox.textContent = `Most popular song: ${playlistData['most_popular_song']['title']} - ${playlistData['most_popular_song']['details']['popularity']}%`;
+    detailsContainer.appendChild(mostPopularSongBox);
+}
+
+/* Find and return the given playlist based on the passed name parameter */
+function findPlaylist(playlistName){
     for (playlist of playlists){
-        // Data that will be displayed in the details view
-        const playlistData = getPlaylistData(playlist);
-        const mostPopularSongBox = document.createElement('div');
-        mostPopularSongBox.textContent = `Most popular song: ${playlistData['most_popular_song']['title']} - ${playlistData['most_popular_song']['details']['popularity']}%`;
-        detailsContainer.appendChild(mostPopularSongBox);
+        if (playlist['name'] === playlistName){
+            return playlist;
+        }
     }
+    return;
 }
 function makeHeading(text){
     const heading = document.createElement("h1")
@@ -870,64 +885,61 @@ function mostCommonGenreInPlaylist(playlist){
 
     }
 }
-function makePlaylistAveragesChart(averagesData){
+function makePlaylistAveragesChart(averagesData, playlistName){
     const averagesCanvas = document.querySelector("#averages-chart");
     const ctx = averagesCanvas.getContext('2d');
     const data = {
-        labels: [
-        'Danceability',
-        'Energy',
-        'Speechiness',
-        'Acousticness',
-        'Liveness',
-        'Valence',
-      ],
-      datasets: [{
+        labels: ['Danceability','Energy','Speechiness','Acousticness','Liveness','Valence',],
+        datasets: [{
         label: 'Playlist Averages',
         data: averagesData,
         backgroundColor: [
-          'rgba(255, 99, 132, 0.75)',
-          'rgba(75, 192, 192, 0.75)',
-          'rgba(255, 205, 86, 0.75)',
-          'rgba(201, 203, 207, 0.75)',
-          'rgba(54, 162, 235, 0.75)', 
-          'purple'
-        ]
-      }]
+            'rgba(255, 99, 132, 0.65)',
+            'rgba(75, 192, 192, 0.65)',
+            'rgba(255, 205, 86, 0.65)',
+            'rgba(201, 203, 207, 0.65)',
+            'rgba(54, 162, 235, 0.65)', 
+            'rgba(128, 0, 128, 0.65)'
+            ]
+        }]
     };
-    config = {
+    const chart = new Chart(ctx, {
         type: 'polarArea',
         data: data,
-        plugins: {
-            legend: {
-                align: "center",
-                position: "left",
+        options: {
+            responsive: false,
+            plugins: {
                 title: {
                     display: true,
-                    font: 'serif',
-                    text: 'Analytics averages of playlist '
-                },
-                labels: {
-                  display: true,
-                  font: {
                     color: "white",
-                    size: 16
-                  }
-                }
-            },
-            title: {
-              display: true,
-              position: "top",
-              text: "Migratory Birds in Different Seasons"
-            },
-        },
-    
-    }
-    const chart = new Chart(ctx, config);
+                    text: `Average Values of ${playlistName}`,
+                    align: "center",
+                    position: "top",
+                    font:{
+                        size: 20,
+                        family: "serif",
+                        weight: "bold"
+                    }
+                },
+                legend: {
+                    align: "center",
+                    position: "top",
+                    labels: {
+                            display: true,
+                            color: "white",
+                            font: {
+                                family: "serif",
+                                size: 13
+                            }
+                        }
+                    },
+                },
+        }
+    });
 }
 
-const playlistTwoAverages = getPlaylistAverages(playlists[0]['songs']);
-makePlaylistAveragesChart(playlistTwoAverages);
+const playlistTwoAverages = getPlaylistAverages(playlists[1]['songs']);
+makePlaylistAveragesChart(playlistTwoAverages, playlists[1]['name']);
 
 // ======================================================== SWITCH VIEW =====================================================================
 
@@ -955,9 +967,6 @@ function setDisplay(flexBody, noBodyOne, noBodyTwo){
     noBodyTwo.style.display = 'none';
 }
 
-function makePlaylistView(){
-
-}
 // Switch view from song info to song search button 
 const infoToSearchBtn = document.createElement("button");
 infoToSearchBtn.id = "info-to-search-btn";

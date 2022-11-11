@@ -36,6 +36,7 @@ header h1{
     background-color: var(--complimentary-color);
     text-shadow: 1px 1px black;
     margin-right: 20px;
+    border: 0.8px solid black;
 }
 
 /* BODY STYLES */
@@ -340,10 +341,11 @@ canvas{
     text-align: center;
     text-shadow: 1px 1px black;
 }
-.averages-container{
-   
-    margin: 50px;
+.averages-container{   
 
+}
+#averages-chart{
+    margin: 0 auto;
 }
 /* FOOTER STYLES */
 .footer-list{
