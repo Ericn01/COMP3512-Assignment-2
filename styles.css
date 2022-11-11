@@ -315,6 +315,7 @@ canvas{
 }
 .playlist-details{
     margin-left: 20px;
+    display: flex;
     background-color: var(--contrasting-color);
     flex-grow: 3;
 }
@@ -345,7 +346,25 @@ canvas{
 
 }
 #averages-chart{
-    margin: 0 auto;
+    margin: 20px auto;
+    height: 550px;
+    width: 550px;
+}
+.details-element{
+    border: 1px solid black;
+    box-shadow: 2px 2px 10px black;
+    background-color: var(--complimentary-color);
+    padding: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    width: 325px;
+    margin: 30px;
+    margin-right: 100px;
+}
+.details-element li{
+    text-align: left;
+    margin: 4px;
+    list-style-type:upper-roman;
 }
 /* FOOTER STYLES */
 .footer-list{

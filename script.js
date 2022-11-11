@@ -754,9 +754,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // TEMPORARY: ADD SWITCH TO PLAYLIST VIEW BUTTON
 document.querySelector("#playlist-view-btn").addEventListener('click', displayPlaylists);
+// Creating some template playlist objects for testing
 makePlaylist("Default playlist", [songs[0], songs[1], songs[3], songs[100], songs[20], songs[15]]);
 makePlaylist("Country Playlist", [songs[5], songs[100]]);
 makePlaylist("EDM Playlist", [songs[150], songs[4], songs[180]]);
+makePlaylist("Wow", [songs[115], songs[116]]);
 // creates a playlist
 function makePlaylist(name, songs){
     const playlist = {
@@ -769,28 +771,39 @@ function makePlaylist(name, songs){
 function addSongToPlaylist(playlist, song){
     playlist["songs"].push(song);
 }
+function getPlaylistNames(playlist){
 
+}
 function getPlaylistData(playlist){
     const averageDuration = getPlaylistAverageDuration(playlist)
     const mostPopularSong = getPlaylistMostPopularSong(playlist);
+    const songList = getPlaylistSongNames(playlist);
     const numSongs = playlist['songs'].length;
     const playlistData = {
         "average_duration": averageDuration,
         "most_popular_song": mostPopularSong,
-        "number_of_songs": numSongs
+        "number_of_songs": numSongs,
+        "song_list": songList,
     };
     return playlistData;
+}
+function getPlaylistSongNames(playlist){
+    const songNames = document.createElement("ul");
+    for (song of playlist['songs']){
+        const listItem = document.createElement("li");
+        listItem.textContent = song['title'];
+        songNames.appendChild(listItem);
+    }
+    return songNames;
 }
 // calculates and returns the average song duration of a given playlist
 function getPlaylistAverageDuration(playlist){
     const playlistSongs = playlist['songs'];
     let totalDuration = 0;
-    if (songs != ""){
-        for (let song of playlistSongs){
-            totalDuration += song['duration'];
+    for (let song of playlistSongs){
+        totalDuration += song['details']['duration'];
         }
-    }
-    const avgDuration = totalDuration / songs.length;
+    const avgDuration = totalDuration / playlistSongs.length;
     return secondsToMin(avgDuration);
 }
 // finds and returns the most popular song in the given playlist
@@ -846,6 +859,7 @@ function makePlaylistList(){
         const playlistDataElement = document.createElement("li");
         playlistDataElement.id = playlistName;
         playlistDataElement.textContent = `${upperCaseFirstChar(playlistName)} - ${numSongs} songs`;
+        playlistDataElement.addEventListener('click', makePlaylistDetails); // Adds an event listener to every playlist item
         outerList.appendChild(playlistDataElement);
     }
     listDiv.appendChild(makeHeading("Playlists"));
@@ -854,14 +868,32 @@ function makePlaylistList(){
 
 function makePlaylistDetails(){
     const playlist = findPlaylist(this.id); // find the playlist that the list element relates to based on the given id
-    const detailsContainer = document.querySelector(".details");
-    detailsContainer.innerHTML = "";
-    detailsContainer.appendChild(makeHeading("Playlist Details"))
+    const playlistName = playlist['name'];
+    const detailsContainer = document.querySelector(".details-container");
+    if (detailsContainer.hasChildNodes()){
+        detailsContainer.textContent = "";
+    }
+    detailsContainer.appendChild(makeHeading(`${playlistName} Details`))
     // Data that will be displayed in the details view
     const playlistData = getPlaylistData(playlist);
+    // Creates and appends the most popular song div to the details container
     const mostPopularSongBox = document.createElement('div');
-    mostPopularSongBox.textContent = `Most popular song: ${playlistData['most_popular_song']['title']} - ${playlistData['most_popular_song']['details']['popularity']}%`;
+    mostPopularSongBox.className = 'details-element';
+    mostPopularSongBox.textContent = `Most Popular Song: ${playlistData['most_popular_song']['title']} - ${playlistData['most_popular_song']['details']['popularity']}%`;
     detailsContainer.appendChild(mostPopularSongBox);
+    // Same is done with the songs names list
+    const songsList = document.createElement('div');
+    songsList.className = 'details-element';
+    songsList.appendChild(playlistData['song_list']);
+    detailsContainer.appendChild(songsList);
+    // Andddd with the average song duration
+    const averageSongDuration = document.createElement('div');
+    averageSongDuration.className = 'details-element';
+    averageSongDuration.textContent = `Average song duration: ${playlistData['average_duration']}`;
+    detailsContainer.appendChild(averageSongDuration);
+    // Creates the playlist average chart
+    const averagesData = getPlaylistAverages(playlist['songs']);
+    makePlaylistAveragesChart(averagesData, playlistName);
 }
 
 /* Find and return the given playlist based on the passed name parameter */
@@ -878,7 +910,7 @@ function makeHeading(text){
     heading.textContent = text;
     return heading;
 }
-function mostCommonGenreInPlaylist(playlist){
+function getMostCommonGenreInPlaylist(playlist){
     if (playlist.length == 1){return playlist["songs"][0]['genre']['name']};
     let highestGenreCount = 0;
     for (song of playlist["songs"]){
@@ -886,8 +918,14 @@ function mostCommonGenreInPlaylist(playlist){
     }
 }
 function makePlaylistAveragesChart(averagesData, playlistName){
+    // Draws, destroys, and redraws the canvas on which the chart is displated
+    const parentNode = document.querySelector(".averages-container");
     const averagesCanvas = document.querySelector("#averages-chart");
-    const ctx = averagesCanvas.getContext('2d');
+    parentNode.removeChild(averagesCanvas);
+    const newCanvas = document.createElement("canvas");
+    parentNode.appendChild(newCanvas);
+    newCanvas.id = "averages-chart";
+    const ctx = newCanvas.getContext('2d');
     const data = {
         labels: ['Danceability','Energy','Speechiness','Acousticness','Liveness','Valence',],
         datasets: [{
@@ -937,9 +975,6 @@ function makePlaylistAveragesChart(averagesData, playlistName){
         }
     });
 }
-
-const playlistTwoAverages = getPlaylistAverages(playlists[1]['songs']);
-makePlaylistAveragesChart(playlistTwoAverages, playlists[1]['name']);
 
 // ======================================================== SWITCH VIEW =====================================================================
 
