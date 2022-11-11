@@ -391,7 +391,7 @@ function makeChart(songData){
         data: [songData[accessIndex].danceability, songData[accessIndex].energy, songData[accessIndex].speechiness, 
                 songData[accessIndex].acousticness, songData[accessIndex].liveness, songData[accessIndex].valence],
         fill: true,
-        tension: 0.20,
+        tension: 0.15,
         backgroundColor: "rgba(25, 25, 255, 0.15)",
         borderColor: "white",
         pointBackgroundColor: "hotpink",
@@ -408,7 +408,7 @@ function makeChart(songData){
         plugins: {
             title: {
                 display: true,
-                text: `'${songData[2]}'` + " radar view",
+                text: `'${songData[2]}'` + " Radar View",
                 align: 'center',
                 color: 'white',
                 font:{
@@ -758,7 +758,7 @@ document.querySelector("#playlist-view-btn").addEventListener('click', displayPl
 makePlaylist("Default playlist", [songs[0], songs[1], songs[3], songs[100], songs[20], songs[15]]);
 makePlaylist("Country Playlist", [songs[5], songs[100]]);
 makePlaylist("EDM Playlist", [songs[150], songs[4], songs[180]]);
-makePlaylist("Wow", [songs[115], songs[116]]);
+makePlaylist("Wow", [songs[115], songs[116], songs[150], songs[101], songs[6], songs[200]]);
 // creates a playlist
 function makePlaylist(name, songs){
     const playlist = {
@@ -771,26 +771,30 @@ function makePlaylist(name, songs){
 function addSongToPlaylist(playlist, song){
     playlist["songs"].push(song);
 }
-function getPlaylistNames(playlist){
-
-}
+/* Returns an object that contains a collection of data about the given playlist */
 function getPlaylistData(playlist){
     const averageDuration = getPlaylistAverageDuration(playlist)
     const mostPopularSong = getPlaylistMostPopularSong(playlist);
     const songList = getPlaylistSongNames(playlist);
     const numSongs = playlist['songs'].length;
+    const mostCommonGenre = getMostCommonGenreInPlaylist(playlist);
     const playlistData = {
         "average_duration": averageDuration,
         "most_popular_song": mostPopularSong,
         "number_of_songs": numSongs,
         "song_list": songList,
+        "most_common_genre": mostCommonGenre,
     };
     return playlistData;
 }
+/* Returns an unordered list that contains the markup for the song names in the given playlist. */
 function getPlaylistSongNames(playlist){
     const songNames = document.createElement("ul");
     for (song of playlist['songs']){
         const listItem = document.createElement("li");
+        listItem.value = song['song_id'];
+        listItem.className = 'title';
+        listItem.addEventListener("click", displaySongInformation)
         listItem.textContent = song['title'];
         songNames.appendChild(listItem);
     }
@@ -818,7 +822,7 @@ function getPlaylistMostPopularSong(playlist){
     return mostPopular;
 }
 function getPlaylistAverages(playlist){
-    const avgArray = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+    const avgArray = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
     for (song of playlist){
         const analytics = song['analytics'];
         avgArray[0] += analytics['danceability'];
@@ -827,6 +831,7 @@ function getPlaylistAverages(playlist){
         avgArray[3] += analytics['acousticness'];
         avgArray[4] += analytics['liveness'];
         avgArray[5] += analytics['valence'];
+        avgArray[6] += song['details']['popularity'];
     }
     for (let i = 0; i < avgArray.length;  i++){
         attributeAvgValue = avgArray[i] / playlist.length
@@ -865,7 +870,9 @@ function makePlaylistList(){
     listDiv.appendChild(makeHeading("Playlists"));
     listDiv.appendChild(outerList);
 }
-
+/* This function is responsible for filling the playlist details container with relevant data. 
+* This also includes a polar area chart that contains information about the averages of each attribute of the given playlist 
+*/
 function makePlaylistDetails(){
     const playlist = findPlaylist(this.id); // find the playlist that the list element relates to based on the given id
     const playlistName = playlist['name'];
@@ -877,23 +884,69 @@ function makePlaylistDetails(){
     // Data that will be displayed in the details view
     const playlistData = getPlaylistData(playlist);
     // Creates and appends the most popular song div to the details container
-    const mostPopularSongBox = document.createElement('div');
-    mostPopularSongBox.className = 'details-element';
-    mostPopularSongBox.textContent = `Most Popular Song: ${playlistData['most_popular_song']['title']} - ${playlistData['most_popular_song']['details']['popularity']}%`;
+    const mostPopularSongBox = getPlaylistDetailsDiv(`Most Popular Song: ${playlistData['most_popular_song']['title']} - ${playlistData['most_popular_song']['details']['popularity']}%`)
     detailsContainer.appendChild(mostPopularSongBox);
     // Same is done with the songs names list
-    const songsList = document.createElement('div');
-    songsList.className = 'details-element';
+    const songsList = getPlaylistDetailsDiv("");
+    songsList.innerHTML += "<h3> Playlist Songs </h3>";
     songsList.appendChild(playlistData['song_list']);
     detailsContainer.appendChild(songsList);
     // Andddd with the average song duration
-    const averageSongDuration = document.createElement('div');
-    averageSongDuration.className = 'details-element';
-    averageSongDuration.textContent = `Average song duration: ${playlistData['average_duration']}`;
+    const averageSongDuration = getPlaylistDetailsDiv(`Average song duration: ${playlistData['average_duration']}`)
     detailsContainer.appendChild(averageSongDuration);
+    // Finds the most common genre in the playlist, along with the number of occurences
+    const mostCommonGenre = getPlaylistDetailsDiv(`Most common genre: ${playlistData['most_common_genre']}`);
+    detailsContainer.appendChild(mostCommonGenre);
     // Creates the playlist average chart
     const averagesData = getPlaylistAverages(playlist['songs']);
     makePlaylistAveragesChart(averagesData, playlistName);
+    // The same is done with the most pronounced (max valued) average of a song analytic within the playlist.
+    const attributeData = getPlaylistMostPronoucedAttribute(averagesData);
+    const mostPronoucedAttribute = getPlaylistDetailsDiv(`Most pronouced attribute: ${attributeData['max_attribute_name']} | Average value of ${attributeData['max_val']}%`);
+    detailsContainer.appendChild(mostPronoucedAttribute);
+}
+
+function getPlaylistMostPronoucedAttribute(averages){
+    let maxValue = 0;
+    let maxIndex = 0;
+    let maxAttributeName = "";
+    for (let i = 0; i < averages.length - 1; i++){ // The -1 is included so that we do not included popularity as an attribute (not an analytics attribute)
+        if (averages[i] > maxValue){
+            maxValue = averages[i];
+            maxIndex = i;
+        }
+    }
+    switch(maxIndex){
+        case 0: 
+            maxAttributeName = 'Danceability';
+            break;
+        case 1: 
+            maxAttributeName = 'Energy';
+            break;
+        case 2:
+            maxAttributeName = 'Speechiness';
+            break;
+        case 3:
+            maxAttributeName = 'Acousticness';
+            break;
+        case 4:
+            maxAttributeName = 'Liveness';
+            break;
+        case 5:
+            maxAttributeName = 'Valence';
+            break;
+
+    }
+    return {"max_val": maxValue, "max_attribute_name": maxAttributeName};
+}
+
+function getPlaylistDetailsDiv(text){
+    const detailsDiv = document.createElement("div");
+    detailsDiv.className = 'details-element';
+    if (!text == ""){
+        detailsDiv.textContent = text;
+    }
+    return detailsDiv;
 }
 
 /* Find and return the given playlist based on the passed name parameter */
@@ -912,11 +965,23 @@ function makeHeading(text){
 }
 function getMostCommonGenreInPlaylist(playlist){
     if (playlist.length == 1){return playlist["songs"][0]['genre']['name']};
-    let highestGenreCount = 0;
+    const genresList = [];
+    const genresCount = [];
     for (song of playlist["songs"]){
+        const currentSongGenre = song['genre']['name'];
+        genresList.push(currentSongGenre);
+    }
+    // Counts the amount of duplicates and creates a key value pair for it (genreName: numOccurences)
+    genresList.forEach(genre => {
+        genresCount[genre] = (genresCount[genre] || 0) + 1;
+    });
+    const indexOfMostCommonGenre = 0;
+    for (genreNum of genresCount){
 
     }
+    return genresCount[indexOfMostCommonGenre];
 }
+
 function makePlaylistAveragesChart(averagesData, playlistName){
     // Draws, destroys, and redraws the canvas on which the chart is displated
     const parentNode = document.querySelector(".averages-container");
@@ -927,7 +992,7 @@ function makePlaylistAveragesChart(averagesData, playlistName){
     newCanvas.id = "averages-chart";
     const ctx = newCanvas.getContext('2d');
     const data = {
-        labels: ['Danceability','Energy','Speechiness','Acousticness','Liveness','Valence',],
+        labels: ['Danceability','Energy','Speechiness','Acousticness','Liveness','Valence', 'Popularity'],
         datasets: [{
         label: 'Playlist Averages',
         data: averagesData,
@@ -937,7 +1002,8 @@ function makePlaylistAveragesChart(averagesData, playlistName){
             'rgba(255, 205, 86, 0.65)',
             'rgba(201, 203, 207, 0.65)',
             'rgba(54, 162, 235, 0.65)', 
-            'rgba(128, 0, 128, 0.65)'
+            'rgba(128, 0, 128, 0.65)',
+            'rgba(50, 205, 50, 0.65)'
             ]
         }]
     };
@@ -967,11 +1033,35 @@ function makePlaylistAveragesChart(averagesData, playlistName){
                             color: "white",
                             font: {
                                 family: "serif",
-                                size: 13
+                                size: 14
                             }
                         }
                     },
                 },
+            r: {
+                ticks: {
+                    color: "white",
+                    backdropColor: "transparent",
+                    textStrokeWidth: 5,
+                    font:{
+                        family: 'serif',
+                        size: 13
+                    }
+                },
+                pointLabels: {
+                    color: 'white',
+                    font:{
+                        family: 'serif',
+                        size: 14,
+                        weight: 'bold'
+                    }
+                },
+                grid: {
+                    color: "white"
+                },
+                suggestedMin: 0,
+                suggestedMax: 90
+            }
         }
     });
 }

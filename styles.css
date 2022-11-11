@@ -338,7 +338,7 @@ canvas{
 .playlist-list, .playlist-details{
     box-shadow: 1px 1px 8px black;
     border: 2px solid black;
-    height: 700px;
+    height: 800px;
     text-align: center;
     text-shadow: 1px 1px black;
 }
@@ -364,7 +364,8 @@ canvas{
 .details-element li{
     text-align: left;
     margin: 4px;
-    list-style-type:upper-roman;
+    list-style-type: none;
+    padding: 5px;
 }
 /* FOOTER STYLES */
 .footer-list{
