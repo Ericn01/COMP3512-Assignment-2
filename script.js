@@ -24,6 +24,9 @@ const resultsBox = document.querySelector('#autocomplete-results');
 const playlists = [] // empty array for now
 titleInput.addEventListener('input', autocompleteTitles);
 
+// Adding a way to switch to song search view from anywhere 
+document.querySelector("#search-view-btn").addEventListener('click', songInfoToSearchPageViewSwitch);
+
 // This function fills an array with the given attribute of a song in the json file and returns it.
 // For the moment the supported attributes are 
 function getSongAttributeArray(attributeName){

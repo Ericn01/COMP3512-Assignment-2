@@ -12,7 +12,6 @@
 }
 
 /* HEADER STYLES */
-
 header{
     display: flex;
     justify-content: space-between;
@@ -24,7 +23,7 @@ header h1{
     margin-left: 15px;
     text-shadow: 1px 1px 4px gray;
 }
-#playlist-view-btn, #playlist-add{
+#playlist-view-btn, #playlist-add, #search-view-btn{
     cursor: pointer;
     font-size: 14px;
     color: white;
@@ -126,7 +125,9 @@ input::-webkit-inner-spin-button {
 }
 
 /* Misc styling  */
-
+a:visited{
+    color: white;
+}
 /* Results Subsection (View 1)*/
 .results{
     background-color:var(--contrasting-color);
@@ -138,7 +139,12 @@ input::-webkit-inner-spin-button {
     overflow-x: hidden;
     box-shadow: 1px 1px 10px black;
     max-height: 610px; 
+    -ms-overflow-style: none;
+    scrollbar-width: none;
     overflow: scroll;
+}
+.results::-webkit-scrollbar{
+    display: none;
 }
 .results-table{
     min-width: 500px;
@@ -371,7 +377,7 @@ canvas{
 .footer-list{
     border-top: 2px solid black;
     padding: 20px 3px;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     display: flex;
     justify-content: space-evenly;
 }
