@@ -159,8 +159,8 @@ function loadSelectOptions(fieldName){
     let selectElement = document.getElementById(selectionId);
     let fieldContainer = [];
     if (selectElement.options.length === 0){ // This should only be run once, when clicked. 
-        for (let currentSong of songs){
-            let optionText = currentSong[field]["name"];
+        for (let currentSong of songs){ 
+            let optionText = upperCaseFirstChar(currentSong[field]["name"]);
             if (!fieldContainer.includes(optionText)){ // Ensures that there are no duplicates 
                 fieldContainer.push(optionText);
                 let optionValue = currentSong[field]["name"];
@@ -180,8 +180,8 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
     function populateRow(parentElement, attribute, songObj){
         const cellElement = document.createElement("td");
         if (attribute == 'artist' || attribute == 'genre'){
-            subattribute = 'name';
-            cellElement.textContent = songObj[attribute][subattribute];
+            subattribute = 'name'; 
+            cellElement.textContent = upperCaseFirstChar(songObj[attribute][subattribute]);
         }
         else if (attribute == 'details'){
             cellElement.textContent = songObj[attribute]['popularity'] + "%";
@@ -792,11 +792,12 @@ function getPlaylistData(playlist){
 }
 /* Returns an unordered list that contains the markup for the song names in the given playlist. */
 function getPlaylistSongNames(playlist){
-    const songNames = document.createElement("ul");
+    const songNames = document.createElement("div");
+    songNames.className = 'playlist-songs-container';
     for (song of playlist['songs']){
-        const listItem = document.createElement("li");
+        const listItem = document.createElement("p");
         listItem.value = song['song_id'];
-        listItem.className = 'title';
+        listItem.className = 'title'; // Same as those used in the search results table 
         listItem.addEventListener("click", displaySongInformation)
         listItem.textContent = song['title'];
         songNames.appendChild(listItem);
@@ -855,7 +856,7 @@ function displayPlaylists(){
     setPlaylistListItems();
 }
 // [playlist1, playlist2] => each playlist is an array of songs [[{Playlist 1: Song 1}, {Playlist 1: Song 2}], []]
-/* Displays the list of playlists, along with their names, and number of songs */
+/* Displays the list of playlists, along with their names, and the number of songs in the given playlist */
 function makePlaylistList(){
     if (playlists.length == 0){return;} // exits the function if no playlists are present
     const listDiv = document.querySelector(".playlist-list");
@@ -866,9 +867,15 @@ function makePlaylistList(){
         const playlistName = playlist['name'];
         const playlistDataElement = document.createElement("li");
         playlistDataElement.id = playlistName;
-        playlistDataElement.textContent = `${upperCaseFirstChar(playlistName)} - ${numSongs} songs`;
-        playlistDataElement.addEventListener('click', makePlaylistDetails); // Adds an event listener to every playlist item
-        outerList.appendChild(playlistDataElement);
+        // Creating the header for the list item
+        const header = document.createElement("h4");
+        header.textContent = `${upperCaseFirstChar(playlistName)}`;
+        // Creating a div for the number of songs
+        const numSongsBox = document.createElement("p");
+        numSongsBox.textContent = `Number of songs: ${numSongs}`;
+        playlistDataElement.appendChild(header);
+        playlistDataElement.appendChild(numSongsBox);
+                outerList.appendChild(playlistDataElement);
     }
     listDiv.appendChild(makeHeading("Playlists"));
     listDiv.appendChild(outerList);
@@ -883,29 +890,28 @@ function makePlaylistDetails(){
     if (detailsContainer.hasChildNodes()){
         detailsContainer.textContent = "";
     }
-    detailsContainer.appendChild(makeHeading(`${playlistName} Details`))
+    detailsContainer.appendChild(makeHeading(`${playlistName} Details`));
     // Data that will be displayed in the details view
     const playlistData = getPlaylistData(playlist);
     // Creates and appends the most popular song div to the details container
-    const mostPopularSongBox = getPlaylistDetailsDiv(`Most Popular Song: ${playlistData['most_popular_song']['title']} - ${playlistData['most_popular_song']['details']['popularity']}%`)
+    const mostPopularSongBox = getPlaylistDetailsDiv('Most Popular Song',  `'${playlistData['most_popular_song']['title']}' by ${playlistData['most_popular_song']['artist']['name']}, with a popularity score of ${playlistData['most_popular_song']['details']['popularity']}%`)
     detailsContainer.appendChild(mostPopularSongBox);
     // Same is done with the songs names list
-    const songsList = getPlaylistDetailsDiv("");
-    songsList.innerHTML += "<h3> Playlist Songs </h3>";
+    const songsList = getPlaylistDetailsDiv("Playlist Songs", "");
     songsList.appendChild(playlistData['song_list']);
     detailsContainer.appendChild(songsList);
     // Andddd with the average song duration
-    const averageSongDuration = getPlaylistDetailsDiv(`Average song duration: ${playlistData['average_duration']}`)
+    const averageSongDuration = getPlaylistDetailsDiv('Average Song Duration', `The average song duration in this playlist is ${playlistData['average_duration']}`)
     detailsContainer.appendChild(averageSongDuration);
     // Finds the most common genre in the playlist, along with the number of occurences
-    const mostCommonGenre = getPlaylistDetailsDiv(`Most common genre: ${playlistData['most_common_genre']}`);
+    const mostCommonGenre = getPlaylistDetailsDiv('Most Common Genre', `${playlistData['most_common_genre']}`);
     detailsContainer.appendChild(mostCommonGenre);
     // Creates the playlist average chart
     const averagesData = getPlaylistAverages(playlist['songs']);
     makePlaylistAveragesChart(averagesData, playlistName);
     // The same is done with the most pronounced (max valued) average of a song analytic within the playlist.
     const attributeData = getPlaylistMostPronoucedAttribute(averagesData);
-    const mostPronoucedAttribute = getPlaylistDetailsDiv(`Most pronouced attribute: ${attributeData['max_attribute_name']} | Average value of ${attributeData['max_val']}%`);
+    const mostPronoucedAttribute = getPlaylistDetailsDiv('Most Pronouced Attribute', `${attributeData['max_attribute_name']}, with an average value of ${attributeData['max_val']}%`);
     detailsContainer.appendChild(mostPronoucedAttribute);
 }
 
@@ -943,11 +949,17 @@ function getPlaylistMostPronoucedAttribute(averages){
     return {"max_val": maxValue, "max_attribute_name": maxAttributeName};
 }
 
-function getPlaylistDetailsDiv(text){
+function getPlaylistDetailsDiv(boxHeading, text){
     const detailsDiv = document.createElement("div");
     detailsDiv.className = 'details-element';
+    const boxHeadingDiv = document.createElement("h3");
+    boxHeadingDiv.textContent = boxHeading;
+    boxHeadingDiv.className = 'box-heading-div';
+    detailsDiv.appendChild(boxHeadingDiv);
     if (!text == ""){
-        detailsDiv.textContent = text;
+        const textBox = document.createElement("p")
+        textBox.textContent = text;
+        detailsDiv.appendChild(textBox);
     }
     return detailsDiv;
 }
@@ -962,8 +974,8 @@ function findPlaylist(playlistName){
     return;
 }
 function makeHeading(text){
-    const heading = document.createElement("h1")
-    heading.textContent = text;
+    const heading = document.createElement("h1");
+    heading.textContent = upperCaseFirstChar(text);
     return heading;
 }
 function getMostCommonGenreInPlaylist(playlist){
@@ -982,7 +994,8 @@ function getMostCommonGenreInPlaylist(playlist){
     for (genreNum of genresCount){
 
     }
-    return genresCount[indexOfMostCommonGenre];
+    console.log(genresCount[indexOfMostCommonGenre]);
+    return genresCount;
 }
 
 function makePlaylistAveragesChart(averagesData, playlistName){
@@ -1014,7 +1027,7 @@ function makePlaylistAveragesChart(averagesData, playlistName){
         type: 'polarArea',
         data: data,
         options: {
-            responsive: false,
+            responsive: true,
             plugins: {
                 title: {
                     display: true,
@@ -1088,20 +1101,12 @@ function switchView(newView){
         console.log("The given view attribute is not currently supported");
     }
 }
-
+/* Sets the display of different views as you're switching from one view to another */
 function setDisplay(flexBody, noBodyOne, noBodyTwo){
-    flexBody.style.display = 'flex';
+    flexBody.style.display = ''; // Flex display is already set in css properties so nothing needs to be overriden here
     noBodyOne.style.display = 'none';
     noBodyTwo.style.display = 'none';
 }
-
-// Switch view from song info to song search button 
-const infoToSearchBtn = document.createElement("button");
-infoToSearchBtn.id = "info-to-search-btn";
-infoToSearchBtn.textContent = 'Find New Songs!';
-document.querySelector(".info").appendChild(infoToSearchBtn);
-infoToSearchBtn.addEventListener('click', songInfoToSearchPageViewSwitch);
-
 function songInfoToSearchPageViewSwitch(){
     switchView("SONG_SEARCH_VIEW");
 }

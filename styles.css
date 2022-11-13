@@ -9,6 +9,7 @@
     --contrasting-color: #474E68;
     --complimentary-color: #6B728E;
     --text-color: #ffffff;
+    --link-transition-color: #ff7f50;
 }
 
 /* HEADER STYLES */
@@ -48,7 +49,7 @@ body{
 }
 /* Search Subsection (View 1)*/
 .search{
-    flex-grow: 1;
+    flex-basis: 33%;
     border: 0.5px solid gray;
     box-shadow: 1px 1px 10px black;
     background-color: var(--complimentary-color);
@@ -68,7 +69,7 @@ body{
 }
 
 .song-search input[type='text'], .song-search select{
-    width: 150px;
+    width: 130px;
     margin-top: 7.5px;
     margin-right: 5%;
     float: right;
@@ -88,12 +89,13 @@ input::-webkit-inner-spin-button {
 .song-search h2{
     text-align: center;
 }
+
 .input-container{
-    margin: 20px 70px auto;
+    margin: 35px 45px auto;
     width: 85% auto;
     background-color: var(--contrasting-color);
     box-shadow: 2px 2px 5px black;
-    padding: 15px 12px;
+    padding: 20px 15px;
 }
 
 .year-input-wrapper, .popularity-input-wrapper{
@@ -105,21 +107,22 @@ input::-webkit-inner-spin-button {
     font-weight: normal;
 }
 .button-container{
-    margin: 20px 55px;
+    margin: 20px 50px;
     display: flex;
     justify-content: space-evenly;
     padding-top: 15px;
     padding-bottom: 10px;
 }
 .song-search button{
-    padding: 6.5px;
+    padding: 9px;
     border-radius: 7.5px;
     border: none;
     box-shadow: 1px 1px 3px black;
     background-color: var(--highlight-color);
     color: var(--text-color);
     text-shadow: 1px 1px 5px black;
-    width: 45%;
+    width: 50%;
+    margin: 0px 15px;
     font-weight: 600;
     cursor: pointer;
 }
@@ -128,17 +131,26 @@ input::-webkit-inner-spin-button {
 a:visited{
     color: white;
 }
+.results-table th{
+    text-shadow: 0.35px 0.35px black;
+}
+button:hover{
+    box-shadow: 1px 1px 8px black;
+}
+h2{
+    text-shadow: 1px 1px black;
+}
 /* Results Subsection (View 1)*/
 .results{
     background-color:var(--contrasting-color);
     padding: 12px;
     margin: 15px;
     text-align: center;
-    flex-grow: 3;
+    flex-basis: 67%;
     border: 0.5px solid gray;
     overflow-x: hidden;
     box-shadow: 1px 1px 10px black;
-    max-height: 610px; 
+    max-height: 725px; 
     -ms-overflow-style: none;
     scrollbar-width: none;
     overflow: scroll;
@@ -146,32 +158,27 @@ a:visited{
 .results::-webkit-scrollbar{
     display: none;
 }
+
 .results-table{
-    min-width: 500px;
+    min-width: 100%;
     border-collapse: collapse;
     box-shadow: 1px 1px 10px black;
     padding: 10px 15px;
     table-layout: fixed;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 35px;
+    margin: 25px auto;
     text-align: left;
-    width: 950px;
     font-size: 0.85rem;
     background-color: var(--complimentary-color);
 }
-table tr:hover{
-    transition: 0.2s ease;
-    transform: scale(1.01);
-}
+
 tr:nth-child(odd){
     background-color: var(--contrasting-color);
 }
 th{
-    top: 0;
+    top: -12px; /* For some reason I had to put a negative value in so that the header wouldn't have a gap between itself and the top of the table */
     padding: 0.8rem 1rem;
     position: sticky;
-    font-size: 1rem;
+    font-size: 1.075rem;
     border-bottom: 1.2px solid black;
     background-color: var(--highlight-color);
 }
@@ -182,12 +189,14 @@ td{
 }
 
 .title{
-    text-decoration: underline;
     cursor: pointer;
 }
 .title:hover{
+    transition: 0.25s;
+    text-decoration: underline;
     font-weight: bold;
-    color: lightblue;
+    color: var(--link-transition-color);
+    text-shadow: 1px 1px black;
 }
 label{
     font-size: 1.1rem;
@@ -202,6 +211,11 @@ label{
     transition: 0.3s ease;
     color: var(--complimentary-color);
 }
+
+#magnifying-glass-emoji{
+    font-size: 0.95rem;
+    margin-left: 5px;
+}
 /* Song Information Subsection (View 2)*/
 
 .info{
@@ -211,7 +225,7 @@ label{
     display: grid;
     gap: 10px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: repeat(5, minmax(0, 1fr))
+    grid-template-rows: repeat(4, minmax(0, 1fr))
 }
 
 .song-details{
@@ -314,6 +328,7 @@ canvas{
 /* SONG PLAYLIST VIEW */
 .song-playlists{
     margin: 10px;
+    height: 840px;
 }
 .playlist-list{
     background: var(--complimentary-color);
@@ -325,20 +340,34 @@ canvas{
     background-color: var(--contrasting-color);
     flex-grow: 3;
 }
+.playlist-list, .playlist-details{
+    min-height: 100%;
+}
 .playlist-list ul{
-    text-align: center;
+    padding-inline-start: 0px;
+    margin: 0px 25px;
 }
 .playlist-list li{
     background-color: var(--contrasting-color);
     font-size: 1.1rem;
     list-style-type: none;
+    
     box-shadow: 2px 2px 3px black;
-    margin: 10px 12px auto;
-    padding: 12px;
     cursor: pointer;
 }
+.playlist-songs-container{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.playlist-songs-container p{
+    font-size: 0.95rem;
+    box-shadow: 1px 0px 4px black;
+    margin: 5px;
+    padding: 2px;
+    background-color: var(--contrasting-color);
+}
 .playlist-list li:hover{
-    color: var(--highlight-color);
+    color: var(--link-transition-color);
     text-decoration: underline;
 }
 .playlist-list, .playlist-details{
@@ -349,29 +378,30 @@ canvas{
     text-shadow: 1px 1px black;
 }
 .averages-container{   
-
+    flex-basis: 80%;
 }
 #averages-chart{
     margin: 20px auto;
-    height: 550px;
-    width: 550px;
 }
 .details-element{
     border: 1px solid black;
     box-shadow: 2px 2px 10px black;
     background-color: var(--complimentary-color);
-    padding: 8px;
+    padding: 3px 8px;
     font-size: 1rem;
     font-weight: bold;
-    width: 325px;
-    margin: 30px;
-    margin-right: 100px;
+    flex-basis: 20%;
+    margin: 20px 25px;
 }
 .details-element li{
     text-align: left;
     margin: 4px;
     list-style-type: none;
     padding: 5px;
+}
+.box-heading-div{
+    font-size: 1.15rem;
+    font-weight: 700;
 }
 /* FOOTER STYLES */
 .footer-list{
@@ -383,4 +413,102 @@ canvas{
 }
 footer li{
     list-style-type: none;
+}
+
+/* Responsive webpage / media queries section */
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+
+}
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media (min-width: 600px) {
+    
+}
+
+/* 770px breakpoint configuration */
+@media (max-width: 770px) {
+    header h1{
+        font-size: 1.65rem;
+    }
+    #playlist-view-btn, #search-view-btn{
+        width: 35%;
+        font-size: 0.75rem;
+    }
+    .song-search input[type='text'], .song-search select{
+        width: 100px;
+    }
+    th{
+        font-size: 0.85rem;
+    }
+    .results-table th:last-child, .results-table td:last-child{ /* Hides the popularity field from the table */
+        display: none;
+    } 
+} 
+
+@media (max-width: 1200px){
+    .chart{
+        text-align: center;
+        grid-column: span 2;
+    }
+    canvas{
+        position: relative;
+    }
+    .song-search, .song-info, .song-playlists{
+        display: block;
+    }
+    .search{
+        width: 50%;
+        margin: 15px auto;
+    }
+    .sort{
+        font-size: 0.9rem;
+    }
+    .song-search input[type='text'], .song-search select{
+        width: 120px;
+    }
+    .footer-list{
+        font-size: 1rem;
+    }
+    .playlist-list{
+        width: 60%;
+        margin: auto;
+        margin-bottom: 25px;
+        padding: 10px 15px;
+    }
+    .details-element h1{
+        grid-column:span 2;
+    }
+    .details-container{
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .playlist-details{
+        width: 75%;
+        margin: auto;
+    }
+    .playlist-list, .playlist-details{
+        min-height: 0px;
+        height: auto;
+    }
+    .songs-playlists{
+        height: auto;
+    }
+}
+/* 1520px breakpoint - some elements begin to squish together at this point, but not much has to be done */
+@media (max-width: 1520px){
+    
+    .song-search input[type='number']{
+        width: 65px;
+    }
+    label{
+        font-size: 1rem;
+    }
+    td,th{
+        font-size: 0.9rem;
+    }
+    .playlist-details{
+        display: block;
+    }
 }
