@@ -376,7 +376,7 @@ function displaySongInformation(){
  */
 function makeChart(songData){
     const accessIndex = 0; // The analytics object is wrapped in an array of length 1, hence index 0 to access it
-    const labels = ['Danceability', 'Energy', 'Speechiness', 'Acousticness', 'Liveness', 'Valence'];
+    const labels = ['Energy', 'Danceability', 'Liveness', 'Valence', 'Acousticness', 'Speechiness'];
     const parentNode = document.querySelector('.chart');
     // To redraw on the canvas we must first destroy the old one. If this isn't done, JS throws an error
     const canvas = document.querySelector("#song-chart")
@@ -387,20 +387,33 @@ function makeChart(songData){
     // Append the new canvas onto the chart container (parent node)
     parentNode.appendChild(newCanvas);
     const ctx = newCanvas.getContext('2d');
+    // Default comparison song values
+    const cSongData = songs[0]['analytics']
     const data = {
         labels: labels,
         datasets: [ {
-        label: "Value",
-        data: [songData[accessIndex].danceability, songData[accessIndex].energy, songData[accessIndex].speechiness, 
-                songData[accessIndex].acousticness, songData[accessIndex].liveness, songData[accessIndex].valence],
+        label: `${songData[2]}`, // Song title value
+        data: [songData[accessIndex].energy, songData[accessIndex].danceability, songData[accessIndex].liveness, 
+                songData[accessIndex].valence, songData[accessIndex].acousticness, songData[accessIndex].speechiness],
         fill: true,
         tension: 0.15,
-        backgroundColor: "rgba(25, 25, 255, 0.15)",
+        backgroundColor: "rgba(25, 25, 255, 0.4)",
         borderColor: "white",
         pointBackgroundColor: "hotpink",
         pointHoverBackgroundColor: "white",
         pointHoverBorderColor: "black",
         pointRadius: 4
+        },
+        /* Default song to compare to - For now I'll be using Alarm, but I'd like to add functionality such that the user can choose the songs to compare, up to 3 songs */
+        {
+            label: `Overall Average`,
+            data: songAnalyticsAverageValues, /* The average values of all songs combined in the DB */
+            fill: true,
+            tension: 0.15,
+            backgroundColor: "rgba(255, 25, 25, 0.15)",
+            borderColor: "white",
+            pointBackgroundColor: "blue",
+            pointRadius: 3
         }
     ]
     };
@@ -410,7 +423,8 @@ function makeChart(songData){
     options: {
         plugins: {
             legend:{
-                display: false
+                display: true,
+                labels: {color: "white"},
             },
             title: {
                 display: true,
@@ -461,6 +475,27 @@ function makeChart(songData){
     }
     }); 
 }
+function getSongAnalyticAverages(){
+    const NUM_SONGS = songs.length;
+    const analyticAverages = new Array(6).fill(0); // Creates an array of length 6 with values 0
+    for (let i = 0; i < NUM_SONGS; i++){
+        const songAnalytics = Object.values(songs[i]['analytics']); // Analytics array containing values of current song object 
+        let analyticIndex = 0;
+        songAnalytics.forEach((value) => {
+            analyticAverages[analyticIndex] += value;
+            analyticIndex++;
+        });
+    }
+    let count = 0;
+    while (count < analyticAverages.length){ // Haven't used a while loop for a while, just felt like using it now :)
+        analyticAverages[count] /= NUM_SONGS;
+        analyticAverages[count] = Math.ceil(analyticAverages[count]);
+        count++;
+    }
+    return analyticAverages;
+}
+const songAnalyticsAverageValues = getSongAnalyticAverages(); 
+
 function makeSongInformation(songData){
     const bpm = songData[1].bpm; const bpmRanking = findRanking(bpm,"bpm");
     const popularity = songData[1].popularity; const popularityRanking = findRanking(popularity, "popularity");
@@ -1001,7 +1036,6 @@ function getMostCommonGenreInPlaylist(playlist){
     let currentGenre = genresList[0];
     let genreIndex = 0;
     for (genre of genresList){
-        console.log(currentGenre + " : " + genre);
         if (genre.trim() !== currentGenre.trim()){
             genreCounts.push(1);
             genreIndex++;
