@@ -501,7 +501,8 @@ function makeDetailsBox(songData){
     // Creating the 'add to playlist button'
     const songPlaylistButton = document.createElement("button");
     songPlaylistButton.textContent = 'Add to Playlist';
-    songPlaylistButton.id = 'playlist-add';
+    songPlaylistButton.className = 'playlist-add';
+    songPlaylistButton.id = songData['title']; 
     songPlaylistButton.addEventListener('click', addSongToPlaylist);
     // Setting up the duration and genre data 
     const durationGenreBox = document.createElement("h3")
@@ -774,7 +775,15 @@ function makePlaylist(name, songs){
     playlists.push(playlist);
 }
 // adds a song to the passed playlist
-function addSongToPlaylist(playlist, song){
+function addSongToPlaylist(songTitle){
+    let song;
+    for (let currentSong of songs){
+        if (currentSong['title'] === songTitle){
+            song = currentSong;
+        }
+    }
+    const playlistName = prompt("Enter the name of the playlist you want to add to");
+    const playlist = findPlaylist(playlistName);
     playlist["songs"].push(song);
 }
 /* Returns an object that contains a collection of data about the given playlist */
@@ -1091,15 +1100,6 @@ function makePlaylistAveragesChart(averagesData, playlistName){
         }
     });
 }
-function displayChartLegend(){
-    const windowWidth = screen.width;
-    console.log(windowWidth);
-    if (windowWidth <= 750){
-        return false;
-    }
-    return true;
-}
-
 // ======================================================== SWITCH VIEW =====================================================================
 
 function switchView(newView){

@@ -24,7 +24,7 @@ header h1{
     margin-left: 15px;
     text-shadow: 1px 1px 4px black;
 }
-#playlist-view-btn, #playlist-add, #search-view-btn{
+#playlist-view-btn, .playlist-add, #search-view-btn{
     cursor: pointer;
     font-size: 14px;
     color: white;
@@ -519,8 +519,11 @@ footer li{
 /* 750px breakpoint configuration */
 @media only screen and (max-width: 750px) {
     .chart{
-        min-width: 375px;
+        min-width: 400px;
         min-height: 400px;
+    }
+    .averages-chart{
+        min-width: 100%;
     }
     .song-title{
         font-size: 1.15rem;
@@ -600,10 +603,6 @@ footer li{
 
 /* Phones media queries */
 @media only screen and (max-width: 500px) {
-    .chart{
-        min-width: 250px;
-        min-height: 250px;
-    }
     .results-table th:nth-child(3), .results-table td:nth-child(3){ /* Hides Away the year row as there's not much space for it */
         display: none;
     }
