@@ -109,7 +109,7 @@ function disableInputs(){
 function disableEnableInputBehavior(input, state){
     if (state == 'disabled'){
         input.style.color = 'gray';
-        input.style.backgroundColor = 'rgba(0,0,0,0.025)';
+        input.style.backgroundColor = 'rgba(0,0,0,0.035)';
         input.disabled = true;
     }
     else if (state == 'enabled'){
@@ -844,9 +844,9 @@ function getPlaylistAverages(playlist){
     return avgArray;
 }
 function setPlaylistListItems(){
-    const listItems = document.querySelectorAll(".playlist-list li");
-    for (let li of listItems){
-        li.addEventListener("click", makePlaylistDetails)
+    const listItems = document.querySelectorAll(".playlist-list h4");
+    for (let heading of listItems){
+        heading.addEventListener("click", makePlaylistDetails)
     }
 }
 // Creates the playlist view markup -> Playlist list
@@ -861,24 +861,22 @@ function makePlaylistList(){
     if (playlists.length == 0){return;} // exits the function if no playlists are present
     const listDiv = document.querySelector(".playlist-list");
     listDiv.innerHTML = ""; // clears whatever html was previously present 
-    const outerList = document.createElement("ul");
+    listDiv.appendChild(makeHeading("Playlists"));
     for (playlist of playlists){
+        const outerList = document.createElement("div");
         const numSongs = getPlaylistData(playlist)['number_of_songs'];
         const playlistName = playlist['name'];
-        const playlistDataElement = document.createElement("li");
-        playlistDataElement.id = playlistName;
         // Creating the header for the list item
         const header = document.createElement("h4");
+        header.id = playlistName;
         header.textContent = `${upperCaseFirstChar(playlistName)}`;
         // Creating a div for the number of songs
         const numSongsBox = document.createElement("p");
         numSongsBox.textContent = `Number of songs: ${numSongs}`;
-        playlistDataElement.appendChild(header);
-        playlistDataElement.appendChild(numSongsBox);
-                outerList.appendChild(playlistDataElement);
+        outerList.appendChild(header);
+        outerList.appendChild(numSongsBox);
+        listDiv.appendChild(outerList);
     }
-    listDiv.appendChild(makeHeading("Playlists"));
-    listDiv.appendChild(outerList);
 }
 /* This function is responsible for filling the playlist details container with relevant data. 
 * This also includes a polar area chart that contains information about the averages of each attribute of the given playlist 
@@ -893,13 +891,13 @@ function makePlaylistDetails(){
     detailsContainer.appendChild(makeHeading(`${playlistName} Details`));
     // Data that will be displayed in the details view
     const playlistData = getPlaylistData(playlist);
-    // Creates and appends the most popular song div to the details container
-    const mostPopularSongBox = getPlaylistDetailsDiv('Most Popular Song',  `'${playlistData['most_popular_song']['title']}' by ${playlistData['most_popular_song']['artist']['name']}, with a popularity score of ${playlistData['most_popular_song']['details']['popularity']}%`)
-    detailsContainer.appendChild(mostPopularSongBox);
-    // Same is done with the songs names list
+    // Append the songs names list to the details container.
     const songsList = getPlaylistDetailsDiv("Playlist Songs", "");
     songsList.appendChild(playlistData['song_list']);
     detailsContainer.appendChild(songsList);
+    // Creates and appends the most popular song div to the details container
+    const mostPopularSongBox = getPlaylistDetailsDiv('Most Popular Song',  `'${playlistData['most_popular_song']['title']}' by ${playlistData['most_popular_song']['artist']['name']}, with a popularity score of ${playlistData['most_popular_song']['details']['popularity']}%`)
+    detailsContainer.appendChild(mostPopularSongBox);
     // Andddd with the average song duration
     const averageSongDuration = getPlaylistDetailsDiv('Average Song Duration', `The average song duration in this playlist is ${playlistData['average_duration']}`)
     detailsContainer.appendChild(averageSongDuration);

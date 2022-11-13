@@ -22,17 +22,17 @@ header{
 header h1{
     font-size: 2.1em;
     margin-left: 15px;
-    text-shadow: 1px 1px 4px gray;
+    text-shadow: 1px 1px 4px black;
 }
 #playlist-view-btn, #playlist-add, #search-view-btn{
     cursor: pointer;
     font-size: 14px;
     color: white;
     font-weight: bold;
+    box-shadow: 1px 1px 1px black;
     height: 40px;
     width: 120px;
     border-radius: 10px;
-    box-shadow: 2px 2px 3px black;
     background-color: var(--complimentary-color);
     text-shadow: 1px 1px black;
     margin-right: 20px;
@@ -49,7 +49,7 @@ body{
 }
 /* Search Subsection (View 1)*/
 .search{
-    flex-basis: 33%;
+    flex-basis: 30%;
     border: 0.5px solid gray;
     box-shadow: 1px 1px 10px black;
     background-color: var(--complimentary-color);
@@ -116,8 +116,8 @@ input::-webkit-inner-spin-button {
 .song-search button{
     padding: 9px;
     border-radius: 7.5px;
-    border: none;
-    box-shadow: 1px 1px 3px black;
+    border: 1px solid black;
+    box-shadow: 1px 1px 1px black;
     background-color: var(--highlight-color);
     color: var(--text-color);
     text-shadow: 1px 1px 5px black;
@@ -134,8 +134,10 @@ a:visited{
 .results-table th{
     text-shadow: 0.35px 0.35px black;
 }
-button:hover{
-    box-shadow: 1px 1px 8px black;
+button:hover, #playlist-view-btn:hover, #playlist-add:hover, #search-view-btn:hover{
+    transition: 0.5s;
+    box-shadow: 2px 2px 10px black;
+    background-color: var(--link-transition-color);
 }
 h2{
     text-shadow: 1px 1px black;
@@ -146,7 +148,7 @@ h2{
     padding: 12px;
     margin: 15px;
     text-align: center;
-    flex-basis: 67%;
+    flex-basis: 70%;
     border: 0.5px solid gray;
     overflow-x: hidden;
     box-shadow: 1px 1px 10px black;
@@ -292,7 +294,7 @@ label{
 }
 .chart{
     flex-basis: 50%;
-    max-width: 50%;
+    max-width: 43%;
     /* The following ensures that the chart is centered both horizontally and vertically*/
     display: flex;
     align-items: center; 
@@ -343,18 +345,14 @@ canvas{
 .playlist-list, .playlist-details{
     min-height: 100%;
 }
-.playlist-list ul{
-    padding-inline-start: 0px;
-    margin: 0px 25px;
-}
-.playlist-list li{
+.playlist-list div{
+    margin: 10px 25px;
     background-color: var(--contrasting-color);
     font-size: 1.1rem;
     list-style-type: none;
-    
     box-shadow: 2px 2px 3px black;
-    cursor: pointer;
 }
+
 .playlist-songs-container{
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -366,9 +364,13 @@ canvas{
     padding: 2px;
     background-color: var(--contrasting-color);
 }
-.playlist-list li:hover{
+.playlist-list h4{
+    font-size: 1.25rem;
+}
+.playlist-list h4:hover{
     color: var(--link-transition-color);
     text-decoration: underline;
+    cursor: pointer;
 }
 .playlist-list, .playlist-details{
     box-shadow: 1px 1px 8px black;
@@ -379,18 +381,20 @@ canvas{
 }
 .averages-container{   
     flex-basis: 80%;
+    display: flex;
+    align-items: center;
 }
 #averages-chart{
     margin: 20px auto;
 }
 .details-element{
+    width: 400px; /* The width of this element shouldn't change. */
     border: 1px solid black;
     box-shadow: 2px 2px 10px black;
     background-color: var(--complimentary-color);
     padding: 3px 8px;
     font-size: 1rem;
     font-weight: bold;
-    flex-basis: 20%;
     margin: 20px 25px;
 }
 .details-element li{
@@ -417,59 +421,18 @@ footer li{
 
 /* Responsive webpage / media queries section */
 
-/* Extra small devices (phones, 600px and down) */
-@media only screen and (max-width: 600px) {
-
-}
-
-/* Small devices (portrait tablets and large phones, 600px and up) */
-@media (min-width: 600px) {
-    
-}
-
-/* 770px breakpoint configuration */
-@media (max-width: 770px) {
-    header h1{
-        font-size: 1.65rem;
+/* 1350px breakpoint - some elements begin to squish together at this point, but not much has to be done */
+@media only screen and (max-width: 1350px){
+    .song-playlists{
+        display: block;
     }
-    #playlist-view-btn, #search-view-btn{
-        width: 35%;
-        font-size: 0.75rem;
-    }
-    .song-search input[type='text'], .song-search select{
-        width: 100px;
-    }
-    th{
-        font-size: 0.85rem;
-    }
-    .results-table th:last-child, .results-table td:last-child{ /* Hides the popularity field from the table */
-        display: none;
-    } 
-} 
-
-@media (max-width: 1200px){
     .chart{
         text-align: center;
         grid-column: span 2;
+        margin: auto;
     }
     canvas{
         position: relative;
-    }
-    .song-search, .song-info, .song-playlists{
-        display: block;
-    }
-    .search{
-        width: 50%;
-        margin: 15px auto;
-    }
-    .sort{
-        font-size: 0.9rem;
-    }
-    .song-search input[type='text'], .song-search select{
-        width: 120px;
-    }
-    .footer-list{
-        font-size: 1rem;
     }
     .playlist-list{
         width: 60%;
@@ -477,38 +440,187 @@ footer li{
         margin-bottom: 25px;
         padding: 10px 15px;
     }
-    .details-element h1{
-        grid-column:span 2;
+    .details-container h1, .details-element:nth-child(2){ 
+        grid-column: span 2;
     }
     .details-container{
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+    .details-element{
+        margin: 10px;
+    }
     .playlist-details{
-        width: 75%;
+        width: 80%;
         margin: auto;
     }
     .playlist-list, .playlist-details{
         min-height: 0px;
         height: auto;
     }
-    .songs-playlists{
+    .song-playlists{
+        min-height: 1000px;
         height: auto;
     }
-}
-/* 1520px breakpoint - some elements begin to squish together at this point, but not much has to be done */
-@media (max-width: 1520px){
-    
-    .song-search input[type='number']{
-        width: 65px;
-    }
-    label{
-        font-size: 1rem;
-    }
-    td,th{
-        font-size: 0.9rem;
+    .averages-container{
+        padding: 25px 10px;
     }
     .playlist-details{
         display: block;
+    }
+}
+@media only screen and (max-width: 1200px){
+    label{
+        font-size: 1rem;
+    }
+    .analysis h2, h1{
+        font-size: 1.2rem;
+    }
+    .chart{
+        min-width: 600px;
+    }
+    #details-box{
+        height: auto;
+        padding: 20px;
+    }
+    .song-title{
+        font-size: 1.75rem;
+    }
+    .song-details{
+        width: 80%;
+        margin: auto;
+    }
+    .info{
+        width: 85%;
+        margin: 25px auto;
+    }
+    .details-element{
+        width: auto;
+    }
+    .song-search, .song-info{
+        display: block;
+    }
+    .search{
+        width: 65%;
+        margin: 15px auto;
+    }
+    .sort{
+        font-size: 0.9rem;
+    }
+    .footer-list{
+        justify-content: space-evenly;
+        font-size: 1rem;
+    }
+    .song-search input[type='text'], .song-search select{
+        width: 175px;
+    }
+    .song-search input[type='number']{
+        width: 100px;
+    }
+
+}
+/* 750px breakpoint configuration */
+@media only screen and (max-width: 750px) {
+    .chart{
+        min-width: 375px;
+    }
+    .song-title{
+        font-size: 1.15rem;
+    }
+    .analysis h2, h1{
+        font-size: 1rem;
+    }
+   
+    .song-details{
+        width: 75%;
+    }
+    .info{
+        display: block;
+    }
+    .analysis {
+        box-shadow: 1px 1px 8px black;
+        margin: 10px 0px;
+    }
+    .song-title{
+        font-size: 1.35rem;
+    }
+    .playlist-list{
+        width: 90%;
+    }
+    .playlist-details{
+        width: 95%;
+    }
+    .playlist-list h4, .box-heading-div{font-size: 1rem;}
+    .details-element p, .playlist-list p{
+        font-size: 0.85rem;
+    }
+    header h1{
+        font-size: 1.65rem; 
+    }
+    .search{
+        width: 80%;
+    }
+    #playlist-view-btn, #search-view-btn{
+        width: 100px;
+        padding: 2px;
+        font-size: 0.75rem;
+    }
+    .song-search input[type='text'], .song-search select{
+        width: 120px;
+    }
+    #magnifying-glass-emoji{
+        font-size: 0.8rem;
+    }
+    th{
+        font-size: 0.80rem;
+    }
+    td{
+        font-size: 0.70rem;
+    }
+    
+    .footer-list{
+        font-size: 0.85rem;
+    }
+    .footer-list li{
+        text-align: center;;
+    }
+    .results-table th:last-child, .results-table td:last-child{ /* Hides the popularity field from the table */
+        display: none;
+    } 
+    header{
+        display: block;
+        text-align: center;
+    }
+    header div{
+        margin-bottom: 15px;
+    }
+} 
+
+/* Phones media queries */
+@media only screen and (max-width: 500px) {
+    .results-table th:nth-child(3), .results-table td:nth-child(3){ /* Hides Away the year row as there's not much space for it */
+        display: none;
+    }
+    th{
+        font-size: 0.75rem;
+    }
+    #magnifying-glass-emoji{
+        font-size: 0.7rem;
+    }
+    .sort{
+        font-size: 0.8rem;
+    }
+    .input-container{
+        margin: 20px 15px;
+    }
+    .results-table{
+        text-align: center;
+    }
+    .results table td:first-child{
+        text-align: left;
+        margin-left: 5px;
+    }
+    header div button{
+        padding: 0px
     }
 }
