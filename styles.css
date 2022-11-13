@@ -346,7 +346,7 @@ canvas{
     min-height: 100%;
 }
 .playlist-list div{
-    margin: 10px 25px;
+    margin: 25px 30px;
     background-color: var(--contrasting-color);
     font-size: 1.1rem;
     list-style-type: none;
@@ -383,6 +383,7 @@ canvas{
     flex-basis: 80%;
     display: flex;
     align-items: center;
+    max-width: 800px;
 }
 #averages-chart{
     margin: 20px auto;
@@ -448,7 +449,8 @@ footer li{
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .details-element{
-        margin: 10px;
+        margin: 7.5px;
+        width: auto;
     }
     .playlist-details{
         width: 80%;
@@ -462,9 +464,7 @@ footer li{
         min-height: 1000px;
         height: auto;
     }
-    .averages-container{
-        padding: 25px 10px;
-    }
+
     .playlist-details{
         display: block;
     }
@@ -494,9 +494,6 @@ footer li{
         width: 85%;
         margin: 25px auto;
     }
-    .details-element{
-        width: auto;
-    }
     .song-search, .song-info{
         display: block;
     }
@@ -523,6 +520,7 @@ footer li{
 @media only screen and (max-width: 750px) {
     .chart{
         min-width: 375px;
+        min-height: 400px;
     }
     .song-title{
         font-size: 1.15rem;
@@ -530,7 +528,9 @@ footer li{
     .analysis h2, h1{
         font-size: 1rem;
     }
-   
+    .averages-container{
+        min-width: 350px;
+    }
     .song-details{
         width: 75%;
     }
@@ -550,7 +550,9 @@ footer li{
     .playlist-details{
         width: 95%;
     }
-    .playlist-list h4, .box-heading-div{font-size: 1rem;}
+    .playlist-list h4, .box-heading-div{
+        font-size: 1rem;
+    }
     .details-element p, .playlist-list p{
         font-size: 0.85rem;
     }
@@ -598,6 +600,10 @@ footer li{
 
 /* Phones media queries */
 @media only screen and (max-width: 500px) {
+    .chart{
+        min-width: 250px;
+        min-height: 250px;
+    }
     .results-table th:nth-child(3), .results-table td:nth-child(3){ /* Hides Away the year row as there's not much space for it */
         display: none;
     }

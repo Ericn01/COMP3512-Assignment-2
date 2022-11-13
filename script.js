@@ -409,6 +409,9 @@ function makeChart(songData){
     data: data,
     options: {
         plugins: {
+            legend:{
+                display: false
+            },
             title: {
                 display: true,
                 text: `'${songData[2]}'` + " Radar View",
@@ -902,7 +905,7 @@ function makePlaylistDetails(){
     const averageSongDuration = getPlaylistDetailsDiv('Average Song Duration', `The average song duration in this playlist is ${playlistData['average_duration']}`)
     detailsContainer.appendChild(averageSongDuration);
     // Finds the most common genre in the playlist, along with the number of occurences
-    const mostCommonGenre = getPlaylistDetailsDiv('Most Common Genre', `${playlistData['most_common_genre']}`);
+    const mostCommonGenre = getPlaylistDetailsDiv('Most Common Genre', `${upperCaseFirstChar(playlistData['most_common_genre'][0])}, which occurs ${playlistData['most_common_genre'][1]} times in this playlist. `); 
     detailsContainer.appendChild(mostCommonGenre);
     // Creates the playlist average chart
     const averagesData = getPlaylistAverages(playlist['songs']);
@@ -976,24 +979,34 @@ function makeHeading(text){
     heading.textContent = upperCaseFirstChar(text);
     return heading;
 }
+
 function getMostCommonGenreInPlaylist(playlist){
     if (playlist.length == 1){return playlist["songs"][0]['genre']['name']};
     const genresList = [];
-    const genresCount = [];
+    const genreCounts = [0];
     for (song of playlist["songs"]){
         const currentSongGenre = song['genre']['name'];
         genresList.push(currentSongGenre);
     }
-    // Counts the amount of duplicates and creates a key value pair for it (genreName: numOccurences)
-    genresList.forEach(genre => {
-        genresCount[genre] = (genresCount[genre] || 0) + 1;
-    });
-    const indexOfMostCommonGenre = 0;
-    for (genreNum of genresCount){
-
+    genresList.sort();
+    let currentGenre = genresList[0];
+    let genreIndex = 0;
+    for (genre of genresList){
+        console.log(currentGenre + " : " + genre);
+        if (genre.trim() !== currentGenre.trim()){
+            genreCounts.push(1);
+            genreIndex++;
+            currentGenre = genre;
+        }
+        else{
+            genreCounts[genreIndex]++;
+        }
     }
-    console.log(genresCount[indexOfMostCommonGenre]);
-    return genresCount;
+    let genreMax = Math.max.apply(null, genreCounts);
+    let maxIndex = genreCounts.findIndex((value) => value === genreMax);
+    let maxGenreName = genresList[maxIndex];
+    const genresData = [maxGenreName, genreMax];
+    return genresData;
 }
 
 function makePlaylistAveragesChart(averagesData, playlistName){
@@ -1034,34 +1047,33 @@ function makePlaylistAveragesChart(averagesData, playlistName){
                     align: "center",
                     position: "top",
                     font:{
-                        size: 20,
+                        size: 18,
                         family: "serif",
                         weight: "bold"
                     }
                 },
                 legend: {
+                    display: true,
                     align: "center",
                     position: "top",
                     labels: {
-                            display: true,
                             color: "white",
                             font: {
                                 family: "serif",
-                                size: 14
+                                size: 13
                             }
                         }
                     },
                 },
-            r: {
+            scale: {
                 ticks: {
-                    color: "white",
-                    backdropColor: "transparent",
-                    textStrokeWidth: 5,
-                    font:{
-                        family: 'serif',
-                        size: 13
-                    }
-                },
+                    backgroundColor: "transparent",
+                    color: "white"
+                }
+            },
+            r: {
+                grid: {color: "white"},
+                
                 pointLabels: {
                     color: 'white',
                     font:{
@@ -1078,6 +1090,14 @@ function makePlaylistAveragesChart(averagesData, playlistName){
             }
         }
     });
+}
+function displayChartLegend(){
+    const windowWidth = screen.width;
+    console.log(windowWidth);
+    if (windowWidth <= 750){
+        return false;
+    }
+    return true;
 }
 
 // ======================================================== SWITCH VIEW =====================================================================
