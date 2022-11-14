@@ -375,7 +375,7 @@ function displaySongInformation(){
  * @param {*} songData the required data of the song that the user is searching for
  */
 function makeChart(songData){
-    const accessIndex = 0; // The analytics object is wrapped in an array of length 1, hence index 0 to access it
+    const analyticValues = songData[0]; // The analytics object is wrapped in an array of length 1, hence index 0 to access it
     const labels = ['Energy', 'Danceability', 'Liveness', 'Valence', 'Acousticness', 'Speechiness'];
     const parentNode = document.querySelector('.chart');
     // To redraw on the canvas we must first destroy the old one. If this isn't done, JS throws an error
@@ -393,15 +393,14 @@ function makeChart(songData){
         labels: labels,
         datasets: [ {
         label: `${songData[2]}`, // Song title value
-        data: [songData[accessIndex].energy, songData[accessIndex].danceability, songData[accessIndex].liveness, 
-                songData[accessIndex].valence, songData[accessIndex].acousticness, songData[accessIndex].speechiness],
+        data: [analyticValues.energy, analyticValues.danceability, analyticValues.liveness, 
+                analyticValues.valence, analyticValues.acousticness, analyticValues.speechiness],
         fill: true,
         tension: 0.15,
-        backgroundColor: "rgba(25, 25, 255, 0.4)",
-        borderColor: "white",
-        pointBackgroundColor: "hotpink",
-        pointHoverBackgroundColor: "white",
-        pointHoverBorderColor: "black",
+        backgroundColor: "rgba(25, 255, 25, 0.25)",
+        borderColor: "rgba(25,255,25,1)",
+        pointBackgroundColor: "rgba(25,255,25,1)",
+        pointBorderColor: "white",
         pointRadius: 4
         },
         /* Default song to compare to - For now I'll be using Alarm, but I'd like to add functionality such that the user can choose the songs to compare, up to 3 songs */
@@ -410,10 +409,11 @@ function makeChart(songData){
             data: songAnalyticsAverageValues, /* The average values of all songs combined in the DB */
             fill: true,
             tension: 0.15,
-            backgroundColor: "rgba(255, 25, 25, 0.15)",
-            borderColor: "white",
-            pointBackgroundColor: "blue",
-            pointRadius: 3
+            backgroundColor: "rgba(179,181,198,0.25)",
+            borderColor: "rgba(179,181,198,1)",
+            pointBackgroundColor: "rgba(179,181,198,1)",
+            pointBorderColor: "white",
+            pointRadius: 4
         }
     ]
     };
@@ -463,7 +463,7 @@ function makeChart(songData){
                     color: "white"
                 },
                 suggestedMin: 0,
-                suggestedMax: 100
+                //suggestedMax: 100
             }
         },
         responsive: true,
@@ -524,8 +524,8 @@ function makeDetailsBox(songData){
     // Song title heading setup
     const title = songData[2];
     const songTitleHeading = document.createElement("h1");
-    songTitleHeading.className = 'song-title';
-    songTitleHeading.textContent = title;
+    songTitleHeading.className = 'song-title'; 
+    songTitleHeading.textContent = abbreviateSongTitle(title);
     // Artist name setup
     const artist = songData[3]['name'];
     const artistNameBox = document.createElement("h3");
@@ -537,8 +537,8 @@ function makeDetailsBox(songData){
     const songPlaylistButton = document.createElement("button");
     songPlaylistButton.textContent = 'Add to Playlist';
     songPlaylistButton.className = 'playlist-add';
-    songPlaylistButton.id = songData['title']; 
-    songPlaylistButton.addEventListener('click', addSongToPlaylist);
+    songPlaylistButton.id = songData[2]; // The second index of song data refers to the current song's title 
+    songPlaylistButton.addEventListener('click', makePopupBox);
     // Setting up the duration and genre data 
     const durationGenreBox = document.createElement("h3")
     durationGenreBox.textContent = `${duration} | ${upperCaseFirstChar(genre)} ${getGenreEmoticon(genre)}`
@@ -793,33 +793,149 @@ document.addEventListener('DOMContentLoaded', () => {
     titleInput.placeholder = `${songTitles[Math.floor(Math.random() * NUM_SONGS)]}`; // Math random -> (0-1) * NUM_SONGS = [0-317] (decimals included) -> math.floor to make value an integer
 })
 // ======================================================== PLAYLIST INFO PAGE ============================================================== 
-
+// Note --> This section ended up being a lot more convoluted than I originally thought it would be.
 // TEMPORARY: ADD SWITCH TO PLAYLIST VIEW BUTTON
 document.querySelector("#playlist-view-btn").addEventListener('click', displayPlaylists);
 // Creating some template playlist objects for testing
-makePlaylist("Default playlist", [songs[0], songs[1], songs[3], songs[100], songs[20], songs[15]]);
+makePlaylist("Default playlist", [songs[0], songs[1], songs[3], songs[100], songs[20], songs[15], songs[22], songs[33]]);
 makePlaylist("Country Playlist", [songs[5], songs[100]]);
 makePlaylist("EDM Playlist", [songs[150], songs[4], songs[180]]);
 makePlaylist("Wow", [songs[115], songs[116], songs[150], songs[101], songs[6], songs[200]]);
 // creates a playlist
 function makePlaylist(name, songs){
-    const playlist = {
-        "name" : name,
-        "songs": songs,
-    };
-    playlists.push(playlist);
+    if (checkPlaylistName(name)){
+        const playlist = {
+            "name" : name,
+            "songs": songs,
+        };
+        playlists.push(playlist);
+    }
+    // Write what should happen if the given name already exists
 }
-// adds a song to the passed playlist
-function addSongToPlaylist(songTitle){
-    let song;
-    for (let currentSong of songs){
-        if (currentSong['title'] === songTitle){
-            song = currentSong;
+function checkPlaylistName(name){
+    for (p of playlists){
+        if (p['name'].trim().toLowerCase() === name.trim().toLowerCase()){
+            return false;
         }
     }
-    const playlistName = prompt("Enter the name of the playlist you want to add to");
-    const playlist = findPlaylist(playlistName);
-    playlist["songs"].push(song);
+    return true;
+}
+// Make random song playlist. Cap number of 
+function makeRandomPlaylist(name, numSongs){
+    const randomPlaylistSongs = [];
+    for (let i = 0; i < numSongs; i++){
+
+    }
+    playlists.push({"name" : name, "songs": randomPlaylistSongs})
+}
+// adds a song to the selected playlists
+function addSongToPlaylist(songTitle){ 
+    const checkboxes = document.querySelectorAll(".playlist-add-div input[type='checkbox']");
+    const playlistSelection = [];
+    for (checkbox of checkboxes){
+        if (checkbox.checked){
+            playlistSelection.push(checkbox.id) // checkbox id contains the name of the given playlist
+        }
+    }
+    let addedCount = 0;
+    for (playlistName of playlistSelection){
+        const playlistMatch = findPlaylist(playlistName);
+        const songMatch = findSong(songTitle);
+        playlistMatch["songs"].push(songMatch);
+        addedCount++;
+    }
+    document.querySelector(".playlist-add-div").removeChild(document.querySelector("#popup-btn"));
+    document.querySelector(".playlist-add-div").innerHTML += `<p style='color:lightgreen'> ${songTitle} was added to ${addedCount} playlists. </p>`;
+}
+function findSong(title){
+    for (song of songs){
+        if (title === song['title']){
+            return song;
+        }
+    }
+    return;
+}
+/* Adds event listeners to see if the popup box should be closed. Also returns the checkbox */
+function closePopupBoxCheck(songTitle){
+    window.addEventListener('click', (e) => {
+        const popupButton = document.querySelector("#popup-btn");
+        const popupElement = document.querySelector(".playlist-add-div");
+        if (!popupElement.contains(e.target)){ // box does not contain a click within it's boundaries
+          // document.querySelector(".song-info").removeChild(popupElement); // Removes the popup element from the screen
+        }
+        else if (popupButton.contains(e.target)){
+            addSongToPlaylist(songTitle);
+            setTimeout(() => {
+                document.querySelector(".song-info").removeChild(popupElement);
+            }, 2500)
+        }
+    }); 
+}
+function makePopupBox(){
+    const songTitle = this.id 
+    // Setup the playlist popux box
+    const playlistAddBox = document.createElement("div");
+    playlistAddBox.className = "playlist-add-div";
+    // Create the heading for the popup box
+    const heading = document.createElement("h2");
+    heading.textContent = `Add '${songTitle}' to: `;
+    playlistAddBox.appendChild(heading);
+    // Get and append the playlist selections
+    const playlistNamesBox = getPlaylistNamesBox(abbreviateSongTitle(songTitle));
+    playlistAddBox.appendChild(playlistNamesBox);
+    // Make a button to submit the user input 
+    const submitSelectionButton = document.createElement("button");
+    submitSelectionButton.id = 'popup-btn'
+    submitSelectionButton.textContent = "Submit";
+    playlistAddBox.appendChild(submitSelectionButton);
+    // Appends the popup box to the song info
+    document.querySelector(".song-info").appendChild(playlistAddBox);
+    closePopupBoxCheck(songTitle); // Adds an event listener to see if the popup box should be closed
+}
+/* Some of the songs in the JSON file have ridiculously long names due to the added parentheses that include unnecessary info 
+*  This function will be used to remove the parentheses on songs that have the stated problem.
+*/
+function abbreviateSongTitle(songTitle){
+    let shortenedTitle = "";
+    const regex = '\([\w\d\s]+\)' // I made this regex specifically for this case - matches to parentheses and all the text within it
+    songTitle.length >= 40 && songTitle.match(regex) ? shortenedTitle = songTitle.replace(regex, "") + "..." : shortenedTitle = songTitle // Removes the matched text if the title is greater than 40 chars and matches the given regular expression
+    return shortenedTitle;
+}
+/**
+ * Generates and returns a div that allows the user to select the playlist(s) that he wants to add the current song to.
+ * @param {*} songTitle 
+ */
+function getPlaylistNamesBox(songTitle){
+    const outerContainer = document.createElement("div");
+    outerContainer.className = 'checkbox-outer-container';
+    for (playlist of playlists){
+        // Playlist checkbox 
+        const playlistCheckbox = document.createElement("input");
+        playlistCheckbox.setAttribute("type", "checkbox");
+        playlistCheckbox.name = 'playlist-checkbox';
+        playlistCheckbox.className = 'playlist-checkbox';
+        playlistCheckbox.id = playlist.name;
+        // Label associated to given checkbox
+        const label = document.createElement("label")
+        label.setAttribute("for", "playlist-checkbox");
+        label.textContent = playlist['name'];
+        // playlist checkbox container
+        const checkboxContainer = document.createElement("div");
+        checkboxContainer.append(playlistCheckbox, label);
+        // Logic on whether or not the user can add the given song to a playlist 
+        let songAlreadyInPlaylist;
+        for (let song of playlist['songs']){
+            song['title'] === songTitle ? songAlreadyInPlaylist = true : songAlreadyInPlaylist = false;
+            if (songAlreadyInPlaylist){
+                playlistCheckbox.disabled = true;
+                label.style.textDecoration = "line-through";
+                label.title = "Song is already in this playlist!";
+            }   
+        }
+        // Append to the outer container
+        outerContainer.appendChild(checkboxContainer);
+    }
+    return outerContainer;
 }
 /* Returns an object that contains a collection of data about the given playlist */
 function getPlaylistData(playlist){
@@ -924,6 +1040,10 @@ function makePlaylistList(){
         outerList.appendChild(numSongsBox);
         listDiv.appendChild(outerList);
     }
+}
+
+function makePlaylistOptions(){
+    const optionsContainer = document.createElement("");
 }
 /* This function is responsible for filling the playlist details container with relevant data. 
 * This also includes a polar area chart that contains information about the averages of each attribute of the given playlist 
@@ -1108,29 +1228,34 @@ function makePlaylistAveragesChart(averagesData, playlistName){
                         }
                     },
                 },
-            scale: {
-                ticks: {
-                    backgroundColor: "transparent",
-                    color: "white"
-                }
-            },
-            r: {
-                grid: {color: "white"},
+            scales: {
+                r: {
+                    ticks: {
+                        backdropColor: "transparent",
+                        color: "white",
+                        font:{
+                            family: 'serif',
+                            size: 15,
+                            weight: "bold"
+                        }
+                    },
+                    grid: {color: "white"},
                 
-                pointLabels: {
-                    color: 'white',
-                    font:{
-                        family: 'serif',
-                        size: 14,
-                        weight: 'bold'
-                    }
-                },
-                grid: {
-                    color: "white"
-                },
-                suggestedMin: 0,
-                suggestedMax: 90
+                    pointLabels: {
+                        color: 'white',
+                        font:{
+                            family: 'serif',
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    grid: {
+                        color: "white"
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 90
             }
+            },
         }
     });
 }

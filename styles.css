@@ -24,7 +24,7 @@ header h1{
     margin-left: 15px;
     text-shadow: 1px 1px 4px black;
 }
-#playlist-view-btn, .playlist-add, #search-view-btn{
+button{
     cursor: pointer;
     font-size: 14px;
     color: white;
@@ -57,7 +57,7 @@ body{
 }
 .song-search, .song-info, .song-playlists{
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
 }
 .song-search input[type='text'], .song-search input[type='number'], .song-search select{
     color: var(--text-color);
@@ -157,7 +157,7 @@ h2{
     scrollbar-width: none;
     overflow: scroll;
 }
-.results::-webkit-scrollbar{
+.results::-webkit-scrollbar, .playlist-songs-container::-webkit-scrollbar{
     display: none;
 }
 
@@ -222,34 +222,72 @@ label{
 
 .info{
     margin-top: 45px;
-    flex-basis: 50%;
+    flex-basis: 45%;
     min-width: 50%;
     display: grid;
     gap: 10px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: repeat(4, minmax(0, 1fr))
 }
-
+.playlist-add-div input[type='checkbox']{
+    cursor: pointer;
+    border: none;
+}
+.playlist-add-div{
+    transition: 0.75s;
+    padding: 5px 15px;
+    border: 2px solid black;
+    width: 350px;
+    border-radius: 6.5px;
+    height: auto;
+    max-height: 300px;
+    background: linear-gradient(#373B44, #4286f4);
+    background-color: var(--complimentary-color);
+    z-index: 9999;
+    box-shadow: 2px 2px 5px  black;
+    position: fixed;
+    left: 50%;
+    top: 45%;
+    text-align: center;
+    margin-left: -170px;
+    margin-top: -150px;
+}
+.checkbox-outer-container{
+    display: grid;
+    text-align: left;
+    gap: 5px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+#popup-btn{
+    margin: 25px 0px;
+    padding: 0px;
+    font-size: 15px;
+    width: 100px;
+    height: 30px;
+}
 .song-details{
     grid-column: span 2;
     text-align: center;
     padding: 5px 15px;
     margin: 10px;
     display: block;
-    background-color: var(--contrasting-color);
+    /* background-color: var(--contrasting-color);
     border: 1px solid black;
-    box-shadow: 2px 5px 10px black;
+    box-shadow: 2px 5px 10px black; */
 }
 #song-info-header{
     text-align: center;
     font-size: 24px;
     grid-column: 1 / span 2;
 }
+.playlist-add{
+    background-color: var(--highlight-color);
+}
 
 #details-box{
     margin-top: 30px;
     flex: 75%;
-    height: 250px;
+    padding-bottom: 30px;
 }
 .song-info{
     flex-wrap: wrap;
@@ -293,7 +331,7 @@ label{
     border-radius: 1rem;
 }
 .chart{
-    flex-basis: 50%;
+    flex-basis: 55%;
     max-width: 43%;
     /* The following ensures that the chart is centered both horizontally and vertically*/
     display: flex;
@@ -305,8 +343,8 @@ canvas{
 }
 
 .song-title{
-    color: var(--highlight-color);
-    text-shadow: 1px 1px 5px black;
+    color: white;
+    text-shadow: 1px 1px 3px black;
     font-size: 2rem;
     letter-spacing: 0.8px;
 }
@@ -352,10 +390,11 @@ canvas{
     list-style-type: none;
     box-shadow: 2px 2px 3px black;
 }
-
 .playlist-songs-container{
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 145px;
+    overflow-y: scroll;
 }
 .playlist-songs-container p{
     font-size: 0.95rem;
@@ -469,7 +508,7 @@ footer li{
         display: block;
     }
 }
-@media only screen and (max-width: 1200px){
+@media only screen and (max-width: 1300px){
     label{
         font-size: 1rem;
     }
