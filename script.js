@@ -20,7 +20,6 @@ switchView("SONG_SEARCH_VIEW");
 // Define a few global variables (will be refactored later)
 const songTitles = getSongAttributeArray("title"); // Loads all the song titles into an array
 const titleInput = document.querySelector('#title-input');
-const resultsBox = document.querySelector('#autocomplete-results');
 const playlists = [] // empty array for now
 titleInput.addEventListener('input', autocompleteTitles);
 
@@ -60,13 +59,15 @@ function getSongAttributeArray(attributeName){
 }
 
 function autocompleteTitles(){
+    const datalistReference = this.list; // References the datalist element associated with the input
     if (this.value.length >= 2){ // Starts using autocomplete after 2 character have been typed
         const titleMatches = findMatches(this.value, songTitles);
-        resultsBox.replaceChildren();
+        console.log(titleMatches);
+        datalistReference.replaceChildren();
         for (let match of titleMatches){
-                let option = document.createElement('option');
-                option.textContent = match;
-                resultsBox.appendChild(option);
+            let option = document.createElement('option');
+            option.textContent = match;
+            datalistReference.appendChild(option);
         }
     }
 }
@@ -833,8 +834,16 @@ function makePlaylist(name, songs){
             "songs": songs,
         };
         playlists.push(playlist);
+        cookiefyPlaylists();
     }
     // Write what should happen if the given name already exists
+}
+function cookiefyPlaylists(){
+    const cookieName = 'playlists';
+    const ONE_YEAR_IN_MS = 31536000000;
+    const cookieValue = JSON.stringify(playlists);
+    const playlistsCookie = `${cookieName}=${cookieValue}; max-age=${ONE_YEAR_IN_MS}`;
+    document.cookie = playlistsCookie;
 }
 function checkPlaylistName(name){
     for (p of playlists){
@@ -848,7 +857,7 @@ function checkPlaylistName(name){
 function makeRandomPlaylist(name, numSongs){
     const randomPlaylistSongs = [];
     for (let i = 0; i < numSongs; i++){
-
+        randomPlaylistSongs.push(song[Math.random() * NUM_SONGS]);
     }
     playlists.push({"name" : name, "songs": randomPlaylistSongs})
 }
@@ -861,6 +870,7 @@ function addSongToPlaylist(songTitle){
             playlistSelection.push(checkbox.id) // checkbox id contains the name of the given playlist
         }
     }
+    cookiefyPlaylists(); // Updates the playlist cookie 
     addToPlaylistSuccessTransition(songTitle, playlistSelection);
 }
 /* Counts the number of playlists that the given song was added to */
@@ -886,7 +896,7 @@ function findSong(title){
             return song;
         }
     }
-    return;
+    return 0;
 }
 /* Adds event listeners to see if the popup box should be closed. */
 function closePopupBoxCheck(songTitle){
@@ -1063,7 +1073,7 @@ function makePlaylistList(){
         // Creating the header for the list item
         const header = document.createElement("h4");
         header.id = playlistName;
-        header.textContent = `${upperCaseFirstChar(playlistName)}`;
+        header.textContent = `${upperCaseFirstChar(playlistName)} (${getPlaylistData(findPlaylist(playlistName))['number_of_songs']} songs)`;
         listDiv.appendChild(header);
     }
     const playlistOptions = makePlaylistOptions();
@@ -1084,6 +1094,8 @@ function makePlaylistOptions(){
     const addPlaylist = document.createElement("div");
     addPlaylist.addEventListener('click', makeNewPlaylistMarkup);
     addPlaylist.textContent = 'Make New Playlist';
+    const removePlaylist = document.createElement("div");
+    removePlaylist.textContent = 'Remove Song From Playlist'
     const subContainer = document.createElement("div");
     subContainer.append(addSong, addPlaylist);
     subContainer.className = 'options-wrapper';
@@ -1091,11 +1103,23 @@ function makePlaylistOptions(){
     return optionsContainer;
 }
 function makeNewPlaylistAction(){
+    console.log('click');
+    const box = document.querySelector(".new-playlist-container");
     const playlistName = document.querySelector("#playlist-name-input").textContent;
     const playlistSong = document.querySelector("#playlist-name-input").textContent;
-    const song = findSong(playlistSong);
-    makePlaylist(playlistName, [song]);
-    displayPlaylists(); // refreshes the view
+    if (playlistName != "" && playlistSong != ""){
+        const song = findSong(playlistSong);
+        if (song === 0){
+            box.innerHTML += '<h3> The given song is not present in the database. Please try again... </h3>'
+        }
+        else {
+            makePlaylist(playlistName, [song]);
+            displayPlaylists(); // refreshes the view
+        }
+    }
+    else{
+        box.innerHTML += "<h3> <em> Please add data to fields </em> </h3>";
+    }
 }
 function makeNewPlaylistMarkup(){
     // Container Div
@@ -1117,8 +1141,6 @@ function makeNewPlaylistMarkup(){
     // Autocompletion for song input
     const autocomplete = document.createElement("datalist") 
     autocomplete.id = 'song-aucomplete';
-    songInput.setAttribute('list', '#song-autocomplete');
-    songInput.setAttribute('autocomplete', 'off');
     // Song input label 
     const songInputLabel = document.createElement('label');
     songInputLabel.textContent = "Select Song";
@@ -1126,6 +1148,7 @@ function makeNewPlaylistMarkup(){
     const songContainer = document.createElement("div");
     songContainer.appendChild(songInputLabel);
     songContainer.appendChild(songInput);
+    songContainer.appendChild(autocomplete);
     // Playlist button 
     const newPlaylistButton = document.createElement("button");
     newPlaylistButton.textContent = 'Submit!';
@@ -1136,6 +1159,10 @@ function makeNewPlaylistMarkup(){
     // Append to container
     document.querySelector(".playlist-options").appendChild(newPlaylistContainer);
     newPlaylistButton.addEventListener('click', makeNewPlaylistAction);
+    // Data list linking for song select input
+    songInput.setAttribute('list', 'song-autocomplete');
+    songInput.autocomplete = 'off';
+    songInput.addEventListener('input', autocompleteTitles);
 }
 function makeAddSongToPlaylistMarkup(){
 
@@ -1154,7 +1181,7 @@ function makePlaylistDetails(){
     // Data that will be displayed in the details view
     const playlistData = getPlaylistData(playlist);
     // Append the songs names list to the details container.
-    const songsList = getPlaylistDetailsDiv(`Song List (${playlistData['number_of_songs']} Songs)`, "");
+    const songsList = getPlaylistDetailsDiv(`Song List`, "");
     songsList.appendChild(playlistData['song_list']);
     detailsContainer.appendChild(songsList);
     // Creates and appends the most popular song div to the details container
