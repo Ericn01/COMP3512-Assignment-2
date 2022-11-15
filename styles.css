@@ -50,9 +50,10 @@ body{
 /* Search Subsection (View 1)*/
 .search{
     flex-basis: 30%;
-    border: 0.5px solid gray;
-    box-shadow: 1px 1px 10px black;
+    padding: 7.5px;
+    border-radius: 20px;
     background-color: var(--complimentary-color);
+    box-shadow: 1px 1px 10px black;
     margin: 15px;
 }
 .song-search, .song-info, .song-playlists{
@@ -147,15 +148,12 @@ h1{
 }
 /* Results Subsection (View 1)*/
 .results{
-    background-color:var(--contrasting-color);
     padding: 12px;
     margin: 15px;
     text-align: center;
     flex-basis: 70%;
-    border: 0.5px solid gray;
     overflow-x: hidden;
-    box-shadow: 1px 1px 10px black;
-    max-height: 725px; 
+    max-height: 750px; 
     -ms-overflow-style: none;
     scrollbar-width: none;
     overflow: scroll;
@@ -172,7 +170,7 @@ h1{
     table-layout: fixed;
     margin: 25px auto;
     text-align: left;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     background-color: var(--complimentary-color);
 }
 
@@ -216,7 +214,9 @@ label{
     transition: 0.3s ease;
     color: var(--complimentary-color);
 }
-
+.clicked{
+    color: green;
+}
 #magnifying-glass-emoji{
     font-size: 0.95rem;
     margin-left: 5px;
@@ -228,7 +228,7 @@ label{
     flex-basis: 45%;
     min-width: 50%;
     display: grid;
-    gap: 10px;
+    gap: 15px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: repeat(4, minmax(0, 1fr))
 }
@@ -270,7 +270,6 @@ label{
 .song-details{
     grid-column: span 2;
     text-align: center;
-    padding: 5px 15px;
     margin: 10px;
     display: block;
     /* background-color: var(--contrasting-color);
@@ -287,9 +286,7 @@ label{
 }
 
 #details-box{
-    margin-top: 30px;
     flex: 75%;
-    padding-bottom: 30px;
 }
 .song-info{
     flex-wrap: wrap;
@@ -298,7 +295,8 @@ label{
     text-align: center;
     align-self: start;
     border: 1px inset black;
-/*    background-color: var(--complimentary-color); */
+    border-radius: 20px;
+    background-color: var(--contrasting-color); 
     box-shadow: 1px 1px 3px black; 
 }
 
@@ -374,19 +372,17 @@ canvas{
     height: 860px;
 }
 .playlist-selections{
+    box-shadow: 2px 2px 5px black;
     background: var(--complimentary-color);
     flex-grow: 1;
     max-width: 30%;
 }
 .playlist-details{
-    margin-left: 20px;
+    margin-left: 25px;
     display: flex;
-    background-color: var(--contrasting-color);
     flex-grow: 3;
 }
-.playlist-selections, .playlist-details{
-    min-height: 100%;
-}
+
 .playlist-list{
     padding: 15px 0px;
 
@@ -432,8 +428,6 @@ canvas{
     cursor: pointer;
 }
 .playlist-selections, .playlist-details{
-    box-shadow: 1px 1px 8px black;
-    border: 2px solid black;
     height: 800px;
     text-align: center;
     text-shadow: 1px 1px black;
@@ -454,6 +448,7 @@ canvas{
     background-color: var(--complimentary-color);
     padding: 3px 8px;
     font-size: 1rem;
+    border-radius: 15px;
     font-weight: bold;
     margin: 15px 25px;
 }
@@ -501,8 +496,8 @@ footer li{
 
 /* Responsive webpage / media queries section */
 
-/* 1350px breakpoint - some elements begin to squish together at this point, but not much has to be done */
-@media only screen and (max-width: 1350px){
+/* 1300px breakpoint - some elements begin to squish together at this point, but not much has to be done */
+@media only screen and (max-width: 1300px){
     .song-playlists{
         display: block;
     }
@@ -553,8 +548,7 @@ footer li{
     .playlist-details{
         display: block;
     }
-}
-@media only screen and (max-width: 1300px){
+
     label{
         font-size: 1rem;
     }
@@ -586,9 +580,6 @@ footer li{
         width: 65%;
         margin: 15px auto;
     }
-    .sort{
-        font-size: 0.9rem;
-    }
     .footer-list{
         justify-content: space-evenly;
         font-size: 1rem;
@@ -606,6 +597,9 @@ footer li{
     .averages-chart{
         margin: auto;
     }
+    .results-table th{
+        font-size: 1rem;
+    }
 }
 /* 750px breakpoint configuration */
 @media only screen and (max-width: 750px) {
@@ -620,7 +614,7 @@ footer li{
         font-size: 1rem;
     }
     .averages-container{
-        min-width: 350px;
+        min-width: 100%;
     }
     .song-details{
         width: 75%;
@@ -630,7 +624,7 @@ footer li{
     }
     .analysis {
         box-shadow: 1px 1px 8px black;
-        margin: 10px 0px;
+        margin: 10px 0;
     }
     .song-title{
         font-size: 1.35rem;
@@ -665,12 +659,9 @@ footer li{
         font-size: 0.8rem;
     }
     th{
-        font-size: 0.80rem;
+        font-size: 1rem;
     }
-    td{
-        font-size: 0.70rem;
-    }
-    
+
     .footer-list{
         font-size: 0.85rem;
     }
@@ -680,6 +671,14 @@ footer li{
     .results-table th:last-child, .results-table td:last-child{ /* Hides the popularity field from the table */
         display: none;
     } 
+
+    .results-table th, td{
+        font-size: 0.9rem;
+        width: 25%;
+    }
+    .sort{
+        font-size: 1.10rem;
+    }    
     header{
         display: block;
         text-align: center;
@@ -691,29 +690,36 @@ footer li{
 
 /* Phones media queries */
 @media only screen and (max-width: 500px) {
+    .sort{
+        font-size: 0.975rem;
+    }
     .results-table th:nth-child(3), .results-table td:nth-child(3){ /* Hides Away the year row as there's not much space for it */
         display: none;
-    }
-    th{
-        font-size: 0.75rem;
-    }
-    #magnifying-glass-emoji{
-        font-size: 0.7rem;
-    }
-    .sort{
-        font-size: 0.8rem;
     }
     .input-container{
         margin: 20px 15px;
     }
-    .results-table{
-        text-align: center;
+    .results-table td{
+        width: 33.33%;
+        font-size: 0.85rem;
     }
     .results table td:first-child{
         text-align: left;
-        margin-left: 5px;
+        margin-left: 10px;
     }
     header div button{
         padding: 0px
+    }
+}
+@media only screen and (max-width: 380px){
+    .results-table td:first-child{
+        text-decoration: underline;
+    }
+
+    #magnifying-glass-emoji{
+        display: none;
+    }
+    .results-table td{
+        font-size: 0.79rem;
     }
 }

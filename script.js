@@ -214,8 +214,10 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
     }
     populateSongs(songs);
     document.querySelector("#clear-btn").addEventListener("click", (e) => {
+        e.preventDefault();
         for (let input of inputs){
-            if (input.id != 'genre-select' || input.id != 'artist-select'){
+            if (input.type !== 'select-one'){
+                console.log(true);
                 input.textContent = "";
             }
         }
@@ -769,23 +771,45 @@ const sortButtons = document.querySelectorAll(".sort");
 for (let i =0; i < sortButtons.length; i++){
     sortButtons[i].addEventListener('click', sortTableByAttribute);
 }
+
 // Sorts the table by the given attribute 
 function sortTableByAttribute(){
     // The attribute that we are sorting by
     const attribute = this.id;
+    styleSortButton(this) // reference to the button we pressed.
+    const changedAttribute = attribute.replace('-sort', '');
     // First and foremost we need to receive the search results.
     const results = getSearchResults();
-    if (attribute != 'year-sort' || attribute != 'popularity-sort'){
-        results.sort();
-        console.log(results);
-    }
-    else {
-        results.sort((a,b) => a-b);
-        console.log(results);
-    }
-    populateSongs(results);
+    console.log(results);
+    const sortedResults = resultSort(changedAttribute, results);
+    populateSongs(sortedResults);
 }
-
+function styleSortButton(clickBtn){
+    clickBtn.textContent = '▴';
+    for (btn of sortButtons){
+        if (btn.id !== clickBtn.id){
+            btn.textContent = '▾';
+        }
+    }
+}
+function resultSort(attribute, unsortedResults){
+    if (attribute === 'year'){
+        return unsortedResults.sort((a, b) => a['year'] - b['year']);
+    }
+    else if (attribute === 'popularity'){
+        return unsortedResults.sort((a,b) => a['details']['popularity'] - b['details']['popularity']);
+    }
+    else if (attribute === 'genre' || attribute === 'artist'){
+        return unsortedResults.sort((a,b) => a[attribute]['name'].localeCompare(b[attribute]['name']));
+    }
+    else if (attribute === 'title'){
+        return unsortedResults.sort((a,b) => String(a[attribute]).localeCompare(String(b[attribute]))); // the few titles that are encoded as numbers gave me quite a headache with this one...
+    }
+    else{
+        console.log("error occured while sorting - attribute does not exist");
+        return;
+    }    
+}
 // Adds a random placholder title to the title input space when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     const titleInput = document.querySelector("#title-input");
@@ -1030,6 +1054,7 @@ function displayPlaylists(){
 function makePlaylistList(){
     if (playlists.length == 0){return;} // exits the function if no playlists are present
     const container = document.querySelector(".playlist-selections");
+    container.innerHTML = ""; // Remove content from container
     const listDiv = document.createElement("div");
     listDiv.className = "playlist-list";
     listDiv.appendChild(makeHeading("Playlists"));
