@@ -837,6 +837,10 @@ function addSongToPlaylist(songTitle){
             playlistSelection.push(checkbox.id) // checkbox id contains the name of the given playlist
         }
     }
+    addToPlaylistSuccessTransition(songTitle, playlistSelection);
+}
+/* Counts the number of playlists that the given song was added to */
+function addToPlaylistSuccessTransition(songTitle, playlistSelection){
     let addedCount = 0;
     for (playlistName of playlistSelection){
         const playlistMatch = findPlaylist(playlistName);
@@ -844,8 +848,13 @@ function addSongToPlaylist(songTitle){
         playlistMatch["songs"].push(songMatch);
         addedCount++;
     }
-    document.querySelector(".playlist-add-div").removeChild(document.querySelector("#popup-btn"));
-    document.querySelector(".playlist-add-div").innerHTML += `<p style='color:lightgreen'> ${songTitle} was added to ${addedCount} playlists. </p>`;
+    // Let the user know that the song was added to the given playlists
+    const parent = document.querySelector(".playlist-add-div")
+    parent.removeChild(document.querySelector("#popup-btn"));
+    const success = document.createElement("h3");
+    success.textContent = `${songTitle} was added to ${addedCount} playlists.`
+    success.id = 'playlist-add-success';
+    parent.appendChild(success);
 }
 function findSong(title){
     for (song of songs){
@@ -855,19 +864,17 @@ function findSong(title){
     }
     return;
 }
-/* Adds event listeners to see if the popup box should be closed. Also returns the checkbox */
+/* Adds event listeners to see if the popup box should be closed. */
 function closePopupBoxCheck(songTitle){
-    window.addEventListener('click', (e) => {
+    const popupElement = document.querySelector(".playlist-add-div");
+    popupElement.addEventListener('click', (e) => {
         const popupButton = document.querySelector("#popup-btn");
-        const popupElement = document.querySelector(".playlist-add-div");
-        if (!popupElement.contains(e.target)){ // box does not contain a click within it's boundaries
-          // document.querySelector(".song-info").removeChild(popupElement); // Removes the popup element from the screen
-        }
-        else if (popupButton.contains(e.target)){
+        if (popupButton.contains(e.target)){
             addSongToPlaylist(songTitle);
             setTimeout(() => {
                 document.querySelector(".song-info").removeChild(popupElement);
-            }, 2500)
+                displayPlaylists(); // Switches the view to that of playlists, and display the information.
+            }, 2000)
         }
     }); 
 }
@@ -897,8 +904,8 @@ function makePopupBox(){
 */
 function abbreviateSongTitle(songTitle){
     let shortenedTitle = "";
-    const regex = '\([\w\d\s]+\)' // I made this regex specifically for this case - matches to parentheses and all the text within it
-    songTitle.length >= 40 && songTitle.match(regex) ? shortenedTitle = songTitle.replace(regex, "") + "..." : shortenedTitle = songTitle // Removes the matched text if the title is greater than 40 chars and matches the given regular expression
+    const regex = /\([\w\d\s]+\)/ // I made this regex specifically for this case - matches to parentheses and all the text within it
+    songTitle.length >= 40 && songTitle.includes('(') ? shortenedTitle = songTitle.replace(regex, "...") : shortenedTitle = songTitle // Removes the matched text if the title is greater than 40 chars and matches the given regular expression
     return shortenedTitle;
 }
 /**
@@ -1022,8 +1029,10 @@ function displayPlaylists(){
 /* Displays the list of playlists, along with their names, and the number of songs in the given playlist */
 function makePlaylistList(){
     if (playlists.length == 0){return;} // exits the function if no playlists are present
-    const listDiv = document.querySelector(".playlist-list");
-    listDiv.innerHTML = ""; // clears whatever html was previously present 
+    const container = document.querySelector(".playlist-selections");
+    container.innerHTML = "";
+    const listDiv = document.createElement("div");
+    listDiv.className = "playlist-list";
     listDiv.appendChild(makeHeading("Playlists"));
     for (playlist of playlists){
         const outerList = document.createElement("div");
@@ -1040,11 +1049,29 @@ function makePlaylistList(){
         outerList.appendChild(numSongsBox);
         listDiv.appendChild(outerList);
     }
+    const playlistOptions = makePlaylistOptions();
+    container.appendChild(listDiv);
+    container.appendChild(playlistOptions);
+}
+/**
+ * Sets the container for making a new playlist and adding a song to playlist(s).
+ */
+function makePlaylistOptions(){
+    const optionsContainer = document.createElement("div");
+    optionsContainer.className = 'playlist-options';
+    const header = document.createElement("h2");
+    header.textContent = "Options"
+    const addSong = document.createElement("div");
+    addSong.textContent = 'Add Song to Playlist';
+    const addPlaylist = document.createElement("div");
+    addPlaylist.textContent = 'Make New Playlist';
+    const subContainer = document.createElement("div");
+    subContainer.append(addSong, addPlaylist);
+    subContainer.className = 'options-wrapper';
+    optionsContainer.append(header, subContainer);
+    return optionsContainer;
 }
 
-function makePlaylistOptions(){
-    const optionsContainer = document.createElement("");
-}
 /* This function is responsible for filling the playlist details container with relevant data. 
 * This also includes a polar area chart that contains information about the averages of each attribute of the given playlist 
 */
@@ -1059,7 +1086,7 @@ function makePlaylistDetails(){
     // Data that will be displayed in the details view
     const playlistData = getPlaylistData(playlist);
     // Append the songs names list to the details container.
-    const songsList = getPlaylistDetailsDiv("Playlist Songs", "");
+    const songsList = getPlaylistDetailsDiv("Song List", "");
     songsList.appendChild(playlistData['song_list']);
     detailsContainer.appendChild(songsList);
     // Creates and appends the most popular song div to the details container
