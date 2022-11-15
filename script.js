@@ -1022,7 +1022,7 @@ function setPlaylistListItems(){
 // Creates the playlist view markup -> Playlist list
 function displayPlaylists(){
     switchView("SONG_PLAYLIST_VIEW");
-    makePlaylistList(playlists);
+    makePlaylistList();
     setPlaylistListItems();
 }
 // [playlist1, playlist2] => each playlist is an array of songs [[{Playlist 1: Song 1}, {Playlist 1: Song 2}], []]
@@ -1030,24 +1030,16 @@ function displayPlaylists(){
 function makePlaylistList(){
     if (playlists.length == 0){return;} // exits the function if no playlists are present
     const container = document.querySelector(".playlist-selections");
-    container.innerHTML = "";
     const listDiv = document.createElement("div");
     listDiv.className = "playlist-list";
     listDiv.appendChild(makeHeading("Playlists"));
     for (playlist of playlists){
-        const outerList = document.createElement("div");
-        const numSongs = getPlaylistData(playlist)['number_of_songs'];
         const playlistName = playlist['name'];
         // Creating the header for the list item
         const header = document.createElement("h4");
         header.id = playlistName;
         header.textContent = `${upperCaseFirstChar(playlistName)}`;
-        // Creating a div for the number of songs
-        const numSongsBox = document.createElement("p");
-        numSongsBox.textContent = `Number of songs: ${numSongs}`;
-        outerList.appendChild(header);
-        outerList.appendChild(numSongsBox);
-        listDiv.appendChild(outerList);
+        listDiv.appendChild(header);
     }
     const playlistOptions = makePlaylistOptions();
     container.appendChild(listDiv);
@@ -1062,8 +1054,10 @@ function makePlaylistOptions(){
     const header = document.createElement("h2");
     header.textContent = "Options"
     const addSong = document.createElement("div");
+    addSong.addEventListener('click', makeAddSongToPlaylistMarkup)
     addSong.textContent = 'Add Song to Playlist';
     const addPlaylist = document.createElement("div");
+    addPlaylist.addEventListener('click', makeNewPlaylistMarkup);
     addPlaylist.textContent = 'Make New Playlist';
     const subContainer = document.createElement("div");
     subContainer.append(addSong, addPlaylist);
@@ -1071,7 +1065,56 @@ function makePlaylistOptions(){
     optionsContainer.append(header, subContainer);
     return optionsContainer;
 }
+function makeNewPlaylistAction(){
+    const playlistName = document.querySelector("#playlist-name-input").textContent;
+    const playlistSong = document.querySelector("#playlist-name-input").textContent;
+    const song = findSong(playlistSong);
+    makePlaylist(playlistName, [song]);
+    displayPlaylists(); // refreshes the view
+}
+function makeNewPlaylistMarkup(){
+    // Container Div
+    const newPlaylistContainer = document.createElement("div");
+    newPlaylistContainer.className = 'new-playlist-container';
+    // Name Input Fields Markup
+    const nameInput = document.createElement("input");
+    nameInput.setAttribute("type", "text");
+    nameInput.id = 'playlist-name-input';
+    const nameInputLabel = document.createElement('label');
+    nameInputLabel.textContent = "Playlist Name";
+    const nameContainer = document.createElement("div");
+    nameContainer.appendChild(nameInputLabel);
+    nameContainer.appendChild(nameInput);
+    // Same thing goes with song inputs
+    const songInput = document.createElement("input");
+    songInput.setAttribute("type", "text");
+    songInput.className = 'playlist-song-input';
+    // Autocompletion for song input
+    const autocomplete = document.createElement("datalist") 
+    autocomplete.id = 'song-aucomplete';
+    songInput.setAttribute('list', '#song-autocomplete');
+    songInput.setAttribute('autocomplete', 'off');
+    // Song input label 
+    const songInputLabel = document.createElement('label');
+    songInputLabel.textContent = "Select Song";
+    // Subcontainer
+    const songContainer = document.createElement("div");
+    songContainer.appendChild(songInputLabel);
+    songContainer.appendChild(songInput);
+    // Playlist button 
+    const newPlaylistButton = document.createElement("button");
+    newPlaylistButton.textContent = 'Submit!';
+    // Append to the container
+    newPlaylistContainer.appendChild(nameContainer) 
+    newPlaylistContainer.appendChild(songContainer) 
+    newPlaylistContainer.appendChild(newPlaylistButton);
+    // Append to container
+    document.querySelector(".playlist-options").appendChild(newPlaylistContainer);
+    newPlaylistButton.addEventListener('click', makeNewPlaylistAction);
+}
+function makeAddSongToPlaylistMarkup(){
 
+}
 /* This function is responsible for filling the playlist details container with relevant data. 
 * This also includes a polar area chart that contains information about the averages of each attribute of the given playlist 
 */
@@ -1086,7 +1129,7 @@ function makePlaylistDetails(){
     // Data that will be displayed in the details view
     const playlistData = getPlaylistData(playlist);
     // Append the songs names list to the details container.
-    const songsList = getPlaylistDetailsDiv("Song List", "");
+    const songsList = getPlaylistDetailsDiv(`Song List (${playlistData['number_of_songs']} Songs)`, "");
     songsList.appendChild(playlistData['song_list']);
     detailsContainer.appendChild(songsList);
     // Creates and appends the most popular song div to the details container

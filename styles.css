@@ -59,7 +59,7 @@ body{
     display: flex;
     justify-content: space-evenly;
 }
-.song-search input[type='text'], .song-search input[type='number'], .song-search select{
+input[type='text'], .song-search input[type='number'], .song-search select{
     color: var(--text-color);
     background-color: transparent;
     margin-left: 20px;
@@ -141,6 +141,9 @@ button:hover, #playlist-view-btn:hover, #playlist-add:hover, #search-view-btn:ho
 }
 h2{
     text-shadow: 1px 1px black;
+}
+h1{
+    font-size: 1.6rem;
 }
 /* Results Subsection (View 1)*/
 .results{
@@ -294,10 +297,11 @@ label{
 .analysis{
     text-align: center;
     align-self: start;
-    border: 1px solid black;
-    background-color: var(--complimentary-color);
-    box-shadow: 1px 1px 3px black;
+    border: 1px inset black;
+/*    background-color: var(--complimentary-color); */
+    box-shadow: 1px 1px 3px black; 
 }
+
 .analysis h2{
     font-size: 1.5rem;
     font-weight: bolder;
@@ -367,7 +371,7 @@ canvas{
 /* SONG PLAYLIST VIEW */
 .song-playlists{
     margin: 10px;
-    height: 840px;
+    height: 860px;
 }
 .playlist-selections{
     background: var(--complimentary-color);
@@ -383,10 +387,28 @@ canvas{
 .playlist-selections, .playlist-details{
     min-height: 100%;
 }
-.playlist-list div{
-    margin: 25px 30px;
+.playlist-list{
+    padding: 15px 0px;
+
+}
+.playlist-list h1{
+    font-size: 1.8rem;
+}
+.new-playlist-container{
+    margin: 25px auto;
+    padding: 15px 5px;;
+    width: 75%;
+    box-shadow: 1px 1px 4px black;
+    border: 1px solid black;
+}
+.new-playlist-container div{
+    margin-bottom: 20px;
+}
+.playlist-list h4{
     background-color: var(--contrasting-color);
-    font-size: 1.1rem;
+    font-size: 1rem;
+    padding: 5px;   
+    margin: 15px 25%;
     list-style-type: none;
     box-shadow: 2px 2px 3px black;
 }
@@ -403,9 +425,7 @@ canvas{
     padding: 2px;
     background-color: var(--contrasting-color);
 }
-.playlist-list h4{
-    font-size: 1.25rem;
-}
+
 .playlist-list h4:hover{
     color: var(--link-transition-color);
     text-decoration: underline;
