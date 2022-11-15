@@ -398,14 +398,16 @@ canvas{
 .playlist-list h1{
     font-size: 1.8rem;
 }
-.new-playlist-container{
-    margin: 25px auto;
-    padding: 25px 0px;
+.playlist-option{
+    display: none;
+    margin: 10px auto;
+    padding: 12px auto;
     width: 75%;
+    min-height: 200px;
     box-shadow: 1px 1px 4px black;
     border: 1px solid black;
 }
-.new-playlist-container div{
+.playlist-option div{
     margin-bottom: 20px;
 }
 .playlist-list h4{
@@ -475,6 +477,11 @@ canvas{
     font-size: 1.15rem;
     font-weight: 700;
 }
+.option-content div{
+    background-color: var(--contrasting-color);
+    border-radius: 20px;
+    font-size: 1rem;
+}
 .options-wrapper{
     display: flex;
     flex-wrap: wrap;
@@ -506,7 +513,6 @@ canvas{
 footer li{
     list-style-type: none;
 }
-
 /* Responsive webpage / media queries section */
 
 /* 1300px breakpoint - some elements begin to squish together at this point, but not much has to be done */

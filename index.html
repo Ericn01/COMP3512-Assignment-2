@@ -105,7 +105,56 @@
         <!-- ======================================== PLAYLIST SECTION ============================================== -->
         <section class="song-playlists">
             <div class="playlist-selections"> 
+                <div class="playlist-list"> 
 
+                </div>
+                <div class="playlist-options"> 
+                    <h2> Options </h2>
+                    <div class="options-wrapper"> 
+                        <div class="option-btn add-to-playlist" id="o1"> Add Song To Playlist </div>
+                        <div class="option-btn new-playlist" id="o2"> Make New Playlist </div>
+                        <div class="option-btn remove-playlist" id="o3"> Remove Playlist </div>
+                    </div>
+                    <div class="option-content">
+                        <div class="playlist-option add-to-playlist-inputs"> 
+                            <h3 class="option-heading"> Add Song To Playlist </h3>
+                            <div class="playlist-name-container"> <!-- Will contain checkboxes for the playlists to add the selected song to -->
+                                <select class="options-input"> 
+
+                                </select>
+                            </div>
+                            <div>
+                                <label for="add-playlist-song"> Song Name </label>
+                                <input type="text" class="options-input" id="add-playlist-song" list="add-playlist-song-autocomplete" autocomplete="off">
+                                <datalist id="add-playlist-song-autocomplete"> </datalist>
+                            </div>
+                            <button class="action-btn"> Submit </button>
+                        </div>
+                        <div class="playlist-option new-playlist-inputs">
+                            <h3 class="option-heading"> Make New Playlist </h3>
+                            <div class="playlist-name-container">
+                                <label for="new-playlist-name">Playlist Name </label>
+                                <input type="text" class="options-input" id="new-playlist-name" autocomplete="off">
+                            </div>
+                            <div>
+                                <label for="new-playlist-song"> Song Name </label>
+                                <input type="text" class="options-input" id="new-playlist-song" list="new-playlist-autocomplete" autocomplete="off">
+                                <datalist id="new-playlist-autocomplete"> </datalist>
+                            </div>
+                            <button class="action-btn"> Submit </button>
+                        </div>
+                        <div class="playlist-option remove-playlist-inputs">
+                            <h3 class="option-heading"> Remove Playlist </h3>
+                            <div>
+                                Playlist to remove
+                                <select class="options-input">
+
+                                </select>
+                            </div>
+                            <button class="action-btn"> Submit </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="playlist-details"> 
                 <div class="details-container"> </div>
