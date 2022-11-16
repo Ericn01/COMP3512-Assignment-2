@@ -820,11 +820,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // Note --> This section ended up being a lot more convoluted than I originally thought it would be.
 // TEMPORARY: ADD SWITCH TO PLAYLIST VIEW BUTTON
 document.querySelector("#playlist-view-btn").addEventListener('click', displayPlaylists);
+document.querySelector("#playlist-view-btn").addEventListener('click', makePlaylistDetails);
 // Creating some template playlist objects for testing
 makePlaylist("Default playlist", [songs[0], songs[1], songs[3], songs[100], songs[20], songs[15], songs[22], songs[33]]);
 makePlaylist("Country Playlist", [songs[5], songs[100]]);
 makePlaylist("EDM Playlist", [songs[150], songs[4], songs[180]]);
-makePlaylist("Wow", [songs[115], songs[116], songs[150], songs[101], songs[6], songs[200]]);
+makePlaylist("Wow", [songs[115], songs[116], songs[150], songs[101], songs[6], songs[200], songs[100], songs[98]]);
 // creates a playlist
 function makePlaylist(name, songs){
     if (checkPlaylistName(name)){
@@ -1076,6 +1077,7 @@ function makePlaylistList(){
         listDiv.appendChild(header);
     }
     container.prepend(listDiv);
+    loadRemovePlaylistSelect(); // Loads the select element in the remove playlist option
     playlistOptionsEventListeners(); // Creates the playlist options event listeners
 }
 
@@ -1142,7 +1144,40 @@ function addSongToPlaylistAction(){
 
 }
 function removePlaylistAction(){
+    const selection = document.querySelector('#playlist-remove-list').value;
+    removePlaylist(selection);
+    document.querySelector('.remove-playlist-inputs').innerHTML += `<h3> ${selection} was removed. </h3>`;
+    setTimeout(
+        displayPlaylists(), 1500
+    );
+}
+function removePlaylist(playlistName){
+    for (let i = 0; i < playlists.length; i++){
+        if (playlists[i].name === playlistName){
+            playlists.splice(i,i);
+            break;
+        }
+    }
+}
+function loadRemovePlaylistSelect(){
+    const parent = document.querySelector('#playlist-remove-list');
+    parent.innerHTML = '';
+    const playlistNames = getPlaylistNames();
+    console.log(playlistNames);
+    playlistNames.forEach( (playlistName) => {
+        const option = document.createElement('option');
+        option.setAttribute('value', playlistName);
+        option.textContent = playlistName;
+        parent.appendChild(option);
+    });
+}
 
+function getPlaylistNames(){
+    const names = [];
+    playlists.forEach(item => {
+        names.push(item.name);
+    })
+    return names;
 }
 
 
@@ -1150,7 +1185,9 @@ function removePlaylistAction(){
 * This also includes a polar area chart that contains information about the averages of each attribute of the given playlist 
 */
 function makePlaylistDetails(){
-    const playlist = findPlaylist(this.id); // find the playlist that the list element relates to based on the given id
+    let eventId = this.id
+    const viewPlaylistBtnHandler = eventId === 'playlist-view-btn' ? eventId = 'Default playlist' : eventId; 
+    const playlist = findPlaylist(eventId); // find the playlist that the list element relates to based on the given id
     const playlistName = playlist['name'];
     const detailsContainer = document.querySelector(".details-container");
     if (detailsContainer.hasChildNodes()){

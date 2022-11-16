@@ -62,7 +62,7 @@ body{
     display: flex;
     justify-content: space-evenly;
 }
-input[type='text'], .song-search input[type='number'], .song-search select{
+input[type='text'], .song-search input[type='number'], .song-search select, .options-input{
     color: var(--text-color);
     background-color: transparent;
     margin-left: 20px;
@@ -482,6 +482,15 @@ canvas{
     border-radius: 20px;
     font-size: 1rem;
 }
+.option-btn{
+    font-size: 1rem;
+    border-radius: 10px;
+}
+.hidden {
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 1.5s, opacity 1.5s linear;
+}
 .options-wrapper{
     display: flex;
     flex-wrap: wrap;
@@ -501,6 +510,13 @@ canvas{
     transition: 0.8s ease-in;
     background-color: var(--highlight-color);
     cursor: pointer;
+}
+.options-input option{
+    color: black;
+}
+.options-input{
+    width: 110px;
+    margin-left: 10px;
 }
 /* FOOTER STYLES */
 .footer-list{
@@ -667,6 +683,10 @@ footer li{
     .search{
         width: 80%;
     }
+    .results{
+        padding: 10px 0px;
+        margin: 3px 3px;
+    }
     #playlist-view-btn, #search-view-btn{
         width: 100px;
         padding: 2px;
@@ -720,8 +740,7 @@ footer li{
         margin: 20px 15px;
     }
     .results-table td{
-        width: 33.33%;
-        font-size: 0.85rem;
+        font-size: 0.82rem;
     }
     .results table td:first-child{
         text-align: left;
@@ -731,7 +750,12 @@ footer li{
         padding: 0px
     }
     .averages-container{
-        min-width: 350px;
+        width: 100%;
+        margin: 0px;
+        min-width: 330px;
+    }
+    #averages-chart{
+        margin: 0px;
     }
 }
 @media only screen and (max-width: 380px){
