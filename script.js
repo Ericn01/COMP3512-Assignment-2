@@ -597,14 +597,11 @@ function getGenreEmoticon(genreName){
  * @returns the formatted duration string
  */
 function secondsToMin(seconds){
-    minutesNum = seconds / 60
-    secondsNum = Number(String(minutesNum).substring(1)) * 60;
-    let secondsDecimalVal = String(secondsNum).substring(1)
-    Number(secondsDecimalVal) > .5 ? Math.ceil(Number(secondsDecimalVal)) : Math.floor(Number(secondsDecimalVal));
-    minutesFormatted = String(minutesNum).substring(0, 1);
-    secondsFormatted = String(secondsNum).substring(0, 2);
-    secondsFormatted.length == 1 ? secondsFormatted += "0" : secondsFormatted; // if the length of seconds formatted is one, that means it's missing a 0
-    return `${minutesFormatted}:${secondsFormatted} minutes`;
+    minutesNum = seconds / 60; // M.S...
+    if (String(minutesNum).length === 1) {return minutesNum + ":00"}; // Condition if the seconds value is a multiple of 60.
+    secondsNum = String(minutesNum).substring(1) * 60;
+    secondsNum < 10 ? secondsNum = "0" + String(Math.round(secondsNum, 0)) : secondsNum; // Appends a 0 to the start of values that are less than 10 
+    return `${String(minutesNum).substring(0,1)}:${String(secondsNum).substring(0,2)} minutes`;
 }
 function rankFormat(rank){
     return `Rank: #${rank + 1}`;
@@ -780,7 +777,6 @@ function sortTableByAttribute(){
     const changedAttribute = attribute.replace('-sort', '');
     // First and foremost we need to receive the search results.
     const results = getSearchResults();
-    console.log(results);
     const sortedResults = resultSort(changedAttribute, results);
     populateSongs(sortedResults);
 }
