@@ -84,8 +84,8 @@ function findMatches(word, titles){
 }
 
 /* Add a event listener to every radio button */
-const radioButtons = document.querySelectorAll("input[type='radio']");
-const inputs = document.querySelectorAll("input, select");
+const radioButtons = document.querySelectorAll(".search-form input[type='radio']");
+const inputs = document.querySelectorAll(".search-form input, .search form select");
 // Adding an event listener for the radio button 
 for (let currentRadioBtn of radioButtons){
     currentRadioBtn.addEventListener('change', disableInputs);
@@ -95,7 +95,7 @@ function disableInputs(){
     if (this.checked){
         let radioType = String(this.id.replace("-radio", ''));
         for (let input of inputs){
-            if (!input.id.includes(radioType) && input.type != "radio" && input.className != 'options-input'){
+            if (!input.id.includes(radioType) && input.type != "radio"){
                 disableEnableInputBehavior(input, 'disabled');
             }
             else if(input.id.includes(radioType)){
@@ -306,10 +306,10 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
         // Loop through the song objects array
         for (song of songObj){
             if (searchAttribute == 'title' && String(song['title']).toLowerCase().includes(userValue.toLowerCase())){ // Includes function is case sensitive!
-                        results.push(song);
+                    results.push(song);
                 }
             else if ((searchAttribute =='artist' || searchAttribute == 'genre') && (song[searchAttribute]['name'].includes)(userValue)){
-                results.push(song);
+                    results.push(song);
                 }
             else if (searchAttribute == 'popularity' || searchAttribute == 'year'){
                 if (searchAttribute == "year"){ 
@@ -852,8 +852,13 @@ function checkPlaylistName(name){
 // Make random song playlist. Cap number of 
 function makeRandomPlaylist(name, numSongs){
     const randomPlaylistSongs = [];
-    for (let i = 0; i < numSongs; i++){
-        randomPlaylistSongs.push(song[Math.random() * NUM_SONGS]);
+    const NUM_SONGS = songs.length;
+    let count = 0;
+    while (count < numSongs){
+        const randomIndex = Math.floor(Math.random() * NUM_SONGS);
+        const randomSong = songs[randomIndex];
+        randomPlaylistSongs.push(randomSong);
+        count++;
     }
     playlists.push({"name" : name, "songs": randomPlaylistSongs})
 }
@@ -1053,6 +1058,7 @@ function setPlaylistListItems(){
 // Creates the playlist view markup -> Playlist list
 function displayPlaylists(){
     switchView("SONG_PLAYLIST_VIEW");
+    cookiefyPlaylists(); // Makes sure that playlist cookies are up to date
     makePlaylistList();
     setPlaylistListItems();
 }
@@ -1085,60 +1091,84 @@ function playlistOptionsEventListeners(){
     for (option of options){
         option.addEventListener('click', optionViewControl);
     }
-    // Adds an autocomplete function to both of these elements
+    // Adds an autocomplete function to these elements
     document.querySelector('#new-playlist-song').addEventListener('input', autocompleteTitles);
-    document.querySelector('#add-playlist-song').addEventListener('input', autocompleteTitles);
     // Listens for submit button actions 
     const optionActionButtons = document.querySelectorAll(".action-btn");
-    optionActionButtons[0].addEventListener('click', addSongToPlaylistAction);
-    optionActionButtons[1].addEventListener('click', newPlaylistAction);
-    optionActionButtons[2].addEventListener('click', removePlaylistAction);
+    optionActionButtons[0].addEventListener('click', newPlaylistAction);
+    optionActionButtons[1].addEventListener('click', removePlaylistAction);
 }
 function optionViewControl(){
     const options = document.querySelectorAll(".playlist-option");
     const selectorId = this.id;
     switch(selectorId){
         case 'o1':
-            displayOptions(options[0], options[1], options[2]);
+            displayOptions(options[0], options[1]);
             break;
         case 'o2':
-            displayOptions(options[1], options[0], options[2]);
-            break;
-        case 'o3':
-            displayOptions(options[2], options[1], options[0]);
+            displayOptions(options[1], options[0]);
             break;
         default: 
             console.log('element not found');
     }
 }
 
-function displayOptions(displayed, n1, n2){
+function displayOptions(displayed, n1){
     displayed.style.display = 'block';
     n1.style.display = 'none';
-    n2.style.display = 'none';
 }
 function newPlaylistAction(){
+    const container = document.querySelector(".new-playlist-inputs");
+    // Get user selection 
+    const selectionId = getCheckedId(document.querySelectorAll('.new-playlist-radio'));
+    // Creating the error message element
+    const actionMsg = document.createElement('p');
+    setInterval(() => {actionMsg.innerHTML = ""}, 1200); // removes the action message html every 1200 milliseconds
+    container.appendChild(actionMsg);
+    // Adding some styles to it 
+    actionMsg.style.fontStyle = 'italic';
+    actionMsg.style.fontWeight = 'bold';
+
     // Getting inputs from text fields.
-    const playlistName = document.querySelector("#new-playlist-name").textContent;
-    const playlistSong = document.querySelector("#new-playlist-song").textContent;
-    if (playlistName != "" && playlistSong != ""){
-        const song = findSong(playlistSong);
-        if (song === 0){
-            container.innerHTML += '<h3> The given song is not present in the database. Please try again... </h3>'
+    const playlistName = document.querySelector("#new-playlist-name").value;
+    const playlistSong = document.querySelector("#new-playlist-song").value;
+    if (playlistName != ""){
+        if (selectionId == 'random-new-playlist-radio'){
+            const numSongs = document.querySelector('#num-songs-range').value;
+            makeRandomPlaylist(playlistName, numSongs);
+            actionMsg.textContent = `${playlistName} was successfully created.`;
+            setTimeout(displayPlaylists(), 1000); // refreshes the view after 1 second
         }
-        else {
-            makePlaylist(playlistName, [song]);
-            displayPlaylists(); // refreshes the view
+        else if (selectionId == 'user-new-playlist-radio' && playlistName != ""){
+            if (!checkPlaylistName(playlistName)){
+            actionMsg.textContent = 'A playlist with that name already exists';
+            container.appendChild(actionMsg);
+            }
+            const song = findSong(playlistSong);
+            if (song === 0){
+                actionMsg.textContent = 'The given song is not present in the database'
+            }
+            else {
+                makePlaylist(playlistName, [song]);
+                actionMsg.textContent = `${playlistName} was successfully created.`;
+                setTimeout(displayPlaylists(), 1000); // refreshes the view after 1 second
+            }
         }
     }
     else{
-        container.innerHTML += "<h3> <em> Please add data to missing fields </em> </h3>";
+        actionMsg.textContent = "Please provide a playlist name.";
     }
 }
-
-function addSongToPlaylistAction(){
-
+/* Returns the ID of the element button that has been checked*/
+function getCheckedId(radioNodeList){
+    for (let radio of radioNodeList){
+        if (radio.checked){
+            return radio.id;
+        }
+    }
+    return 0; // Case in which no radio button was checked
 }
+
 function removePlaylistAction(){
     const selection = document.querySelector('#playlist-remove-list').value;
     removePlaylist(selection);
@@ -1148,9 +1178,10 @@ function removePlaylistAction(){
     );
 }
 function removePlaylist(playlistName){
+
     for (let i = 0; i < playlists.length; i++){
         if (playlists[i].name === playlistName){
-            playlists.splice(i,i);
+            playlists.splice(i,i + 1);
             break;
         }
     }

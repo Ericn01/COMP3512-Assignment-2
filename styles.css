@@ -402,10 +402,41 @@ canvas{
     display: none;
     margin: 10px auto;
     padding: 12px auto;
-    width: 75%;
+    width: 95%;
     min-height: 200px;
     box-shadow: 1px 1px 4px black;
     border: 1px solid black;
+}
+
+.playlist-option button{
+    height: 30px;
+    width: 100px;
+    margin-bottom: 10px;
+}
+.new-playlist-flex{
+    display: flex;
+    margin-bottom: 0px;
+    justify-content: space-evenly;
+}
+.new-playlist-flex div{
+    text-align: left;
+    margin: 0px 5px;
+    border: 2px solid black;
+}
+.left-new-playlist{
+    flex-grow: 1.5;
+}
+.new-playlist-radio-label{
+    font-size: 1.1rem;
+}
+.right-new-playlist{
+    flex-grow: 1;
+}
+.new-playlist-flex h4{
+    margin-left: 10px;
+}
+.playlist-option label{
+    font-size: 0.9rem;
 }
 .playlist-option div{
     margin-bottom: 20px;
@@ -484,7 +515,8 @@ canvas{
 }
 .option-btn{
     font-size: 1rem;
-    border-radius: 10px;
+    width: 30%;
+    border-radius: 30px;
 }
 .hidden {
     visibility: hidden;
