@@ -2,14 +2,23 @@
  * This page will contain the code controlling the entire single page application
  * If it ends up becoming too long, I may split it up into seperate sections
  */
-songs = JSON.parse(songData);
 
-// const api_url = "http://www.randyconnolly.com/funwebdev/3rd/api/music/songs-nested.php"; // The URL containing the JSON data that will be fetched
-// async function getSongs(){
-//     const response = await fetch(api_url);
-//     const data = await response.json();
-//     console.log(getSongs());
-// }
+// ===================================================== FETCHING JSON DATA FROM API ========================================================
+// This function is responsible for fetching the required data from the given API. 
+// The data for this project has been taken from (URL) and converted into a JSON format that is very similar to the one originally used in class.
+// The JSON file that I am fetching contains 900ish songs as opposed to 317 
+async function fetchData(){
+    return (await fetch("https://api.npoint.io/2c14c1644af80702e550")).json(); // Courtesy of npoint.io for hosting the JSON Data
+}
+document.addEventListener("DOMContentLoaded", async() =>{
+    let songs = "";
+    try{
+        songs = await fetchData();
+        const songsStringified = JSON.stringify(songs);
+        localStorage.setItem("songs", songsStringified);
+    } catch(error){
+        console.log(error);
+    }
 // ========================================================== SONG SEARCH PAGE ============================================================== 
 /**
  * This function loads the select inputs in the song search page. 
@@ -57,7 +66,7 @@ function getSongAttributeArray(attributeName){
     }
     return songAttributeArray;
 }
-
+/* Autocompletes the title options after the user types in a certain amount of characters*/
 function autocompleteTitles(){
     const datalistReference = this.list; // References the datalist element associated with the input
     if (this.value.length >= 2){ // Starts using autocomplete after 2 character have been typed
@@ -568,13 +577,22 @@ function getGenreEmoticon(genreName){
         "dance pop": "💃",
         "pop": "🥂",
         "canadian hip hop": "🇨🇦",
+        "canadian pop": "🇨🇦",
+        "australian pop": "🇦🇺",
         "atl hip hop": "🧨",
         "indie pop": "🧑",
         "modern rock": "🎸",
         "hip hop": "🔥",
         "emo rap": "😢",
         "folk-pop": "🌿",
+        "permanent wave": "🔮",
+        "alaska wave": "🏴󠁵󠁳󠁡󠁫󠁿",
+        "neo mellow": "🛀",
         "chicago rap": "💥",
+        "house": "🏠",
+        "french indie pop": "🇫🇷",
+        "danish pop": "🇧🇪",
+        "hollywood": "🎥",
         "grime": "🎹",
         "dfw rap": "🎤",
         "r&b": "🎷",
@@ -807,11 +825,10 @@ function resultSort(attribute, unsortedResults){
     }    
 }
 // Adds a random placholder title to the title input space when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    const titleInput = document.querySelector("#title-input");
-    const NUM_SONGS = songs.length;
-    titleInput.placeholder = `${songTitles[Math.floor(Math.random() * NUM_SONGS)]}`; // Math random -> (0-1) * NUM_SONGS = [0-317] (decimals included) -> math.floor to make value an integer
-})
+const titlePlaceholder = document.querySelector("#title-input");
+const NUM_SONGS = songs.length;
+titlePlaceholder.placeholder = `${songTitles[Math.floor(Math.random() * NUM_SONGS)]}`; // Math random -> (0-1) * NUM_SONGS = [0-317] (decimals included) -> math.floor to make value an integer
+
 // ======================================================== PLAYLIST INFO PAGE ============================================================== 
 // Note --> This section ended up being a lot more convoluted than I originally thought it would be.
 // TEMPORARY: ADD SWITCH TO PLAYLIST VIEW BUTTON
@@ -1452,3 +1469,4 @@ function setDisplay(flexBody, noBodyOne, noBodyTwo){
 function songInfoToSearchPageViewSwitch(){
     switchView("SONG_SEARCH_VIEW");
 }
+});
