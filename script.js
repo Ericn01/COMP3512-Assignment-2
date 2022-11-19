@@ -33,9 +33,12 @@ document.addEventListener("DOMContentLoaded", async() =>{
 switchView("SONG_SEARCH_VIEW");
 // Define a few global variables (will be refactored later)
 const songTitles = getSongAttributeArray("title"); // Loads all the song titles into an array
+const songArtists = [...new Set(getSongAttributeArray("artist"))]; // This ensures that there are no duplicate values in the set. 
 const titleInput = document.querySelector('#title-input');
+const artistInput = document.querySelector("#artist-input");
 const playlists = [] // empty array for now
 titleInput.addEventListener('input', autocompleteTitles);
+artistInput.addEventListener('input', autocompleteArtists);
 
 // Adding a way to switch to song search view from anywhere 
 document.querySelector("#search-view-btn").addEventListener('click', songInfoToSearchPageViewSwitch);
@@ -69,7 +72,7 @@ function getSongAttributeArray(attributeName){
             default:
         }
     }
-    return songAttributeArray;
+    return songAttributeArray; 
 }
 /* Autocompletes the title options after the user types in a certain amount of characters*/
 function autocompleteTitles(){
@@ -78,6 +81,18 @@ function autocompleteTitles(){
         const titleMatches = findMatches(this.value, songTitles);
         datalistReference.replaceChildren();
         for (let match of titleMatches){
+            let option = document.createElement('option');
+            option.textContent = match;
+            datalistReference.appendChild(option);
+        }
+    }
+}
+function autocompleteArtists(){
+    const datalistReference = this.list; // References the datalist element associated with the input
+    if (this.value.length >= 1){ // Starts using autocomplete after 1 character has been typed
+        const artistMatches = findMatches(this.value, songArtists);
+        datalistReference.replaceChildren();
+        for (let match of artistMatches){
             let option = document.createElement('option');
             option.textContent = match;
             datalistReference.appendChild(option);
@@ -190,7 +205,6 @@ function loadSelectOptions(fieldName){
 }
 // Load the select elements with data upon clicking.
 document.getElementById("genre-select").addEventListener('click', loadSelectOptions("genre"));
-document.getElementById("artist-select").addEventListener('click', loadSelectOptions("artist"));
     function populateRow(parentElement, attribute, songObj){
         const cellElement = document.createElement("td");
         if (attribute == 'artist' || attribute == 'genre'){
@@ -280,7 +294,7 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
                 searchAttribute = "title";
                 break;
             case "artist-radio":
-                pushInputValue("artist-select", searchParameters);
+                pushInputValue("artist-input", searchParameters);
                 searchAttribute = "artist";
                 break;
             case "genre-radio":
@@ -393,7 +407,7 @@ function displaySongInformation(){
  */
 function makeChart(songData){
     const analyticValues = songData[0]; // The analytics object is wrapped in an array of length 1, hence index 0 to access it
-    const labels = ['Energy', 'Danceability', 'Liveness', 'Valence', 'Acousticness', 'Speechiness'];
+    const labels = ['Energy', 'Valence', 'Liveness', 'Speechiness', 'Acousticness', 'Danceability'];
     const parentNode = document.querySelector('.chart');
     // To redraw on the canvas we must first destroy the old one. If this isn't done, JS throws an error
     const canvas = document.querySelector("#song-chart")
@@ -410,8 +424,8 @@ function makeChart(songData){
         labels: labels,
         datasets: [ {
         label: `${songData[2]}`, // Song title value
-        data: [analyticValues.energy, analyticValues.danceability, analyticValues.liveness, 
-                analyticValues.valence, analyticValues.acousticness, analyticValues.speechiness],
+        data: [analyticValues.energy, analyticValues.valence, analyticValues.liveness, 
+                analyticValues.speechiness, analyticValues.acousticness, analyticValues.danceability],
         fill: true,
         tension: 0.15,
         backgroundColor: "rgba(25, 255, 25, 0.25)",
@@ -559,7 +573,8 @@ function makeDetailsBox(songData){
     songPlaylistButton.addEventListener('click', makePopupBox);
     // Setting up the duration and genre data 
     const durationGenreBox = document.createElement("h3")
-    durationGenreBox.textContent = `${duration} | ${upperCaseFirstChar(genre)} ${getGenreEmoticon(genre)}`
+    let genreEmoticon = getGenreEmoticon(genre);
+    durationGenreBox.textContent = `${duration} | ${upperCaseFirstChar(genre)} ${genreEmoticon}`
     // Appending all the child elements
     detailsBox.appendChild(songTitleHeading);
     detailsBox.appendChild(artistNameBox);
@@ -579,15 +594,90 @@ function upperCaseFirstChar(str){
 }
 /** Associates an emoticon with the specified genre name and returns it. Simple function added for fun. */
 function getGenreEmoticon(genreName){
-    let shortenedGenre = genreName;
+    let shortenedGenre = getShortenedGenreName(genreName);
+    console.log(shortenedGenre);
+    // There could have been many ways to do this, but I feel as though this is the clearest syntatictally
+    const emotes = {
+        "dance pop": "💃",
+        "pop": "🥂",
+        "puerto rican pop": "🇵🇷",
+        "canadian": "🇨🇦",
+        "australian": "🇦🇺",
+        "argentina": "🇦🇷",
+        "germany": "🇩🇪",
+        "colombia": "🇨🇴",
+        "atl hip hop": "🧨",
+        "indie": "🧑",
+        "rock": "🎸",
+        "reggaeton": "😌",
+        "hip hop": "🔥",
+        "emo rap": "😢",
+        "folk-pop": "🌿",
+        "permanent wave": "🔮",
+        "alaska wave": "🏴󠁵󠁳󠁡󠁫󠁿",
+        "neo mellow": "🛀",
+        "house": "🏠",
+        "french indie pop": "🇫🇷",
+        "danish pop": "🇧🇪",
+        "hollywood": "🎥",
+        "grime": "🎹",
+        "rap": "🎤",
+        "r&b": "🎷",
+        "cali rap": "🏖️",
+        "melodic rap": "🎵",
+        "art pop": "🎨",
+        "brostep": "🏍️",
+        "boy band": "🎢", 
+        "alt z": "🤳",
+        "country": "🐎",
+        "latin": "🇲🇽",
+        "afro": "🦱",
+        "complextro": "🚀",
+        "dreamo": "💭",
+        "none given": "🤷‍♂️"
+    };
+    let emote = emotes[shortenedGenre];
+    if (emote === undefined){
+        emote = "";
+    }
+    return emote;
+}
+
+function getShortenedGenreName(genreName){
+    let shortenedGenre = genreName.toLowerCase();
+    // There are wayyyy too many genres to have an emoji for each one, so I'm creating a funnel of specificity to catch most cases
+    if (genreName.includes("pop")){
+        shortenedGenre = "pop";
+    }
+    if (genreName.includes("hip hop")){
+        shortenedGenre = "hip hop"
+    }
+    if (genreName.includes("dance pop")){
+        shortenedGenre = "dance pop"
+    }
+    if (genreName.includes("rap")){
+        shortenedGenre = "rap";
+    }
     if (genreName.includes("r&b")){
         shortenedGenre = "r&b";
     }
     if (genreName.includes("rock")){
         shortenedGenre = "rock";
     }
+    if (genreName.includes("country")){
+        shortenedGenre = "country";
+    }
     if (genreName.includes("rap")){
         shortenedGenre = "rap";
+    }
+    if (genreName.includes("drill")){
+        shortenedGenre = "drill";
+    }
+    if (genreName.includes("alt") || genreName.includes("indie")){
+        shortenedGenre = "alt";
+    }
+    if (genreName.includes("afro")){
+        shortenedGenre = "afro";
     }
     if (genreName.includes("canadian")){
         shortenedGenre = "canadian";
@@ -601,52 +691,13 @@ function getGenreEmoticon(genreName){
     if (genreName.includes("german") || genreName.includes("dutch")){
         shortenedGenre = "germany"
     }
+    if (genreName.includes("colombia")){
+        shortenedGenre = "colombia"
+    }
     if (genreName.includes("latin") || genreName.includes("mexico")){
         shortenedGenre = "latin";
     }
-    // There could have been many ways to do this, but I feel as though this is the clearest syntatictally
-    const emotes = {
-        "dance pop": "💃",
-        "pop": "🥂",
-        "puerto rican pop": "🇵🇷",
-        "Lgbtq+ Hip Hop": "🏳️‍🌈",
-        "canadian": "🇨🇦",
-        "australian": "🇦🇺",
-        "argentina": "🇦🇷",
-        "germany": "🇩🇪",
-        "atl hip hop": "🧨",
-        "indie pop": "🧑",
-        "rock": "🎸",
-        "reggaeton": "😌",
-        "hip hop": "🔥",
-        "emo rap": "😢",
-        "folk-pop": "🌿",
-        "permanent wave": "🔮",
-        "alaska wave": "🏴󠁵󠁳󠁡󠁫󠁿",
-        "neo mellow": "🛀",
-        "chicago rap": "💥",
-        "house": "🏠",
-        "french indie pop": "🇫🇷",
-        "danish pop": "🇧🇪",
-        "hollywood": "🎥",
-        "grime": "🎹",
-        "dfw rap": "🎤",
-        "r&b": "🎷",
-        "cali rap": "🏖️",
-        "melodic rap": "🎵",
-        "art pop": "🎨",
-        "brostep": "🏍️",
-        "boy band": "🎢", 
-        "alt z": "🤳",
-        "contemporary country": "🐎",
-        "latin": "🇲🇽",
-        "afroswing": "🦱",
-        "complextro": "🚀",
-        "nyc rap": "🍎",
-        "none given": "🤷‍♂️"
-    };
-    const emote = emotes[shortenedGenre];
-    return emote;
+    return shortenedGenre;
 }
 
 /**
@@ -870,6 +921,8 @@ function resultSort(attribute, unsortedResults){
 const titlePlaceholder = document.querySelector("#title-input");
 const NUM_SONGS = songs.length;
 titlePlaceholder.placeholder = `${songTitles[Math.floor(Math.random() * NUM_SONGS)]}`; // Math random -> (0-1) * NUM_SONGS = [0-317] (decimals included) -> math.floor to make value an integer
+const artistPlaceholder = document.querySelector("#artist-input");
+artistPlaceholder.placeholder = `${songArtists[Math.floor(Math.random() * songArtists.length)]}`;
 
 // ======================================================== PLAYLIST INFO PAGE ============================================================== 
 // Note --> This section ended up being a lot more convoluted than I originally thought it would be.
@@ -1237,10 +1290,9 @@ function removePlaylistAction(){
     );
 }
 function removePlaylist(playlistName){
-
     for (let i = 0; i < playlists.length; i++){
         if (playlists[i].name === playlistName){
-            playlists.splice(i,i + 1);
+            playlists.splice(i,i);
             break;
         }
     }

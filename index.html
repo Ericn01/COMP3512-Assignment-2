@@ -34,8 +34,9 @@
                     </div>
                     <div class="input-container">
                         <input type="radio" name="search-radio" id="artist-radio"/>
-                        <label for="artist-select"> Artist </label>
-                        <select class='select-input' id="artist-select">
+                        <input type="text" name="artist-input" id="artist-input" list="artist-autocomplete-results" autocomplete="off"> 
+                        <datalist id="artist-autocomplete-results"></datalist>
+                        <label for="artist-input"> Artist </label>
                         </select>
                     </div>
                     <div class="input-container">
