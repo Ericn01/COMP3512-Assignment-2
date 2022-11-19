@@ -6,18 +6,23 @@
 // ===================================================== FETCHING JSON DATA FROM API ========================================================
 // This function is responsible for fetching the required data from the given API. 
 // The data for this project has been taken from (URL) and converted into a JSON format that is very similar to the one originally used in class.
-// The JSON file that I am fetching contains 900ish songs as opposed to 317 
+// The JSON file that I am fetching contains 2300ish songs as opposed to only 317 
 async function fetchData(){
-    return (await fetch("https://api.npoint.io/2c14c1644af80702e550")).json(); // Courtesy of npoint.io for hosting the JSON Data
+    return (await fetch("https://api.npoint.io/754241399347bc042cba")).json(); // Courtesy of npoint.io for hosting the JSON Data
 }
 document.addEventListener("DOMContentLoaded", async() =>{
-    let songs = "";
-    try{
-        songs = await fetchData();
-        const songsStringified = JSON.stringify(songs);
-        localStorage.setItem("songs", songsStringified);
-    } catch(error){
-        console.log(error);
+    let songs = getLocalStorage();
+    function getLocalStorage(){
+        return JSON.parse(localStorage.getItem('songs')) || "";
+    }
+    if (songs == ""){
+        try{
+            songs = await fetchData();
+            const songsStringified = JSON.stringify(songs);
+            localStorage.setItem('songs', songsStringified);
+        } catch(error){
+            console.log(error);
+        }
     }
 // ========================================================== SONG SEARCH PAGE ============================================================== 
 /**
@@ -364,6 +369,7 @@ document.getElementById("artist-select").addEventListener('click', loadSelectOpt
                 songAttributes.push(song['title']);
                 songAttributes.push(song['artist']);
                 songAttributes.push(song['genre']);
+                songAttributes.push(song['year']);
                 break;
             }
         }
@@ -508,14 +514,14 @@ function getSongAnalyticAverages(){
 const songAnalyticsAverageValues = getSongAnalyticAverages(); 
 
 function makeSongInformation(songData){
-    const bpm = songData[1].bpm; const bpmRanking = findRanking(bpm,"bpm");
-    const popularity = songData[1].popularity; const popularityRanking = findRanking(popularity, "popularity");
-    const energy = songData[0].energy; const energyRanking = findRanking(energy, "energy");
-    const valence = songData[0].valence; const valenceRanking = findRanking(valence, "valence");
-    const acousticness = songData[0].acousticness; const acousticnessRanking = findRanking(acousticness, "acousticness");
-    const speechiness = songData[0].speechiness; const speechinessRanking = findRanking(speechiness, "speechiness");
-    const liveness = songData[0].liveness; const livenessRanking = findRanking(liveness, "liveness");
-    const danceability = songData[0].danceability; const danceabilityRanking = findRanking(danceability, "danceability");
+    const bpm = Math.round(songData[1].bpm, 0); const bpmRanking = findRanking(bpm,"bpm");
+    const popularity = Math.round(songData[1].popularity); const popularityRanking = findRanking(popularity, "popularity");
+    const energy = Math.round(songData[0].energy); const energyRanking = findRanking(energy, "energy");
+    const valence = Math.round(songData[0].valence); const valenceRanking = findRanking(valence, "valence");
+    const acousticness = Math.round(songData[0].acousticness); const acousticnessRanking = findRanking(acousticness, "acousticness");
+    const speechiness = Math.round(songData[0].speechiness); const speechinessRanking = findRanking(speechiness, "speechiness");
+    const liveness = Math.round(songData[0].liveness); const livenessRanking = findRanking(liveness, "liveness");
+    const danceability = Math.round(songData[0].danceability); const danceabilityRanking = findRanking(danceability, "danceability");
     makeDetailsBox(songData)    
     const headings = ["BPM 🏃", "Popularity 📈", "Energy 🔋", "Valence 😃", "Acousticness 🎶", 
     "Speechiness 👄", "Liveness ✨", "Danceability 🕺"]
@@ -533,10 +539,11 @@ function makeDetailsBox(songData){
         detailsBox.textContent = "";
     }
     // Song title heading setup
-    const title = songData[2];
+    const title = songData[2]; // The song's title
+    const year = songData[5]; // The song's release date 
     const songTitleHeading = document.createElement("h1");
     songTitleHeading.className = 'song-title'; 
-    songTitleHeading.textContent = abbreviateSongTitle(title);
+    songTitleHeading.textContent = `${abbreviateSongTitle(title)} (${year})`;
     // Artist name setup
     const artist = songData[3]['name'];
     const artistNameBox = document.createElement("h3");
@@ -572,16 +579,45 @@ function upperCaseFirstChar(str){
 }
 /** Associates an emoticon with the specified genre name and returns it. Simple function added for fun. */
 function getGenreEmoticon(genreName){
+    let shortenedGenre = genreName;
+    if (genreName.includes("r&b")){
+        shortenedGenre = "r&b";
+    }
+    if (genreName.includes("rock")){
+        shortenedGenre = "rock";
+    }
+    if (genreName.includes("rap")){
+        shortenedGenre = "rap";
+    }
+    if (genreName.includes("canadian")){
+        shortenedGenre = "canadian";
+    }
+    if (genreName.includes("australian") || genreName.includes("aussie")){
+        shortenedGenre = "australian";
+    }
+    if (genreName.includes('argentin')){
+        shortenedGenre = 'argentina'
+    }
+    if (genreName.includes("german") || genreName.includes("dutch")){
+        shortenedGenre = "germany"
+    }
+    if (genreName.includes("latin") || genreName.includes("mexico")){
+        shortenedGenre = "latin";
+    }
     // There could have been many ways to do this, but I feel as though this is the clearest syntatictally
     const emotes = {
         "dance pop": "💃",
         "pop": "🥂",
-        "canadian hip hop": "🇨🇦",
-        "canadian pop": "🇨🇦",
-        "australian pop": "🇦🇺",
+        "puerto rican pop": "🇵🇷",
+        "Lgbtq+ Hip Hop": "🏳️‍🌈",
+        "canadian": "🇨🇦",
+        "australian": "🇦🇺",
+        "argentina": "🇦🇷",
+        "germany": "🇩🇪",
         "atl hip hop": "🧨",
         "indie pop": "🧑",
-        "modern rock": "🎸",
+        "rock": "🎸",
+        "reggaeton": "😌",
         "hip hop": "🔥",
         "emo rap": "😢",
         "folk-pop": "🌿",
@@ -605,10 +641,14 @@ function getGenreEmoticon(genreName){
         "contemporary country": "🐎",
         "latin": "🇲🇽",
         "afroswing": "🦱",
+        "complextro": "🚀",
+        "nyc rap": "🍎",
+        "none given": "🤷‍♂️"
     };
-    const emote = emotes[genreName];
+    const emote = emotes[shortenedGenre];
     return emote;
 }
+
 /**
  * Converts a number of seconds into a formatted M:SS date
  * @param {} seconds the number of seconds to convert
@@ -698,21 +738,23 @@ function getAttributeContext(attribute, data, index){
  * @returns 
  */
 function progressBarColor(value){
+    const rankingPercent = (value / NUM_SONGS) * 100;
     let color = "#ff0d0d";
-    if (value >= 260){
-        color = "#69b34c";
+    if (rankingPercent <= 15.0){
+        color = '#ff4e11';
     }
-    else if (value >= 210 && value < 260){
-        color = '#abc334';
-    }
-    else if (value >= 150 && value < 210){
-        color = '#fab733';
-    }
-    else if (value >= 100 && value < 150){
+    else if (rankingPercent >= 15.0 && rankingPercent < 35.0){
         color = "#ff8e15";
     }
-    else if (value >= 50 && value < 100){
-        color = '#ff4e11';
+    else if (rankingPercent >= 35.0 && rankingPercent < 65.0){
+        color = '#fab733';
+    }
+    else if (rankingPercent >= 65.0 && rankingPercent < 85.0){
+        color = '#abc334';
+
+    }
+    else if (rankingPercent >= 85.0 && rankingPercent <= 100.0){
+        color = "#69b34c";
     }
     return color;
 }
