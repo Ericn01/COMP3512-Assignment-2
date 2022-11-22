@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Zen+Antique&display=swap');
-/*@import url('https://fonts.googleapis.com/css2?family=Trispace:wght@300&display=swap');*/
 /* Imported styles */
 
 /* Page variables (all colors used will be in here) */
@@ -135,6 +134,19 @@ input::-webkit-inner-spin-button {
 a:visited{
     color: white;
 }
+.sort-container{
+    display: flex;
+    flex-direction: column;
+    width: 25px;
+    margin-left: 15px;
+    justify-content: center;
+}
+tr{
+    vertical-align: middle;
+}
+.sort-container span{
+    padding: 0px;
+}
 .results-table th{
     text-shadow: 0.35px 0.35px black;
 }
@@ -181,7 +193,6 @@ tr:nth-child(odd){
     background-color: var(--contrasting-color);
 }
 th{
-    top: -12px; /* For some reason I had to put a negative value in so that the header wouldn't have a gap between itself and the top of the table */
     padding: 0.8rem 1rem;
     position: sticky;
     font-size: 1.075rem;
@@ -208,7 +219,7 @@ label{
     font-size: 1.1rem;
 }
 .sort{
-    margin-left: 10px;
+
     font-size: 20px;
     cursor: pointer;
 }
@@ -388,13 +399,22 @@ canvas{
 }
 
 .playlist-list{
-    padding: 15px 0px;
-    max-height: 500px;
+    padding: 15px 10px;
+    max-height: 330px;
+    gap: 15px;
+    display: grid;
+    align-items:start;
+    align-content: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     overflow-y: scroll;
     -ms-overflow-style: none;
+    text-align: center;
     scrollbar-width: none; 
 }
 .playlist-list h1{
+    margin: 0px;
+    margin-bottom: 10px;
+    grid-column: span 2;
     font-size: 1.8rem;
 }
 .playlist-option{
@@ -449,13 +469,14 @@ canvas{
 .playlist-option div{
     margin-bottom: 20px;
 }
+
 .playlist-list h4{
-    border-radius: 12px;;
-    background-color: var(--contrasting-color);
     font-size: 1rem;
-    margin: 15px 25%;
-    padding: 12px 15px;
-    text-align: left;;
+    border-radius: 12px;
+    margin: 0px;
+    background-color: var(--contrasting-color);
+    padding: 15px 18px;
+    text-align: center;
     list-style-type: none;
     box-shadow: 2px 2px 3px black;
 }
@@ -587,7 +608,7 @@ footer li{
     .playlist-selections{
         margin: auto;
         max-width: none;
-        width: 60%;
+        width: 75%;
     }
     .playlist-list div{
         margin: 20px auto;

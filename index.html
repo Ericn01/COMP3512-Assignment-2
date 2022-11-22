@@ -10,6 +10,7 @@
     <title> Search Top Spotify Songs! </title>
     <link rel="icon" type="image/x-icon" href="favicon.ico"/>
     <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <script type="text/javascript" src="script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -64,8 +65,8 @@
                         </div>
                     </div>
                     <div class="button-container"> 
-                        <button type="clear" class="form-btn" id="clear-btn"> Clear </button>
-                        <button type="submit" class="form-btn" id="submit-btn"> Filter </button>
+                        <button type="clear" class="form-btn" id="clear-btn"> <span> Clear </span> 🔃</button>
+                        <button type="submit" class="form-btn" id="submit-btn"> Filter <span id="magnifying-glass-emoji"> 🔍 </span> </button>
                     </div>
                 </form>
             </div>
@@ -74,11 +75,35 @@
                 <table class="results-table">
                     <thead> 
                         <tr> 
-                            <th> Title <span id="magnifying-glass-emoji"> 🔍 </span> <span class="sort" id="title-sort" title="Sort by title">▾</span></th>
-                            <th> Artist <span class="sort" id="artist-sort" title="Sort by artist name">▾</span></th>
-                            <th> Year <span class="sort" id="year-sort" title="Sort by year (default)">▾</span></th>
-                            <th> Genre <span class="sort" id="genre-sort" title="Sort by genre">▾</span></th>
-                            <th> Popularity <span class="sort" id="popularity-sort" title="Sort by popularity">▾</span></th>    
+                            <th> Title 
+                                <span class="sort-container"> 
+                                    <span class="sort" id="title-sort-desc" title="Title sort in descending order">▴</span> 
+                                    <span class="sort" id="title-sort-asc" title="Title sort in ascending order">▾</span> 
+                                </span>
+                            </th>
+                            <th> Artist
+                                <span class="sort-container"> 
+                                    <span class="sort" id="artist-sort-desc" title="Artist sort in descending order">▴</span> 
+                                    <span class="sort" id="artist-sort-asc" title="Artist sort in ascending order">▾</span> 
+                                </span> 
+                            <th> Year 
+                                <span class="sort-container"> 
+                                    <span class="sort" id="year-sort-desc" title="Year sort in descending order">▴</span> 
+                                    <span class="sort" id="year-sort-asc" title="Year sort in ascending order">▾</span> 
+                                </span> 
+                            </th>
+                            <th> Genre 
+                                <span class="sort-container"> 
+                                    <span class="sort" id="genre-sort-desc" title="Genre sort in descending order">▴</span> 
+                                    <span class="sort" id="genre-sort-asc" title="Genre sort in ascending order">▾</span> 
+                                </span> 
+                            </th>
+                            <th> Popularity 
+                                <span class="sort-container"> 
+                                    <span class="sort" id="popularity-sort-desc" title="Popularity sort in descending order">▴</span> 
+                                    <span class="sort" id="popularity-sort-asc" title="Popularity sort in ascending order">▾</span> 
+                                </span> 
+                            </th>    
                         </tr>
                     </thead>
                     <tbody id="results-body">
@@ -137,7 +162,7 @@
                                 <br><br>
                                 <label for="num-songs-range"> Number of Songs </label>
                                     <br>
-                                    <label>1 </label> <input type="range" name='num-songs-range' id="num-songs-range" min="1" max="50" value="8"> <label>50</label>
+                                    <label>1 </label> <input type="range" name='num-songs-range' id="num-songs-range" min="1" max="50" value="10"> <label>50</label>
                             </div>
                         </div>
                             <button class="action-btn"> Submit </button>
@@ -151,6 +176,7 @@
                                 </select>
                             </div>
                             <button class="action-btn"> Submit </button>
+                            <div class="remove-message"> </div>
                         </div>
                     </div>
                 </div>
@@ -170,6 +196,4 @@
             <li> Eric Nielsen, 2022 </li>
         </ul>
     </footer>
-    <script type="text/javascript" src="songs.json"></script>
-    <script type='text/javascript' src='script.js'></script>
     </html>

@@ -1,8 +1,8 @@
 /**
- * This page will contain the code controlling the entire single page application
- * If it ends up becoming too long, I may split it up into seperate sections
+* Course: COMP3512 (Web Development II)
+* Author: Eric Nielsen
+* Date: November 22, 2022
  */
-
 // ===================================================== FETCHING JSON DATA FROM API ========================================================
 // This function is responsible for fetching the required data from the given API. 
 // The data for this project has been taken from (URL) and converted into a JSON format that is very similar to the one originally used in class.
@@ -24,6 +24,66 @@ document.addEventListener("DOMContentLoaded", async() =>{
             console.log(error);
         }
     }
+// ===================================================== MISCELLANEOUS FUNCTIONS ============================================================
+const NUM_SONGS = songs.length;
+/* 
+*  Modifies the first character of every word in a string such that it is in uppercase form
+*  Essentially has the same functionality as python's title() function.
+*/
+function upperCaseFirstChar(str){
+    const stringArray = str.split(" ");
+    let upperCaseFirstCharString = "";
+    for (let elem of stringArray){
+        upperCaseFirstCharString += (elem[0].toUpperCase() + elem.substring(1)) + " ";
+    }
+    return upperCaseFirstCharString;
+}
+/* Some of the songs in the JSON file have ridiculously long names due to the added parentheses that include unnecessary info 
+*  This function will be used to remove the parentheses on songs that have the stated problem.
+*/
+function abbreviateSongTitle(songTitle){
+    let shortenedTitle = "";
+    const regex = /\([\w\d\s]+\)/i; // I made this regex specifically for this case - matches to parentheses and all the text within it
+    songTitle.length >= 35 && songTitle.includes('(') ? shortenedTitle = songTitle.replace(regex, "...") : shortenedTitle = songTitle // Removes the matched text if the title is greater than 40 chars and matches the given regular expression
+    return shortenedTitle;
+}
+/**
+ * Converts a number of seconds into a formatted M:SS date
+ * @param {} seconds the number of seconds to convert
+ * @returns the formatted duration string
+ */
+function secondsToMin(seconds){
+    let minutesNum = seconds / 60; // M.S...
+    if (String(minutesNum).length === 1) {return minutesNum + ":00"}; // Condition if the seconds value is a multiple of 60.
+    let secondsNum = String(minutesNum).substring(1) * 60;
+    secondsNum < 10 ? secondsNum = "0" + String(Math.round(secondsNum, 0)) : secondsNum; // Appends a 0 to the start of values that are less than 10 
+    return `${String(minutesNum).substring(0,1)}:${String(secondsNum).substring(0,2)} minutes`;
+}
+/* Autocompletes the title options after the user types in a certain amount of characters*/
+function autocompleteTitles(){
+    const datalistReference = this.list; // References the datalist element associated with the input
+    if (this.value.length >= 2){ // Starts using autocomplete after 2 character have been typed
+        const titleMatches = findMatches(this.value, songTitles);
+        datalistReference.replaceChildren();
+        for (let match of titleMatches){
+            let option = document.createElement('option');
+            option.textContent = match;
+            datalistReference.appendChild(option);
+        }
+    }
+}
+/* Simple function that checks to see if the current user input string matches any of the song titles in the JSON file */
+function findMatches(word, titles){
+    const currentMatches = [];
+    for(let title of titles){
+        let stringTitle = String(title).toLowerCase(); // Includes function is casensitive so the word and string must have the same casing when compared
+        if (stringTitle.includes(word.toLowerCase())){
+            currentMatches.push(title);
+        }
+    }
+    return currentMatches; // returns a sorted array of song matches
+}
+
 // ========================================================== SONG SEARCH PAGE ============================================================== 
 /**
  * This function loads the select inputs in the song search page. 
@@ -36,13 +96,16 @@ const songTitles = getSongAttributeArray("title"); // Loads all the song titles 
 const songArtists = [...new Set(getSongAttributeArray("artist"))]; // This ensures that there are no duplicate values in the set. 
 const titleInput = document.querySelector('#title-input');
 const artistInput = document.querySelector("#artist-input");
-const playlists = [] // empty array for now
+// Adding event listeners to autocomplete these text inputs
 titleInput.addEventListener('input', autocompleteTitles);
 artistInput.addEventListener('input', autocompleteArtists);
 
 // Adding a way to switch to song search view from anywhere 
 document.querySelector("#search-view-btn").addEventListener('click', songInfoToSearchPageViewSwitch);
-
+/* Switches the view from the song info page to the search page */
+function songInfoToSearchPageViewSwitch(){
+    switchView("SONG_SEARCH_VIEW");
+}
 // This function fills an array with the given attribute of a song in the json file and returns it.
 // For the moment the supported attributes are 
 function getSongAttributeArray(attributeName){
@@ -74,19 +137,7 @@ function getSongAttributeArray(attributeName){
     }
     return songAttributeArray; 
 }
-/* Autocompletes the title options after the user types in a certain amount of characters*/
-function autocompleteTitles(){
-    const datalistReference = this.list; // References the datalist element associated with the input
-    if (this.value.length >= 2){ // Starts using autocomplete after 2 character have been typed
-        const titleMatches = findMatches(this.value, songTitles);
-        datalistReference.replaceChildren();
-        for (let match of titleMatches){
-            let option = document.createElement('option');
-            option.textContent = match;
-            datalistReference.appendChild(option);
-        }
-    }
-}
+
 function autocompleteArtists(){
     const datalistReference = this.list; // References the datalist element associated with the input
     if (this.value.length >= 1){ // Starts using autocomplete after 1 character has been typed
@@ -98,18 +149,6 @@ function autocompleteArtists(){
             datalistReference.appendChild(option);
         }
     }
-}
-
-/* Simple function that checks to see if the current user input string matches any of the song titles in the JSON file */
-function findMatches(word, titles){
-    const currentMatches = [];
-    for(let title of titles){
-        let stringTitle = String(title).toLowerCase(); // Includes function is casensitive so the word and string must have the same casing when compared
-        if (stringTitle.includes(word.toLowerCase())){
-            currentMatches.push(title);
-        }
-    }
-    return currentMatches.sort(); // returns a sorted array of song matches
 }
 
 /* Add a event listener to every radio button */
@@ -133,12 +172,11 @@ function disableInputs(){
         }
     }
 }
-
 // Defines the behavior of the given input depending on the state that is passed (enabled or disabled)
 function disableEnableInputBehavior(input, state){
     if (state == 'disabled'){
         input.style.color = 'gray';
-        input.style.backgroundColor = 'rgba(0,0,0,0.035)';
+        input.style.backgroundColor = 'rgba(0,0,0,0.050)';
         input.disabled = true;
     }
     else if (state == 'enabled'){
@@ -192,7 +230,7 @@ function loadSelectOptions(fieldName){
             let optionText = upperCaseFirstChar(currentSong[field]["name"]);
             if (!fieldContainer.includes(optionText)){ // Ensures that there are no duplicates 
                 fieldContainer.push(optionText);
-                let optionValue = currentSong[field]["name"];
+                let optionValue = currentSong[field]["name"]; 
                 const songOption = document.createElement("option");
                 songOption.style.color = 'black'; // Able to see the select options
                 songOption.text = fieldContainer[fieldContainer.length - 1]; // adds the element that we just pushed into the array
@@ -203,13 +241,12 @@ function loadSelectOptions(fieldName){
         
     }
 }
-// Load the select elements with data upon clicking.
-document.getElementById("genre-select").addEventListener('click', loadSelectOptions("genre"));
+    // Load the select elements with data upon clicking.
+    document.querySelector("#genre-select").addEventListener('click', loadSelectOptions("genre"));
     function populateRow(parentElement, attribute, songObj){
         const cellElement = document.createElement("td");
         if (attribute == 'artist' || attribute == 'genre'){
-            subattribute = 'name'; 
-            cellElement.textContent = upperCaseFirstChar(songObj[attribute][subattribute]);
+            cellElement.textContent = upperCaseFirstChar(songObj[attribute]['name']);
         }
         else if (attribute == 'details'){
             cellElement.textContent = songObj[attribute]['popularity'] + "%";
@@ -217,8 +254,11 @@ document.getElementById("genre-select").addEventListener('click', loadSelectOpti
         else{
             if (attribute == 'title'){
                 cellElement.value = songObj["song_id"];
+                cellElement.textContent = abbreviateSongTitle(String(songObj['title']));
             }
-            cellElement.textContent = songObj[attribute];
+            else{ 
+                cellElement.textContent = songObj[attribute];
+            }
         }
         cellElement != 'details' ? cellElement.className = attribute : cellElement.className = 'popularity'; // setting the class name of the cell element
         parentElement.appendChild(cellElement);
@@ -240,12 +280,18 @@ document.getElementById("genre-select").addEventListener('click', loadSelectOpti
         }
         trackResults(); // This function adds an event listener to all the title elements from our search results
     }
+    // Table "link" click 
+    function trackResults(){
+        let tableLinks = document.querySelectorAll(".title"); // NodeList of all titles
+        for (let link of tableLinks){
+            link.addEventListener('click', displaySongInformation);
+        }
+    }
     populateSongs(songs);
     document.querySelector("#clear-btn").addEventListener("click", (e) => {
         e.preventDefault();
         for (let input of inputs){
             if (input.type !== 'select-one'){
-                console.log(true);
                 input.textContent = "";
             }
         }
@@ -324,15 +370,23 @@ document.getElementById("genre-select").addEventListener('click', loadSelectOpti
         const searchResults = findResults(searchParameters, searchAttribute, songs); // Returns the results of the search query
         return searchResults;
     }
+    /* Displays the search results */
     function displayResults(){
         const searchResults = getSearchResults();
         populateSongs(searchResults);
     }
+    /**
+     * Finds and returns the results of a search on the JSON file based on the given parameters
+     * @param {*} valuesArr the array containing the search parameter values
+     * @param {*} searchAttribute the attribute that the file is being searched by
+     * @param {*} songObj the object that is being parsed through
+     * @returns an array of song objects that meet the given criteria 
+     */
     function findResults(valuesArr, searchAttribute, songObj){
         const results = [];
         const userValue = valuesArr[0];
         // Loop through the song objects array
-        for (song of songObj){
+        for (let song of songObj){
             if (searchAttribute == 'title' && String(song['title']).toLowerCase().includes(userValue.toLowerCase())){ // Includes function is case sensitive!
                     results.push(song);
                 }
@@ -373,22 +427,69 @@ document.getElementById("genre-select").addEventListener('click', loadSelectOpti
         }
         return results;
     }
-    function getSongAttributes(id){
-        let songId = id; // the value of the link element (song id)
-        const songAttributes = [];
-        for (song of songs){
-            if (songId === song['song_id']){ // Linear search through the songs object to see if the link id is equal to the current song id
-                songAttributes.push(song['analytics']); // Retrieves the analytics of the given song. 
-                songAttributes.push(song['details']); // Retrieves addional details of the song.
-                songAttributes.push(song['title']);
-                songAttributes.push(song['artist']);
-                songAttributes.push(song['genre']);
-                songAttributes.push(song['year']);
-                break;
-            }
-        }
-        return songAttributes;
+// Receive all of the sort buttons, and add an event listener to sort them.
+const sortButtons = document.querySelectorAll(".sort");
+for (let i =0; i < sortButtons.length; i++){
+    sortButtons[i].addEventListener('click', sortTableByAttribute);
+}
+// Sorts the table by the given attribute 
+function sortTableByAttribute(){
+    // The attribute that we are sorting by
+    const attribute = this.id;
+    styleSortButton(this) // reference to the button we pressed.
+    const changedAttribute = attribute.substring(0, attribute.match(/[-][\w]{1,}/i).index);
+    const sortOrder = getSortOrder(attribute);
+    // First and foremost we need to receive the search results.
+    const results = getSearchResults();
+    const sortedResults = resultSort(changedAttribute, results, sortOrder);
+    populateSongs(sortedResults);
+}
+function styleSortButton(sortBtn){
+    const sortOrder = getSortOrder(sortBtn.id);
+    if (sortOrder == 'ascending'){
+        sortBtn.style.color = "#228c22";
     }
+    else{
+        sortBtn.style.color = "#ec9706";
+    }
+    for (btn of sortButtons){
+        if (btn.id !== sortBtn.id){
+            btn.style.color = "white";
+        }
+    }
+}
+function getSortOrder(sortId){
+    return sortId.includes("desc") ? sortOrder = 'descending' : sortOrder = 'ascending';
+}
+/* Sorts the search table based on the attribute that is clicked*/
+function resultSort(attribute, unsortedResults, order){
+    let sortedResults = ""
+    if (attribute === 'year'){
+        sortedResults = unsortedResults.sort((a, b) => a['year'] - b['year']); 
+    }
+    else if (attribute === 'popularity'){
+        sortedResults = unsortedResults.sort((a,b) => a['details']['popularity'] - b['details']['popularity']);
+    }
+    else if (attribute === 'genre' || attribute === 'artist'){
+        sortedResults = unsortedResults.sort((a,b) => a[attribute]['name'].localeCompare(b[attribute]['name']));
+    }
+    else if (attribute === 'title'){
+        sortedResults = unsortedResults.sort((a,b) => String(a[attribute]).localeCompare(String(b[attribute]))); // the few titles that are encoded as numbers gave me quite a headache with this one...
+    }
+    else{
+        console.log("error occured while sorting - attribute does not exist");
+        return;
+    }  
+    return order == 'ascending' ? sortedResults : sortedResults.reverse(); // If the user selected ascending order, then return the ascended sorted results, else return the reverse
+}
+
+// Adds a random placholder title to the title input space when the page loads
+const titlePlaceholder = document.querySelector("#title-input");
+titlePlaceholder.placeholder = `${songTitles[Math.floor(Math.random() * songs.length)]}`; // Math random -> (0-1) * number of songs (decimals included) -> math.floor to make value an integer
+const artistPlaceholder = document.querySelector("#artist-input");
+artistPlaceholder.placeholder = `${songArtists[Math.floor(Math.random() * songArtists.length)]}`;
+
+// ================================================================== END OF SECTION =======================================================================
 
 // ======================================================== SONG INFORMATION PAGE =========================================================== 
 /**
@@ -399,7 +500,24 @@ function displaySongInformation(){
     const songData = getSongAttributes(id);
     switchView("SONG_INFORMATION_VIEW"); // Switches the view 
     makeSongInformation(songData);
-    makeChart(songData);   
+    makeChart(songData); 
+}
+/* Returns an array of song attributes*/
+function getSongAttributes(id){
+        let songId = id; // the value of the link element (song id)
+        const songAttributes = [];
+        for (let song of songs){
+            if (songId === song['song_id']){ // Linear search through the songs object to see if the link id is equal to the current song id
+                songAttributes.push(song['analytics']); // Retrieves the analytics of the given song. 
+                songAttributes.push(song['details']); // Retrieves addional details of the song.
+                songAttributes.push(song['title']);
+                songAttributes.push(song['artist']);
+                songAttributes.push(song['genre']);
+                songAttributes.push(song['year']);
+                break;
+            }
+        }
+    return songAttributes;
 }
 /**
  * This function draws a radar chart that displays the song's analytics data.
@@ -419,7 +537,6 @@ function makeChart(songData){
     parentNode.appendChild(newCanvas);
     const ctx = newCanvas.getContext('2d');
     // Default comparison song values
-    const cSongData = songs[0]['analytics']
     const data = {
         labels: labels,
         datasets: [ {
@@ -506,8 +623,8 @@ function makeChart(songData){
     }
     }); 
 }
+/* Calculates and returns the average of */
 function getSongAnalyticAverages(){
-    const NUM_SONGS = songs.length;
     const analyticAverages = new Array(6).fill(0); // Creates an array of length 6 with values 0
     for (let i = 0; i < NUM_SONGS; i++){
         const songAnalytics = Object.values(songs[i]['analytics']); // Analytics array containing values of current song object 
@@ -520,13 +637,13 @@ function getSongAnalyticAverages(){
     let count = 0;
     while (count < analyticAverages.length){ // Haven't used a while loop for a while, just felt like using it now :)
         analyticAverages[count] /= NUM_SONGS;
-        analyticAverages[count] = Math.ceil(analyticAverages[count]);
+        analyticAverages[count] = Math.round(analyticAverages[count], 1);
         count++;
     }
     return analyticAverages;
 }
 const songAnalyticsAverageValues = getSongAnalyticAverages(); 
-
+/* Generates the markup for displaying song information */
 function makeSongInformation(songData){
     const bpm = Math.round(songData[1].bpm, 0); const bpmRanking = findRanking(bpm,"bpm");
     const popularity = Math.round(songData[1].popularity); const popularityRanking = findRanking(popularity, "popularity");
@@ -546,6 +663,7 @@ function makeSongInformation(songData){
         makeAnalyticsBoxMarkup(headings[i], analyticsRanking[i], analytics, dataBoxes[i]);
     }
 }
+
 function makeDetailsBox(songData){
     const detailsBox = document.querySelector(".song-details");
     detailsBox.id = 'details-box'
@@ -557,7 +675,7 @@ function makeDetailsBox(songData){
     const year = songData[5]; // The song's release date 
     const songTitleHeading = document.createElement("h1");
     songTitleHeading.className = 'song-title'; 
-    songTitleHeading.textContent = `${abbreviateSongTitle(title)} (${year})`;
+    songTitleHeading.textContent = `${title} (${year})`;
     // Artist name setup
     const artist = songData[3]['name'];
     const artistNameBox = document.createElement("h3");
@@ -581,21 +699,9 @@ function makeDetailsBox(songData){
     detailsBox.appendChild(durationGenreBox);
     detailsBox.appendChild(songPlaylistButton);
 }
-/* Modifies the first character of every word in a string such that it is in uppercase form
-*  Essentially has the same functionality as python's title() function.
-*/
-function upperCaseFirstChar(str){
-    const stringArray = str.split(" ");
-    let upperCaseFirstCharString = "";
-    for (elem of stringArray){
-        upperCaseFirstCharString += (elem[0].toUpperCase() + elem.substring(1)) + " ";
-    }
-    return upperCaseFirstCharString;
-}
 /** Associates an emoticon with the specified genre name and returns it. Simple function added for fun. */
 function getGenreEmoticon(genreName){
     let shortenedGenre = getShortenedGenreName(genreName);
-    console.log(shortenedGenre);
     // There could have been many ways to do this, but I feel as though this is the clearest syntatictally
     const emotes = {
         "dance pop": "💃",
@@ -606,6 +712,7 @@ function getGenreEmoticon(genreName){
         "argentina": "🇦🇷",
         "germany": "🇩🇪",
         "colombia": "🇨🇴",
+        "italian": "🇮🇹",
         "atl hip hop": "🧨",
         "indie": "🧑",
         "rock": "🎸",
@@ -648,69 +755,43 @@ function getShortenedGenreName(genreName){
     // There are wayyyy too many genres to have an emoji for each one, so I'm creating a funnel of specificity to catch most cases
     if (genreName.includes("pop")){
         shortenedGenre = "pop";
-    }
-    if (genreName.includes("hip hop")){
+    }if (genreName.includes("hip hop")){
         shortenedGenre = "hip hop"
-    }
-    if (genreName.includes("dance pop")){
+    }if (genreName.includes("dance pop")){
         shortenedGenre = "dance pop"
-    }
-    if (genreName.includes("rap")){
+    }if (genreName.includes("rap")){
         shortenedGenre = "rap";
-    }
-    if (genreName.includes("r&b")){
+    }if (genreName.includes("r&b")){
         shortenedGenre = "r&b";
     }
     if (genreName.includes("rock")){
         shortenedGenre = "rock";
-    }
-    if (genreName.includes("country")){
+    }if (genreName.includes("country")){
         shortenedGenre = "country";
-    }
-    if (genreName.includes("rap")){
+    }if (genreName.includes("rap")){
         shortenedGenre = "rap";
-    }
-    if (genreName.includes("drill")){
+    }if (genreName.includes("drill")){
         shortenedGenre = "drill";
-    }
-    if (genreName.includes("alt") || genreName.includes("indie")){
+    }if (genreName.includes("alt") || genreName.includes("indie")){
         shortenedGenre = "alt";
-    }
-    if (genreName.includes("afro")){
+    }if (genreName.includes("afro")){
         shortenedGenre = "afro";
-    }
-    if (genreName.includes("canadian")){
+    }if (genreName.includes("canadian")){
         shortenedGenre = "canadian";
-    }
-    if (genreName.includes("australian") || genreName.includes("aussie")){
+    }if (genreName.includes("itali")){
+        shortenedGenre = 'italian';
+    }if (genreName.includes("australian") || genreName.includes("aussie")){
         shortenedGenre = "australian";
-    }
-    if (genreName.includes('argentin')){
+    }if (genreName.includes('argentin')){
         shortenedGenre = 'argentina'
-    }
-    if (genreName.includes("german") || genreName.includes("dutch")){
+    }if (genreName.includes("german") || genreName.includes("dutch")){
         shortenedGenre = "germany"
-    }
-    if (genreName.includes("colombia")){
+    }if (genreName.includes("colombia")){
         shortenedGenre = "colombia"
-    }
-    if (genreName.includes("latin") || genreName.includes("mexico")){
+    }if (genreName.includes("latin") || genreName.includes("mexico")){
         shortenedGenre = "latin";
     }
     return shortenedGenre;
-}
-
-/**
- * Converts a number of seconds into a formatted M:SS date
- * @param {} seconds the number of seconds to convert
- * @returns the formatted duration string
- */
-function secondsToMin(seconds){
-    minutesNum = seconds / 60; // M.S...
-    if (String(minutesNum).length === 1) {return minutesNum + ":00"}; // Condition if the seconds value is a multiple of 60.
-    secondsNum = String(minutesNum).substring(1) * 60;
-    secondsNum < 10 ? secondsNum = "0" + String(Math.round(secondsNum, 0)) : secondsNum; // Appends a 0 to the start of values that are less than 10 
-    return `${String(minutesNum).substring(0,1)}:${String(secondsNum).substring(0,2)} minutes`;
 }
 function rankFormat(rank){
     return `Rank: #${rank + 1}`;
@@ -785,8 +866,8 @@ function getAttributeContext(attribute, data, index){
 }
 /**
  * Returns a certain color based on the given progress bar value
- * @param {*} value 
- * @returns 
+ * @param {*} value the given 
+ * @returns the color of the progress bar 
  */
 function progressBarColor(value){
     const rankingPercent = (value / NUM_SONGS) * 100;
@@ -828,190 +909,10 @@ function makeAnalyticsProgressBar(value){
     progress.style = `--width:${width}px; --inputted-color:${color}`;
     return progress;
 }
-
-// Table "link" click 
-function trackResults(){
-    let tableLinks = document.querySelectorAll(".title"); // NodeList of all titles
-    for (let link of tableLinks){
-        link.addEventListener('click', displaySongInformation);
-    }
-}
-
 // Adding an event listener to the table sort buttons
 
-// SORTING SONGS TO FIND THEIR RANKING 
-function sortAttribute(attribute){
-    const generalAttributeArray = getSongAttributeArray(attribute);
-    switch(attribute){
-        // === ANALYTICS & DETAILS ATTRIBUTES (NUMBERS) === 
-        case "energy":
-        case "valence":
-        case "acousticness":
-        case "speechiness":
-        case "liveness":
-        case "danceability":
-        case "bpm":
-        case "popularity":
-            generalAttributeArray.sort((a,b) => a-b); // Sorts by ascending order for number values
-            break;
-        // === ARTIST, GENRE, Title ===
-        case "artist":
-        case "genre":
-        case "title":
-            generalAttributeArray.sort(); // Sorts alphabetically -> numbers and symbols will come first
-            break;
-        default:
-    }
-    return generalAttributeArray;
-}
-function findRanking(attributeValue, attributeName){
-    const sortedAttributeArray = sortAttribute(attributeName).reverse(); // The ranking is based on the index of the song, so we want numerical values in descending order
-    let ranking = 0;
-    for (let i = 1; i <= sortedAttributeArray.length; i++){
-        if (attributeValue === sortedAttributeArray[i]){
-            ranking = i;
-        }
-    }
-    return ranking;
-}
-// Receive all of the sort buttons, and add an event listener to sort them.
-const sortButtons = document.querySelectorAll(".sort");
-for (let i =0; i < sortButtons.length; i++){
-    sortButtons[i].addEventListener('click', sortTableByAttribute);
-}
 
-// Sorts the table by the given attribute 
-function sortTableByAttribute(){
-    // The attribute that we are sorting by
-    const attribute = this.id;
-    styleSortButton(this) // reference to the button we pressed.
-    const changedAttribute = attribute.replace('-sort', '');
-    // First and foremost we need to receive the search results.
-    const results = getSearchResults();
-    const sortedResults = resultSort(changedAttribute, results);
-    populateSongs(sortedResults);
-}
-function styleSortButton(clickBtn){
-    clickBtn.textContent = '▴';
-    for (btn of sortButtons){
-        if (btn.id !== clickBtn.id){
-            btn.textContent = '▾';
-        }
-    }
-}
-function resultSort(attribute, unsortedResults){
-    if (attribute === 'year'){
-        return unsortedResults.sort((a, b) => a['year'] - b['year']);
-    }
-    else if (attribute === 'popularity'){
-        return unsortedResults.sort((a,b) => a['details']['popularity'] - b['details']['popularity']);
-    }
-    else if (attribute === 'genre' || attribute === 'artist'){
-        return unsortedResults.sort((a,b) => a[attribute]['name'].localeCompare(b[attribute]['name']));
-    }
-    else if (attribute === 'title'){
-        return unsortedResults.sort((a,b) => String(a[attribute]).localeCompare(String(b[attribute]))); // the few titles that are encoded as numbers gave me quite a headache with this one...
-    }
-    else{
-        console.log("error occured while sorting - attribute does not exist");
-        return;
-    }    
-}
-// Adds a random placholder title to the title input space when the page loads
-const titlePlaceholder = document.querySelector("#title-input");
-const NUM_SONGS = songs.length;
-titlePlaceholder.placeholder = `${songTitles[Math.floor(Math.random() * NUM_SONGS)]}`; // Math random -> (0-1) * NUM_SONGS = [0-317] (decimals included) -> math.floor to make value an integer
-const artistPlaceholder = document.querySelector("#artist-input");
-artistPlaceholder.placeholder = `${songArtists[Math.floor(Math.random() * songArtists.length)]}`;
-
-// ======================================================== PLAYLIST INFO PAGE ============================================================== 
-// Note --> This section ended up being a lot more convoluted than I originally thought it would be.
-// TEMPORARY: ADD SWITCH TO PLAYLIST VIEW BUTTON
-document.querySelector("#playlist-view-btn").addEventListener('click', displayPlaylists);
-document.querySelector("#playlist-view-btn").addEventListener('click', makePlaylistDetails);
-// Creating some template playlist objects for testing
-makePlaylist("Default playlist", [songs[0], songs[1], songs[3], songs[100], songs[20], songs[15], songs[22], songs[33]]);
-makePlaylist("Country Playlist", [songs[5], songs[100]]);
-makePlaylist("EDM Playlist", [songs[150], songs[4], songs[180]]);
-makePlaylist("Wow", [songs[115], songs[116], songs[150], songs[101], songs[6], songs[200], songs[100], songs[98]]);
-// creates a playlist
-function makePlaylist(name, songs){
-    if (checkPlaylistName(name)){
-        const playlist = {
-            "name" : name,
-            "songs": songs,
-        };
-        playlists.push(playlist);
-        cookiefyPlaylists();
-    }
-    // Write what should happen if the given name already exists
-}
-function cookiefyPlaylists(){
-    const cookieName = 'playlists';
-    const ONE_YEAR_IN_MS = 31536000000;
-    const cookieValue = JSON.stringify(playlists);
-    const playlistsCookie = `${cookieName}=${cookieValue}; max-age=${ONE_YEAR_IN_MS}`;
-    document.cookie = playlistsCookie;
-}
-function checkPlaylistName(name){
-    for (p of playlists){
-        if (p['name'].trim().toLowerCase() === name.trim().toLowerCase()){
-            return false;
-        }
-    }
-    return true;
-}
-// Make random song playlist. Cap number of 
-function makeRandomPlaylist(name, numSongs){
-    const randomPlaylistSongs = [];
-    const NUM_SONGS = songs.length;
-    let count = 0;
-    while (count < numSongs){
-        const randomIndex = Math.floor(Math.random() * NUM_SONGS);
-        const randomSong = songs[randomIndex];
-        randomPlaylistSongs.push(randomSong);
-        count++;
-    }
-    playlists.push({"name" : name, "songs": randomPlaylistSongs})
-}
-// adds a song to the selected playlists
-function addSongToPlaylist(songTitle, className){ 
-    const checkboxes = document.querySelectorAll(`.${className} input[type='checkbox']`);
-    const playlistSelection = [];
-    for (checkbox of checkboxes){
-        if (checkbox.checked){
-            playlistSelection.push(checkbox.id) // checkbox id contains the name of the given playlist
-        }
-    }
-    cookiefyPlaylists(); // Updates the playlist cookie 
-    addToPlaylistSuccessTransition(songTitle, playlistSelection);
-}
-/* Counts the number of playlists that the given song was added to */
-function addToPlaylistSuccessTransition(songTitle, playlistSelection){
-    let addedCount = 0;
-    for (playlistName of playlistSelection){
-        const playlistMatch = findPlaylist(playlistName);
-        const songMatch = findSong(songTitle);
-        playlistMatch["songs"].push(songMatch);
-        addedCount++;
-    }
-    // Let the user know that the song was added to the given playlists
-    const parent = document.querySelector(".playlist-add-div")
-    parent.removeChild(document.querySelector("#popup-btn"));
-    const success = document.createElement("h3");
-    success.textContent = `${songTitle} was added to ${addedCount} playlists.`
-    success.style.boxShadow = '1px 1px 2px black';
-    success.id = 'playlist-add-success';
-    parent.appendChild(success);
-}
-function findSong(title){
-    for (song of songs){
-        if (title === song['title']){
-            return song;
-        }
-    }
-    return 0;
-}
+// ========================================================= START OF 'ADD SONG TO PLAYLIST' FUNCTIONALITY ======================================================
 /* Adds event listeners to see if the popup box should be closed. */
 function closePopupBoxCheck(songTitle){
     const popupElement = document.querySelector(".playlist-add-div");
@@ -1021,11 +922,11 @@ function closePopupBoxCheck(songTitle){
             addSongToPlaylist(songTitle, 'playlist-add-div');
             setTimeout(() => {
                 document.querySelector(".song-info").removeChild(popupElement);
-                displayPlaylists(); // Switches the view to that of playlists, and display the information.
             }, 2000)
         }
     }); 
 }
+/* Creates a popup box that allows the user to select what songs */
 function makePopupBox(){
     const songTitle = this.id 
     // Setup the playlist popux box
@@ -1047,15 +948,7 @@ function makePopupBox(){
     document.querySelector(".song-info").appendChild(playlistAddBox);
     closePopupBoxCheck(songTitle); // Adds an event listener to see if the popup box should be closed
 }
-/* Some of the songs in the JSON file have ridiculously long names due to the added parentheses that include unnecessary info 
-*  This function will be used to remove the parentheses on songs that have the stated problem.
-*/
-function abbreviateSongTitle(songTitle){
-    let shortenedTitle = "";
-    const regex = /\([\w\d\s]+\)/ // I made this regex specifically for this case - matches to parentheses and all the text within it
-    songTitle.length >= 40 && songTitle.includes('(') ? shortenedTitle = songTitle.replace(regex, "...") : shortenedTitle = songTitle // Removes the matched text if the title is greater than 40 chars and matches the given regular expression
-    return shortenedTitle;
-}
+
 /**
  * Generates and returns a div that allows the user to select the playlist(s) that he wants to add the current song to.
  * @param {*} songTitle 
@@ -1092,6 +985,142 @@ function getPlaylistNamesBox(songTitle){
     }
     return outerContainer;
 }
+// adds a song to the selected playlists
+function addSongToPlaylist(songTitle, className){ 
+    const checkboxes = document.querySelectorAll(`.${className} input[type='checkbox']`);
+    const playlistSelection = [];
+    for (checkbox of checkboxes){
+        if (checkbox.checked){
+            playlistSelection.push(checkbox.id) // checkbox id contains the name of the given playlist
+        }
+    }
+    cookiefyPlaylists(); // Updates the playlist cookie 
+    addToPlaylistSuccessTransition(songTitle, playlistSelection);
+}
+/* Counts the number of playlists that the given song was added to */
+function addToPlaylistSuccessTransition(songTitle, playlistSelection){
+    let addedCount = 0;
+    for (playlistName of playlistSelection){
+        const playlistMatch = findPlaylist(playlistName);
+        const songMatch = findSong(songTitle);
+        playlistMatch["songs"].push(songMatch);
+        addedCount++;
+    }
+    // Let the user know that the song was added to the given playlists
+    const parent = document.querySelector(".playlist-add-div")
+    parent.removeChild(document.querySelector("#popup-btn"));
+    const success = document.createElement("h3");
+    success.textContent = `${songTitle} was added to ${addedCount} playlists.`
+    success.style.boxShadow = '1px 1px 2px black';
+    success.id = 'playlist-add-success';
+    parent.appendChild(success);
+}
+// ============================================================ END OF 'ADD TO PLAYLIST' FUNCTIONALITY ====================================================================
+
+// SORTING SONGS TO FIND THEIR RANKING 
+function sortAttribute(attribute){
+    const generalAttributeArray = getSongAttributeArray(attribute);
+    switch(attribute){
+        // === ANALYTICS & DETAILS ATTRIBUTES (NUMBERS) === 
+        case "energy":
+        case "valence":
+        case "acousticness":
+        case "speechiness":
+        case "liveness":
+        case "danceability":
+        case "bpm":
+        case "popularity":
+            generalAttributeArray.sort((a,b) => a-b); // Sorts by ascending order for number values
+            break;
+        // === ARTIST, GENRE, Title ===
+        case "artist":
+        case "genre":
+        case "title":
+            generalAttributeArray.sort(); // Sorts alphabetically -> numbers and symbols will come first
+            break;
+        default:
+    }
+    return generalAttributeArray;
+}
+function findRanking(attributeValue, attributeName){
+    const sortedAttributeArray = sortAttribute(attributeName).reverse(); // The ranking is based on the index of the song, so we want numerical values in descending order
+    let ranking = 0;
+    for (let i = 1; i <= sortedAttributeArray.length; i++){
+        if (attributeValue === sortedAttributeArray[i]){
+            ranking = i;
+        }
+    }
+    return ranking;
+}
+
+// ================================================================== END OF SECTION =======================================================================
+
+// ======================================================== PLAYLIST INFO SECTION ============================================================== 
+const playlists = [] // empty array for now
+// Note --> This section ended up being a lot more convoluted than I originally thought it would be.
+// TEMPORARY: ADD SWITCH TO PLAYLIST VIEW BUTTON
+document.querySelector("#playlist-view-btn").addEventListener('click', displayPlaylists);
+document.querySelector("#playlist-view-btn").addEventListener('click', makePlaylistDetails);
+// Creating some template playlist objects for testing
+makePlaylist("Country Songs", [findSong("memory"), findSong("wasted on you"), findSong("more than my hometown"), findSong("tequila"), findSong("sand in my boots"), findSong("10,000 Hours (with Justin Bieber)")]);
+makePlaylist("Old Christmas Tunes", [findSong("jingle bell rock"), findSong("white christmas"), findSong("rudolph the red-nosed reindeer"), findSong("baby, it's cold outside")]);
+makePlaylist("Most Popular Songs", [findSong("beggin'"), findSong("good 4 u"), findSong("save your tears"), findSong("lose you to love me"), findSong("bad habits")]);
+makePlaylist("Club Tracks", [findSong("give me everything"), findSong("Party Rock Anthem"), findSong("time of our lives"), findSong("electricity (with dua lipa)"), findSong("astronomia"), findSong("Juju on That Beat (TZ Anthem)")]);
+
+// creates a playlist
+function makePlaylist(name, songs){
+    if (checkPlaylistName(name)){
+        const playlist = {
+            "name" : name,
+            "songs": songs,
+        };
+        playlists.push(playlist);
+        cookiefyPlaylists();
+    }
+    // Write what should happen if the given name already exists
+}
+function cookiefyPlaylists(){
+    const cookieName = 'playlists';
+    const ONE_YEAR_IN_MS = 31536000000;
+    const cookieValue = JSON.stringify(playlists);
+    const playlistsCookie = `${cookieName}=${cookieValue}; max-age=${ONE_YEAR_IN_MS}`;
+    document.cookie = playlistsCookie;
+}
+function checkPlaylistName(name){
+    for (let p of playlists){
+        if (p['name'].trim().toLowerCase() === name.trim().toLowerCase()){
+            return false;
+        }
+    }
+    return true;
+}
+// Make random song playlist. Cap number of 
+function makeRandomPlaylist(name, numSongs){
+    const randomPlaylistSongs = [];
+    let count = 0;
+    while (count < numSongs){
+        const randomIndex = Math.floor(Math.random() * NUM_SONGS);
+        const randomSong = songs[randomIndex];
+        randomPlaylistSongs.push(randomSong);
+        count++;
+    }
+    playlists.push({"name" : name, "songs": randomPlaylistSongs})
+}
+/**
+ * Finds and returns the song with the given title
+ * @param {} title the passed title
+ * @returns the song match
+ */
+function findSong(title){
+    const titleFormatted = title.toLowerCase().trim();
+    for (let song of songs){
+        const songTitle = String(song['title']).toLowerCase().trim();
+        if (titleFormatted == songTitle){
+            return song;
+        }
+    }
+    return song[0];
+}
 /* Returns an object that contains a collection of data about the given playlist */
 function getPlaylistData(playlist){
     const averageDuration = getPlaylistAverageDuration(playlist)
@@ -1112,7 +1141,7 @@ function getPlaylistData(playlist){
 function getPlaylistSongNames(playlist){
     const songNames = document.createElement("div");
     songNames.className = 'playlist-songs-container';
-    for (song of playlist['songs']){
+    for (let song of playlist['songs']){
         const listItem = document.createElement("p");
         listItem.value = song['song_id'];
         listItem.className = 'title'; // Same as those used in the search results table 
@@ -1143,9 +1172,10 @@ function getPlaylistMostPopularSong(playlist){
     }
     return mostPopular;
 }
+/* Calculates and returns an array containing the average values of all analytic attributes of a given playlist (includes average popularity score as well) */
 function getPlaylistAverages(playlist){
     const avgArray = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-    for (song of playlist){
+    for (let song of playlist){
         const analytics = song['analytics'];
         avgArray[0] += analytics['danceability'];
         avgArray[1] += analytics['energy'];
@@ -1156,7 +1186,7 @@ function getPlaylistAverages(playlist){
         avgArray[6] += song['details']['popularity'];
     }
     for (let i = 0; i < avgArray.length;  i++){
-        attributeAvgValue = avgArray[i] / playlist.length
+        let attributeAvgValue = avgArray[i] / playlist.length
         avgArray[i] = Math.ceil(attributeAvgValue);
     }
     return avgArray;
@@ -1182,7 +1212,7 @@ function makePlaylistList(){
     const listDiv = document.querySelector(".playlist-list");
     listDiv.innerHTML = ""; // clears the list div content
     listDiv.appendChild(makeHeading("Playlists"));
-    for (playlist of playlists){
+    for (let playlist of playlists){
         const playlistName = playlist['name'];
         // Creating the header for the list item
         const header = document.createElement("h4");
@@ -1200,7 +1230,7 @@ function makePlaylistList(){
  */
 function playlistOptionsEventListeners(){
     const options = document.querySelectorAll(".option-btn");
-    for (option of options){
+    for (let option of options){
         option.addEventListener('click', optionViewControl);
     }
     // Adds an autocomplete function to these elements
@@ -1210,6 +1240,7 @@ function playlistOptionsEventListeners(){
     optionActionButtons[0].addEventListener('click', newPlaylistAction);
     optionActionButtons[1].addEventListener('click', removePlaylistAction);
 }
+
 function optionViewControl(){
     const options = document.querySelectorAll(".playlist-option");
     const selectorId = this.id;
@@ -1224,23 +1255,23 @@ function optionViewControl(){
             console.log('element not found');
     }
 }
-
 function displayOptions(displayed, n1){
     displayed.style.display = 'block';
     n1.style.display = 'none';
 }
+/* This function controls the actions that occur when a user creates a new playlist (both random and user selected) */
 function newPlaylistAction(){
     const container = document.querySelector(".new-playlist-inputs");
     // Get user selection 
     const selectionId = getCheckedId(document.querySelectorAll('.new-playlist-radio'));
     // Creating the error message element
     const actionMsg = document.createElement('p');
-    setInterval(() => {actionMsg.innerHTML = ""}, 1200); // removes the action message html every 1200 milliseconds
+    setInterval(() => {actionMsg.innerHTML = ""}, 1000); // removes the action message html every second
     container.appendChild(actionMsg);
     // Adding some styles to it 
     actionMsg.style.fontStyle = 'italic';
     actionMsg.style.fontWeight = 'bold';
-
+    console.log(selectionId);
     // Getting inputs from text fields.
     const playlistName = document.querySelector("#new-playlist-name").value;
     const playlistSong = document.querySelector("#new-playlist-song").value;
@@ -1280,28 +1311,28 @@ function getCheckedId(radioNodeList){
     }
     return 0; // Case in which no radio button was checked
 }
-
+/* */
 function removePlaylistAction(){
     const selection = document.querySelector('#playlist-remove-list').value;
-    removePlaylist(selection);
-    document.querySelector('.remove-playlist-inputs').innerHTML += `<h3> ${selection} was removed. </h3>`;
-    setTimeout(
-        displayPlaylists(), 1500
-    );
+    removePlaylist(selection); // Removes the playlist 
+    const parent = document.querySelector('.remove-message');
+    parent.textContent = "";
+    const removeMessage = document.createElement("h4");
+    removeMessage.textContent = `${selection} was removed`;
+    parent.appendChild(removeMessage);
 }
+/* Removes the selected playlist */
 function removePlaylist(playlistName){
-    for (let i = 0; i < playlists.length; i++){
-        if (playlists[i].name === playlistName){
-            playlists.splice(i,i);
-            break;
-        }
-    }
+    const removeIndex = playlists.findIndex((item) => item.name === playlistName);
+    playlists.splice(removeIndex,1); // removes the playlist at the given index
+    const element = document.querySelectorAll(".playlist-list h4")[removeIndex];
+    element.remove();
 }
+/* Generates and appends the markup for a select input containing all removable playlists */
 function loadRemovePlaylistSelect(){
     const parent = document.querySelector('#playlist-remove-list');
     parent.innerHTML = '';
     const playlistNames = getPlaylistNames();
-    console.log(playlistNames);
     playlistNames.forEach( (playlistName) => {
         const option = document.createElement('option');
         option.setAttribute('value', playlistName);
@@ -1309,7 +1340,7 @@ function loadRemovePlaylistSelect(){
         parent.appendChild(option);
     });
 }
-
+/* Returns an array containing the name of all playlists */
 function getPlaylistNames(){
     const names = [];
     playlists.forEach(item => {
@@ -1317,15 +1348,14 @@ function getPlaylistNames(){
     })
     return names;
 }
-
-
 /* This function is responsible for filling the playlist details container with relevant data. 
 * This also includes a polar area chart that contains information about the averages of each attribute of the given playlist 
 */
 function makePlaylistDetails(){
-    let eventId = this.id
-    const viewPlaylistBtnHandler = eventId === 'playlist-view-btn' ? eventId = 'Default playlist' : eventId; 
-    const playlist = findPlaylist(eventId); // find the playlist that the list element relates to based on the given id
+    playlistListObjs.forEach((listObj) => {console.log(listObj.id); if(listObj.id != this.id){listObj.style.backgroundColor = "474E68"} else{listObj.style.backgroundColor = "#fb2576"}});
+    let eventId = this.id;
+    const viewPlaylistBtnHandler = eventId === 'playlist-view-btn' ? eventId = 'Country Songs' : eventId; 
+    const playlist = findPlaylist(viewPlaylistBtnHandler); // find the playlist that the list element relates to based on the given id
     const playlistName = playlist['name'];
     const detailsContainer = document.querySelector(".details-container");
     if (detailsContainer.hasChildNodes()){
@@ -1345,7 +1375,7 @@ function makePlaylistDetails(){
     const averageSongDuration = getPlaylistDetailsDiv('Average Song Duration ⏱️', `The average song duration in this playlist is ${playlistData['average_duration']}`)
     detailsContainer.appendChild(averageSongDuration);
     // Finds the most common genre in the playlist, along with the number of occurences
-    const mostCommonGenre = getPlaylistDetailsDiv('Most Common Genre 💫', `${upperCaseFirstChar(playlistData['most_common_genre'][0])}, which occurs ${playlistData['most_common_genre'][1]} times in this playlist. `); 
+    const mostCommonGenre = getPlaylistDetailsDiv('Most Common Genre 💫', `${upperCaseFirstChar(playlistData['most_common_genre'][0]).trim()}, which occurs ${playlistData['most_common_genre'][1]} times in this playlist. `); 
     detailsContainer.appendChild(mostCommonGenre);
     // Creates the playlist average chart
     const averagesData = getPlaylistAverages(playlist['songs']);
@@ -1355,6 +1385,7 @@ function makePlaylistDetails(){
     const mostPronoucedAttribute = getPlaylistDetailsDiv('Most Pronouced Attribute 🥇', `${attributeData['max_attribute_name']}, with an average value of ${attributeData['max_val']}%`);
     detailsContainer.appendChild(mostPronoucedAttribute);
 }
+const playlistListObjs = document.querySelectorAll(".playlist-list h4");
 /* Finds and returns the attribute name and value of the with the highest average */
 function getPlaylistMostPronoucedAttribute(averages){
     let maxValue = 0;
@@ -1389,7 +1420,7 @@ function getPlaylistMostPronoucedAttribute(averages){
     }
     return {"max_val": maxValue, "max_attribute_name": maxAttributeName};
 }
-
+/* Creates and appends the markup for the divs that contain information about the given playlist */
 function getPlaylistDetailsDiv(boxHeading, text){
     const detailsDiv = document.createElement("div");
     detailsDiv.className = 'details-element';
@@ -1404,34 +1435,34 @@ function getPlaylistDetailsDiv(boxHeading, text){
     }
     return detailsDiv;
 }
-
-/* Find and return the given playlist based on the passed name parameter */
+/* Find and return the given playlist based on the passed name parameter. Essentially, this parameter acts as the primary key to identify the playlist */
 function findPlaylist(playlistName){
-    for (playlist of playlists){
+    for (let playlist of playlists){
         if (playlist['name'] === playlistName){
             return playlist;
         }
     }
     return;
 }
+/* Creates and returns the markup for a heading */
 function makeHeading(text){
     const heading = document.createElement("h1");
     heading.textContent = upperCaseFirstChar(text);
     return heading;
 }
-
+/* Finds and returns the name of the most common genre in a playlist, along with the amount of times it occurs */
 function getMostCommonGenreInPlaylist(playlist){
     if (playlist.length == 1){return playlist["songs"][0]['genre']['name']};
     const genresList = [];
     const genreCounts = [0];
-    for (song of playlist["songs"]){
+    for (let song of playlist["songs"]){
         const currentSongGenre = song['genre']['name'];
         genresList.push(currentSongGenre);
     }
     genresList.sort();
     let currentGenre = genresList[0];
     let genreIndex = 0;
-    for (genre of genresList){
+    for (let genre of genresList){
         if (genre.trim() !== currentGenre.trim()){
             genreCounts.push(1);
             genreIndex++;
@@ -1447,7 +1478,8 @@ function getMostCommonGenreInPlaylist(playlist){
     const genresData = [maxGenreName, genreMax];
     return genresData;
 }
-
+/* Creates a polar area chart containing information about the average value of each attribute (including popularity) in a given playlist
+*/
 function makePlaylistAveragesChart(averagesData, playlistName){
     // Draws, destroys, and redraws the canvas on which the chart is displated
     const parentNode = document.querySelector(".averages-container");
@@ -1536,7 +1568,7 @@ function makePlaylistAveragesChart(averagesData, playlistName){
     });
 }
 // ======================================================== SWITCH VIEW =====================================================================
-
+/* This function is responsible for switching between the given 'views' in the single page application. */
 function switchView(newView){
     const songSearchBody = document.querySelector(".song-search");
     const songInformationBody = document.querySelector(".song-info");
@@ -1560,7 +1592,5 @@ function setDisplay(flexBody, noBodyOne, noBodyTwo){
     noBodyOne.style.display = 'none';
     noBodyTwo.style.display = 'none';
 }
-function songInfoToSearchPageViewSwitch(){
-    switchView("SONG_SEARCH_VIEW");
-}
 });
+// ================================================================== END OF FILE =======================================================================
