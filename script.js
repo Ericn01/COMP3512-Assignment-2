@@ -43,8 +43,8 @@ function upperCaseFirstChar(str){
 */
 function abbreviateSongTitle(songTitle){
     let shortenedTitle = "";
-    const regex = /\([\w\d\s]+\)/i; // I made this regex specifically for this case - matches to parentheses and all the text within it
-    songTitle.length >= 35 && songTitle.includes('(') ? shortenedTitle = songTitle.replace(regex, "...") : shortenedTitle = songTitle // Removes the matched text if the title is greater than 40 chars and matches the given regular expression
+    const regex = /(\s(\(|\[|\-)[\d\:\w\s\.\-\&\+\,]+(\)|\]|)){1,}/i; // This was good regular expression practice. A few songs have brackets, parentheses, hyphens after them, and expand unnecessarily. This regex matches that and removes it.
+    songTitle.includes('(') || songTitle.includes('-') || songTitle.includes("[") ? shortenedTitle = songTitle.replace(regex, "") : shortenedTitle = songTitle // Removes the matched text if the title is greater than 40 chars and matches the given regular expression
     return shortenedTitle;
 }
 /**
@@ -126,7 +126,7 @@ function getSongAttributeArray(attributeName){
                 break;
             case "artist":
             case "genre":
-                songAttributeArray.push(song[attributeName]['name']); // Returns the name of the genre or artist
+                songAttributeArray.push(song[attributeName]['name'].replace(/,[\s\w\d\,]+/, "")); // Returns the name of the genre or artist
                 break;
             case "popularity":
             case "bpm":
@@ -141,7 +141,7 @@ function getSongAttributeArray(attributeName){
 function autocompleteArtists(){
     const datalistReference = this.list; // References the datalist element associated with the input
     if (this.value.length >= 1){ // Starts using autocomplete after 1 character has been typed
-        const artistMatches = findMatches(this.value, songArtists);
+        const artistMatches = findMatches(this.value, songArtists)
         datalistReference.replaceChildren();
         for (let match of artistMatches){
             let option = document.createElement('option');
@@ -192,6 +192,9 @@ const numberInputs = document.querySelectorAll('input[type="number"]');
 for (let input of numberInputs){
     input.addEventListener('click', numberHandling);
 }
+/**
+ * This function handles number inputs by deciding which one should be enabled/disabled.
+ */
 function numberHandling(){
     const yearLessInput = numberInputs[0];
     const yearGreaterInput = numberInputs[1];
@@ -227,7 +230,7 @@ function loadSelectOptions(fieldName){
     let fieldContainer = [];
     if (selectElement.options.length === 0){ // This should only be run once, when clicked. 
         for (let currentSong of songs){ 
-            let optionText = upperCaseFirstChar(currentSong[field]["name"]);
+            let optionText = upperCaseFirstChar(currentSong[field]["name"])
             if (!fieldContainer.includes(optionText)){ // Ensures that there are no duplicates 
                 fieldContainer.push(optionText);
                 let optionValue = currentSong[field]["name"]; 
@@ -445,16 +448,13 @@ function sortTableByAttribute(){
     populateSongs(sortedResults);
 }
 function styleSortButton(sortBtn){
-    const sortOrder = getSortOrder(sortBtn.id);
-    if (sortOrder == 'ascending'){
-        sortBtn.style.color = "#228c22";
-    }
-    else{
-        sortBtn.style.color = "#ec9706";
-    }
+    sortBtn.style.color = "lightblue";
+    sortBtn.style.textShadow = '2px 2px 4px black';
     for (btn of sortButtons){
         if (btn.id !== sortBtn.id){
             btn.style.color = "white";
+            btn.style.border = "none";
+            btn.style.textShadow = "";
         }
     }
 }
@@ -1014,6 +1014,9 @@ function addToPlaylistSuccessTransition(songTitle, playlistSelection){
     success.style.boxShadow = '1px 1px 2px black';
     success.id = 'playlist-add-success';
     parent.appendChild(success);
+    setTimeout(
+        switchView("SONG_PLAYLIST_VIEW"), 1000
+    )
 }
 // ============================================================ END OF 'ADD TO PLAYLIST' FUNCTIONALITY ====================================================================
 
@@ -1056,16 +1059,27 @@ function findRanking(attributeValue, attributeName){
 // ================================================================== END OF SECTION =======================================================================
 
 // ======================================================== PLAYLIST INFO SECTION ============================================================== 
-const playlists = [] // empty array for now
+const playlists = []; // empty array for now
 // Note --> This section ended up being a lot more convoluted than I originally thought it would be.
 // TEMPORARY: ADD SWITCH TO PLAYLIST VIEW BUTTON
 document.querySelector("#playlist-view-btn").addEventListener('click', displayPlaylists);
 document.querySelector("#playlist-view-btn").addEventListener('click', makePlaylistDetails);
-// Creating some template playlist objects for testing
-makePlaylist("Country Songs", [findSong("memory"), findSong("wasted on you"), findSong("more than my hometown"), findSong("tequila"), findSong("sand in my boots"), findSong("10,000 Hours (with Justin Bieber)")]);
-makePlaylist("Old Christmas Tunes", [findSong("jingle bell rock"), findSong("white christmas"), findSong("rudolph the red-nosed reindeer"), findSong("baby, it's cold outside")]);
-makePlaylist("Most Popular Songs", [findSong("beggin'"), findSong("good 4 u"), findSong("save your tears"), findSong("lose you to love me"), findSong("bad habits")]);
-makePlaylist("Club Tracks", [findSong("give me everything"), findSong("Party Rock Anthem"), findSong("time of our lives"), findSong("electricity (with dua lipa)"), findSong("astronomia"), findSong("Juju on That Beat (TZ Anthem)")]);
+// Creating some template playlist objects for testing - this only occurs if no playlist exists yet, aka the first user login
+if (document.cookie == "" || playlists.length == 0){
+    makePlaylist("Country Songs", [findSong("memory"), findSong("wasted on you"), findSong("more than my hometown"), findSong("tequila"), findSong("sand in my boots"), findSong("10,000 Hours (with Justin Bieber)")]);
+    makePlaylist("Old Christmas Tunes", [findSong("jingle bell rock"), findSong("white christmas"), findSong("rudolph the red-nosed reindeer"), findSong("baby, it's cold outside")]);
+    makePlaylist("Most Popular Songs", [findSong("beggin'"), findSong("good 4 u"), findSong("save your tears"), findSong("lose you to love me"), findSong("bad habits")]);
+    makePlaylist("Club Tracks", [findSong("give me everything"), findSong("Party Rock Anthem"), findSong("time of our lives"), findSong("electricity (with dua lipa)"), findSong("astronomia"), findSong("Juju on That Beat (TZ Anthem)")]);
+}
+else {
+    playlists = getPlaylistCookieData();
+}
+
+function getPlaylistCookieData(){
+    const playlistCookie =  document.cookie; // I'm only storing one cookie for the time being
+    JSON.parse(playlistCookie.substring(10));
+}
+
 
 // creates a playlist
 function makePlaylist(name, songs){
@@ -1082,6 +1096,7 @@ function makePlaylist(name, songs){
 function cookiefyPlaylists(){
     const cookieName = 'playlists';
     const ONE_YEAR_IN_MS = 31536000000;
+    console.log(playlists);
     const cookieValue = JSON.stringify(playlists);
     const playlistsCookie = `${cookieName}=${cookieValue}; max-age=${ONE_YEAR_IN_MS}`;
     document.cookie = playlistsCookie;
@@ -1271,7 +1286,6 @@ function newPlaylistAction(){
     // Adding some styles to it 
     actionMsg.style.fontStyle = 'italic';
     actionMsg.style.fontWeight = 'bold';
-    console.log(selectionId);
     // Getting inputs from text fields.
     const playlistName = document.querySelector("#new-playlist-name").value;
     const playlistSong = document.querySelector("#new-playlist-song").value;
@@ -1280,12 +1294,12 @@ function newPlaylistAction(){
             const numSongs = document.querySelector('#num-songs-range').value;
             makeRandomPlaylist(playlistName, numSongs);
             actionMsg.textContent = `${playlistName} was successfully created.`;
-            setTimeout(displayPlaylists(), 1000); // refreshes the view after 1 second
+            displayPlaylists(); 
         }
         else if (selectionId == 'user-new-playlist-radio' && playlistName != ""){
             if (!checkPlaylistName(playlistName)){
-            actionMsg.textContent = 'A playlist with that name already exists';
-            container.appendChild(actionMsg);
+                actionMsg.textContent = 'A playlist with that name already exists';
+                container.appendChild(actionMsg);
             }
             const song = findSong(playlistSong);
             if (song === 0){
@@ -1311,15 +1325,26 @@ function getCheckedId(radioNodeList){
     }
     return 0; // Case in which no radio button was checked
 }
-/* */
+
+/* The actions that occur during and after a playlist is removed (DOM manipulation included) */
 function removePlaylistAction(){
-    const selection = document.querySelector('#playlist-remove-list').value;
-    removePlaylist(selection); // Removes the playlist 
-    const parent = document.querySelector('.remove-message');
-    parent.textContent = "";
-    const removeMessage = document.createElement("h4");
-    removeMessage.textContent = `${selection} was removed`;
-    parent.appendChild(removeMessage);
+    if (playlists.length !== 1){
+        const selection = document.querySelector('#playlist-remove-list').value;
+        removePlaylist(selection); // Removes the playlist 
+        document.querySelectorAll("#playlist-remove-list option").forEach( (item) => {
+            if (item.value === selection){
+            document.querySelector("#playlist-remove-list").removeChild(item);
+            }
+        });
+        const parent = document.querySelector('.remove-message');
+        parent.innerHTML = ""; // Wipes out earlier messages
+        parent.textContent = `${selection} was removed`;
+        cookiefyPlaylists();
+        setTimeout(displayPlaylists, 500);
+    }
+    else {
+        document.querySelector(".remove-playlist").style.display = "none";
+    }
 }
 /* Removes the selected playlist */
 function removePlaylist(playlistName){
@@ -1352,6 +1377,7 @@ function getPlaylistNames(){
 * This also includes a polar area chart that contains information about the averages of each attribute of the given playlist 
 */
 function makePlaylistDetails(){
+    if (playlists.length !== 0){ // Checking to see if playlists exists 
     playlistListObjs.forEach((listObj) => {console.log(listObj.id); if(listObj.id != this.id){listObj.style.backgroundColor = "474E68"} else{listObj.style.backgroundColor = "#fb2576"}});
     let eventId = this.id;
     const viewPlaylistBtnHandler = eventId === 'playlist-view-btn' ? eventId = 'Country Songs' : eventId; 
@@ -1361,6 +1387,7 @@ function makePlaylistDetails(){
     if (detailsContainer.hasChildNodes()){
         detailsContainer.textContent = "";
     }
+    highlightSelectedPlaylist(playlistName);
     detailsContainer.appendChild(makeHeading(`${playlistName} Details`));
     // Data that will be displayed in the details view
     const playlistData = getPlaylistData(playlist);
@@ -1384,6 +1411,21 @@ function makePlaylistDetails(){
     const attributeData = getPlaylistMostPronoucedAttribute(averagesData);
     const mostPronoucedAttribute = getPlaylistDetailsDiv('Most Pronouced Attribute 🥇', `${attributeData['max_attribute_name']}, with an average value of ${attributeData['max_val']}%`);
     detailsContainer.appendChild(mostPronoucedAttribute);
+    }
+    else{
+        document.querySelector(".playlist-list").innerHTML = "<h1 style='text-align:center; padding:20px; margin-top:10px; text-shadow: 2px 2px 4px black; text-style: italic;'> Nothing to see here. <br> Press the 'New Playlist' button to add data! <h1> ";
+    }
+}
+function highlightSelectedPlaylist(playlistId){
+    for (let playlistButton of document.querySelectorAll(".playlist-list h4")){
+        if (playlistButton.id == playlistId){
+            playlistButton.style.backgroundColor = "#fb2576";
+        }
+        else{
+            playlistButton.style.backgroundColor = "";
+        }
+        playlistButton.style.color = "white";
+    }
 }
 const playlistListObjs = document.querySelectorAll(".playlist-list h4");
 /* Finds and returns the attribute name and value of the with the highest average */
