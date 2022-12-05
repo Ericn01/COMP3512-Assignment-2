@@ -1060,16 +1060,15 @@ function findRanking(attributeValue, attributeName){
 
 // ======================================================== PLAYLIST INFO SECTION ============================================================== 
 const playlists = []; // empty array for now
-// Note --> This section ended up being a lot more convoluted than I originally thought it would be.
-// TEMPORARY: ADD SWITCH TO PLAYLIST VIEW BUTTON
+// Note --> Adding the necesary event listeners
 document.querySelector("#playlist-view-btn").addEventListener('click', displayPlaylists);
 document.querySelector("#playlist-view-btn").addEventListener('click', makePlaylistDetails);
 // Creating some template playlist objects for testing - this only occurs if no playlist exists yet, aka the first user login
-if (document.cookie == "" || playlists.length == 0){
-    makePlaylist("Country Songs", [findSong("memory"), findSong("wasted on you"), findSong("more than my hometown"), findSong("tequila"), findSong("sand in my boots"), findSong("10,000 Hours (with Justin Bieber)")]);
-    makePlaylist("Old Christmas Tunes", [findSong("jingle bell rock"), findSong("white christmas"), findSong("rudolph the red-nosed reindeer"), findSong("baby, it's cold outside")]);
-    makePlaylist("Most Popular Songs", [findSong("beggin'"), findSong("good 4 u"), findSong("save your tears"), findSong("lose you to love me"), findSong("bad habits")]);
-    makePlaylist("Club Tracks", [findSong("give me everything"), findSong("Party Rock Anthem"), findSong("time of our lives"), findSong("electricity (with dua lipa)"), findSong("astronomia"), findSong("Juju on That Beat (TZ Anthem)")]);
+if (playlists.length == 0){
+    makePlaylist("Country Songs 🤠", [findSong("memory"), findSong("wasted on you"), findSong("more than my hometown"), findSong("tequila"), findSong("sand in my boots"), findSong("10,000 Hours (with Justin Bieber)")]);
+    makePlaylist("Old Christmas Tunes 🎄", [findSong("jingle bell rock"), findSong("white christmas"), findSong("rudolph the red-nosed reindeer"), findSong("baby, it's cold outside")]);
+    makePlaylist("Most Popular Songs 🚀", [findSong("beggin'"), findSong("good 4 u"), findSong("save your tears"), findSong("lose you to love me"), findSong("bad habits")]);
+    makePlaylist("Club Tracks 🕺", [findSong("give me everything"), findSong("Party Rock Anthem"), findSong("time of our lives"), findSong("electricity (with dua lipa)"), findSong("astronomia"), findSong("Juju on That Beat (TZ Anthem)")]);
 }
 else {
     playlists = getPlaylistCookieData();
@@ -1079,9 +1078,7 @@ function getPlaylistCookieData(){
     const playlistCookie =  document.cookie; // I'm only storing one cookie for the time being
     JSON.parse(playlistCookie.substring(10));
 }
-
-
-// creates a playlist
+// creates a new playlist and appends it to the playlists array
 function makePlaylist(name, songs){
     if (checkPlaylistName(name)){
         const playlist = {
@@ -1091,15 +1088,19 @@ function makePlaylist(name, songs){
         playlists.push(playlist);
         cookiefyPlaylists();
     }
-    // Write what should happen if the given name already exists
+    else{
+        console.log(`The playlist called ${name} was not inserted because it already exists`);
+    }
 }
 function cookiefyPlaylists(){
     const cookieName = 'playlists';
     const ONE_YEAR_IN_MS = 31536000000;
-    console.log(playlists);
     const cookieValue = JSON.stringify(playlists);
     const playlistsCookie = `${cookieName}=${cookieValue}; max-age=${ONE_YEAR_IN_MS}`;
     document.cookie = playlistsCookie;
+}
+function loadPlaylistsFromCookie(){
+
 }
 function checkPlaylistName(name){
     for (let p of playlists){
@@ -1232,7 +1233,8 @@ function makePlaylistList(){
         // Creating the header for the list item
         const header = document.createElement("h4");
         header.id = playlistName;
-        header.textContent = `${upperCaseFirstChar(playlistName)} (${getPlaylistData(findPlaylist(playlistName))['number_of_songs']} songs)`;
+        header.textContent = `${upperCaseFirstChar(playlistName)}`;
+        header.innerHTML += `<br> (${getPlaylistData(findPlaylist(playlistName))['number_of_songs']} songs)`;
         listDiv.appendChild(header);
     }
     container.prepend(listDiv);
@@ -1380,7 +1382,7 @@ function makePlaylistDetails(){
     if (playlists.length !== 0){ // Checking to see if playlists exists 
     playlistListObjs.forEach((listObj) => {console.log(listObj.id); if(listObj.id != this.id){listObj.style.backgroundColor = "474E68"} else{listObj.style.backgroundColor = "#fb2576"}});
     let eventId = this.id;
-    const viewPlaylistBtnHandler = eventId === 'playlist-view-btn' ? eventId = 'Country Songs' : eventId; 
+    const viewPlaylistBtnHandler = eventId === 'playlist-view-btn' ? eventId = (document.querySelectorAll(".playlist-list h4")[Math.round(Math.random() * document.querySelectorAll("playlist-list h4").length, 0)].id) : eventId; 
     const playlist = findPlaylist(viewPlaylistBtnHandler); // find the playlist that the list element relates to based on the given id
     const playlistName = playlist['name'];
     const detailsContainer = document.querySelector(".details-container");
