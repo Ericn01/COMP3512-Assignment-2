@@ -293,9 +293,9 @@ function loadSelectOptions(fieldName){
     populateSongs(songs);
     document.querySelector("#clear-btn").addEventListener("click", (e) => {
         e.preventDefault();
-        for (let input of inputs){
-            if (input.type !== 'select-one'){
-                input.textContent = "";
+        for (let currentInput of inputs){
+            if (currentInput.type === 'text' || currentInput.type === 'number'){
+                currentInput.value = "";
             }
         }
     });
@@ -448,7 +448,7 @@ function sortTableByAttribute(){
     populateSongs(sortedResults);
 }
 function styleSortButton(sortBtn){
-    sortBtn.style.color = "lightblue";
+    sortBtn.style.color = "#ff7f50";
     sortBtn.style.textShadow = '2px 2px 4px black';
     for (btn of sortButtons){
         if (btn.id !== sortBtn.id){
@@ -623,7 +623,7 @@ function makeChart(songData){
     }
     }); 
 }
-/* Calculates and returns the average of */
+/* Calculates and returns the average of all analytic values for all songs in the JSON file. May be computationally on smartphones */
 function getSongAnalyticAverages(){
     const analyticAverages = new Array(6).fill(0); // Creates an array of length 6 with values 0
     for (let i = 0; i < NUM_SONGS; i++){
@@ -642,7 +642,7 @@ function getSongAnalyticAverages(){
     }
     return analyticAverages;
 }
-const songAnalyticsAverageValues = getSongAnalyticAverages(); 
+const songAnalyticsAverageValues = getSongAnalyticAverages(); // only called on a page refresh
 /* Generates the markup for displaying song information */
 function makeSongInformation(songData){
     const bpm = Math.round(songData[1].bpm, 0); const bpmRanking = findRanking(bpm,"bpm");
@@ -948,7 +948,6 @@ function makePopupBox(){
     document.querySelector(".song-info").appendChild(playlistAddBox);
     closePopupBoxCheck(songTitle); // Adds an event listener to see if the popup box should be closed
 }
-
 /**
  * Generates and returns a div that allows the user to select the playlist(s) that he wants to add the current song to.
  * @param {*} songTitle 
@@ -994,7 +993,6 @@ function addSongToPlaylist(songTitle, className){
             playlistSelection.push(checkbox.id) // checkbox id contains the name of the given playlist
         }
     }
-    cookiefyPlaylists(); // Updates the playlist cookie 
     addToPlaylistSuccessTransition(songTitle, playlistSelection);
 }
 /* Counts the number of playlists that the given song was added to */
@@ -1006,17 +1004,15 @@ function addToPlaylistSuccessTransition(songTitle, playlistSelection){
         playlistMatch["songs"].push(songMatch);
         addedCount++;
     }
+    storePlaylists(); // Updates the playlist cookie 
     // Let the user know that the song was added to the given playlists
     const parent = document.querySelector(".playlist-add-div")
     parent.removeChild(document.querySelector("#popup-btn"));
     const success = document.createElement("h3");
-    success.textContent = `${songTitle} was added to ${addedCount} playlists.`
-    success.style.boxShadow = '1px 1px 2px black';
+    success.textContent = `${songTitle} was succefully added to ${addedCount} playlists.`
+    success.style.textShadow = '1px 1px 2px black';
     success.id = 'playlist-add-success';
     parent.appendChild(success);
-    setTimeout(
-        switchView("SONG_PLAYLIST_VIEW"), 1000
-    )
 }
 // ============================================================ END OF 'ADD TO PLAYLIST' FUNCTIONALITY ====================================================================
 
@@ -1059,24 +1055,25 @@ function findRanking(attributeValue, attributeName){
 // ================================================================== END OF SECTION =======================================================================
 
 // ======================================================== PLAYLIST INFO SECTION ============================================================== 
-const playlists = []; // empty array for now
+let playlists = []; // empty array for now
 // Note --> Adding the necesary event listeners
 document.querySelector("#playlist-view-btn").addEventListener('click', displayPlaylists);
 document.querySelector("#playlist-view-btn").addEventListener('click', makePlaylistDetails);
-// Creating some template playlist objects for testing - this only occurs if no playlist exists yet, aka the first user login
-if (playlists.length == 0){
+// Creating some template playlist objects for testing - this only occurs if no playlist are stored in local storage yet. This should only be possible on the user's first login
+if (!getPlaylistStoredData()){
     makePlaylist("Country Songs 🤠", [findSong("memory"), findSong("wasted on you"), findSong("more than my hometown"), findSong("tequila"), findSong("sand in my boots"), findSong("10,000 Hours (with Justin Bieber)")]);
     makePlaylist("Old Christmas Tunes 🎄", [findSong("jingle bell rock"), findSong("white christmas"), findSong("rudolph the red-nosed reindeer"), findSong("baby, it's cold outside")]);
     makePlaylist("Most Popular Songs 🚀", [findSong("beggin'"), findSong("good 4 u"), findSong("save your tears"), findSong("lose you to love me"), findSong("bad habits")]);
     makePlaylist("Club Tracks 🕺", [findSong("give me everything"), findSong("Party Rock Anthem"), findSong("time of our lives"), findSong("electricity (with dua lipa)"), findSong("astronomia"), findSong("Juju on That Beat (TZ Anthem)")]);
+    storePlaylists();
 }
+// If the user has playlists already, then we're just going to load them from local storage
 else {
-    playlists = getPlaylistCookieData();
+    playlists = getPlaylistStoredData();
 }
-
-function getPlaylistCookieData(){
-    const playlistCookie =  document.cookie; // I'm only storing one cookie for the time being
-    JSON.parse(playlistCookie.substring(10));
+function getPlaylistStoredData(){
+    const playlistData =  JSON.parse(localStorage.getItem("playlists"));
+    return playlistData
 }
 // creates a new playlist and appends it to the playlists array
 function makePlaylist(name, songs){
@@ -1086,22 +1083,17 @@ function makePlaylist(name, songs){
             "songs": songs,
         };
         playlists.push(playlist);
-        cookiefyPlaylists();
+        storePlaylists();
     }
     else{
         console.log(`The playlist called ${name} was not inserted because it already exists`);
     }
 }
-function cookiefyPlaylists(){
-    const cookieName = 'playlists';
-    const ONE_YEAR_IN_MS = 31536000000;
-    const cookieValue = JSON.stringify(playlists);
-    const playlistsCookie = `${cookieName}=${cookieValue}; max-age=${ONE_YEAR_IN_MS}`;
-    document.cookie = playlistsCookie;
+/* Converts current playlist */
+function storePlaylists(){
+    localStorage.setItem("playlists", JSON.stringify(playlists));
 }
-function loadPlaylistsFromCookie(){
 
-}
 function checkPlaylistName(name){
     for (let p of playlists){
         if (p['name'].trim().toLowerCase() === name.trim().toLowerCase()){
@@ -1216,7 +1208,7 @@ function setPlaylistListItems(){
 // Creates the playlist view markup -> Playlist list
 function displayPlaylists(){
     switchView("SONG_PLAYLIST_VIEW");
-    cookiefyPlaylists(); // Makes sure that playlist cookies are up to date
+    storePlaylists(); // Makes sure that playlist cookies are up to date
     makePlaylistList();
     setPlaylistListItems();
 }
@@ -1310,7 +1302,7 @@ function newPlaylistAction(){
             else {
                 makePlaylist(playlistName, [song]);
                 actionMsg.textContent = `${playlistName} was successfully created.`;
-                setTimeout(displayPlaylists(), 1000); // refreshes the view after 1 second
+                setTimeout(displayPlaylists(), 1250); // refreshes the view after 1 second
             }
         }
     }
@@ -1341,7 +1333,7 @@ function removePlaylistAction(){
         const parent = document.querySelector('.remove-message');
         parent.innerHTML = ""; // Wipes out earlier messages
         parent.textContent = `${selection} was removed`;
-        cookiefyPlaylists();
+        storePlaylists();
         setTimeout(displayPlaylists, 500);
     }
     else {
