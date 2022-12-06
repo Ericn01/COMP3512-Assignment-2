@@ -187,6 +187,9 @@ h1{
 tr:nth-child(odd){
     background-color: var(--contrasting-color);
 }
+tr:hover{
+    background-color: var(--dominant-color);
+}
 th{
     padding: 0.8rem 1rem;
     position: sticky;
